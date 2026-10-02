@@ -61,10 +61,14 @@ metadata.csv
 !data/dataset_manifest.json
 !data/**/.gitkeep
 
-# Temporary analysis and scratch directories
+# Temporary analysis, scratch & internal helper documents
 scratch/
 .tempmediaStorage/
 .system_generated/
+PLAN.md
+DONE.md
+*.plan.md
+*.done.md
 
 # Frontend builds & dependencies
 **/node_modules/

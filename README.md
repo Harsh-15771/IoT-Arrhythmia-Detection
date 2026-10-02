@@ -17,9 +17,6 @@
 - 📊 **[DATA_CARD.md](docs/DATA_CARD.md)** — Provenance Manifest, ICU Waveform Datasets & PhysioNet DUA Compliance
 - 🧪 **[tests/test_cardiotwin.py](tests/test_cardiotwin.py)** — Automated Test Suite (17 unit & integration tests)
 
-- 🎯 **[PLAN.md](PLAN.md)** — Execution Strategy & Repositioning Blueprint
-- ✅ **[DONE.md](DONE.md)** — Comprehensive Audit of Built Features, Benchmarks & Verifications
-
 ---
 
 ## 🌟 Key Highlights (v3 Authoritative Release)
@@ -128,9 +125,7 @@ CardioTwin/
 ├── recordings/                    # Hardware Telemetry Stream Logs (39 CSV dumps)
 ├── requirements.txt               # Pinned, tested Python dependencies
 ├── .env.example                   # Environment configuration template
-├── LICENSE                        # MIT License with research disclaimer
-├── PLAN.md                        # Master Project Plan
-└── DONE.md                        # Comprehensive Audit & Feature Completion Status
+└── LICENSE                        # MIT License with research disclaimer
 ```
 
 ---
