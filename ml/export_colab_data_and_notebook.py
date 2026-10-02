@@ -233,7 +233,37 @@ def package_npz_dataset(output_npz="ppg_100hz_dataset.npz"):
     import numpy as np
     import wfdb
     from scipy.signal import resample
-    from train_model_v2 import parse_alarm_file, resample_signal, DATASET_DIR, ORIGINAL_FS, TARGET_FS, WINDOW_SAMPLES, ALARM_MAP
+
+    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DATASET_DIR = os.path.join(ROOT_DIR, "data", "raw", "physionet_2015")
+    ORIGINAL_FS = 250
+    TARGET_FS = 100
+    WINDOW_SAMPLES = 1000
+    ALARM_MAP = {
+        "Asystole": "Asystole",
+        "Bradycardia": "Bradycardia",
+        "Tachycardia": "Tachycardia",
+        "Ventricular_Tachycardia": "V_Tachycardia",
+        "Ventricular_Flutter_Fib": "V_Flutter_Fib",
+    }
+
+    def resample_signal(signal, orig_fs=250, target_fs=100):
+        if orig_fs == target_fs or len(signal) == 0:
+            return signal
+        return resample(signal, int(len(signal) * target_fs / orig_fs))
+
+    def parse_alarm_file(dataset_dir):
+        alarm_info = {}
+        alarms_path = os.path.join(dataset_dir, "ALARMS")
+        if os.path.exists(alarms_path):
+            with open(alarms_path, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line: continue
+                    parts = line.split(",")
+                    if len(parts) == 3:
+                        alarm_info[parts[0]] = (parts[1], int(parts[2]))
+        return alarm_info
 
     print(f"[INFO] Packaging raw 100Hz PPG segments into '{output_npz}' for Google Colab...")
     alarm_info = parse_alarm_file(DATASET_DIR)

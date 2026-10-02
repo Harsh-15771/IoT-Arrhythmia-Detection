@@ -90,10 +90,8 @@ CardioTwin/
 ├── ml/                            # Machine Learning Models, Training & Research
 │   ├── train_unified_models.py   # [ACTIVE v3] 8-class leak-free training pipeline (2,271 patients)
 │   ├── build_clean_dataset.py    # Multi-modal compiler (MIMIC-III + BUT PPG + CinC + BIDMC)
-│   ├── CardioTwin_1D_CNN_Colab.ipynb # Deep learning 1D-CNN research notebook
-│   └── legacy/                   # Historical baseline archives
-│       ├── train_model_v1.py
-│       └── train_model_v2.py
+│   ├── export_colab_data_and_notebook.py # Colab data exporter
+│   └── CardioTwin_1D_CNN_Colab.ipynb # Deep learning 1D-CNN research notebook
 │
 ├── model/                         # Investigational Screening Model Artifacts & Evaluation (v3)
 │   ├── xgboost_ppg_model.pkl     # Trained 8-class XGBoost model (v3.0.0)
@@ -118,9 +116,8 @@ CardioTwin/
 │   └── test_cardiotwin.py        # 17 unit & integration tests (Clinical, Twin, API, ML)
 │
 ├── scripts/                       # Automation & Hardware Audit Scripts
-│   ├── validate_hardware_recordings.py # SQI audit on raw recorded sessions
-│   ├── download_physionet_priority.py
-│   └── download_all_bidmc.py
+│   ├── run_v3_pipeline.py        # Master v3 pipeline orchestrator
+│   └── validate_hardware_recordings.py # SQI audit on raw recorded sessions
 │
 ├── recordings/                    # Hardware Telemetry Stream Logs (39 CSV dumps)
 ├── requirements.txt               # Pinned, tested Python dependencies
