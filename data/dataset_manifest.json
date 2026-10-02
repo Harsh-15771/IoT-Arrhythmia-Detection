@@ -1,0 +1,73 @@
+{
+  "manifest_version": "3.0.0",
+  "model_version": "v3",
+  "status": "Investigational Screening Prototype (Non-Diagnostic)",
+  "total_patients": 2271,
+  "total_records": 2271,
+  "total_windows": 4683,
+  "window_length_seconds": 10.0,
+  "sampling_rate_hz": 100,
+  "num_features": 27,
+  "classes": [
+    "AFib",
+    "Asystole",
+    "Bradycardia",
+    "Cardiac_Paced",
+    "Normal",
+    "Tachycardia",
+    "V_Flutter_Fib",
+    "V_Tachycardia"
+  ],
+  "class_distribution": {
+    "AFib": 400,
+    "Asystole": 204,
+    "Bradycardia": 634,
+    "Cardiac_Paced": 400,
+    "Normal": 1193,
+    "Tachycardia": 1048,
+    "V_Flutter_Fib": 72,
+    "V_Tachycardia": 732
+  },
+  "source_breakdown": {
+    "BUT PPG v2.0": {
+      "unique_patients": 39,
+      "windows": 792,
+      "classes": [
+        "Normal"
+      ]
+    },
+    "PhysioNet CinC 2015": {
+      "unique_patients": 231,
+      "windows": 1890,
+      "classes": [
+        "Asystole",
+        "Bradycardia",
+        "Tachycardia",
+        "V_Flutter_Fib",
+        "V_Tachycardia"
+      ]
+    },
+    "BIDMC PPG": {
+      "unique_patients": 1,
+      "windows": 1,
+      "classes": [
+        "Normal"
+      ]
+    },
+    "MIMIC-III-Ext-PPG": {
+      "unique_patients": 2000,
+      "windows": 2000,
+      "classes": [
+        "AFib",
+        "Bradycardia",
+        "Cardiac_Paced",
+        "Normal",
+        "Tachycardia"
+      ]
+    }
+  },
+  "dua_and_governance": {
+    "physionet_dua": "Protected credentialed health data under PhysioNet DUA. Raw waveforms and clinical notes are excluded from public git repository. Git tracks only aggregate metadata, manifests, feature extractors, and reproducible code.",
+    "data_protection_act": "HIPAA / PhysioNet Credentialed Access Policy compliant. No de-identified raw protected clinical data published to public VCS."
+  }
+}

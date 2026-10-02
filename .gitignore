@@ -1,9 +1,77 @@
+# Python & Virtual Environments
 venv/
+.venv/
+env/
 __pycache__/
-.ipynb_checkpoints/
-
 *.pyc
-.env
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+*.log
 
-physionet_2015/
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+*.crt
+
+# Operating System & IDE Files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing & Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Physical Hardware Recordings & Binaries
 recordings/
+*.csv_backup
+*.hex
+*.bin
+*.elf
+*.o
+*.d
+
+# Raw & Credentialed Clinical Datasets (PhysioNet DUA & License Compliance)
+# NEVER commit raw clinical waveforms, identifiable MIMIC-III files, or challenge records
+data/raw/
+data/raw/**
+data/processed/*.npz
+data/legacy/
+data/legacy/**
+PPG_Dataset.csv
+metadata.csv
+*.dat
+*.hea
+*.mat
+*.zip
+*.tar.gz
+*.csv.aria2
+
+# Allow dataset manifest and structure markers
+!data/dataset_manifest.json
+!data/**/.gitkeep
+
+# Temporary analysis and scratch directories
+scratch/
+.tempmediaStorage/
+.system_generated/
+
+# Frontend builds & dependencies
+**/node_modules/
+**/dist/
+**/.expo/
+**/.vite/
+frontend/web/node_modules/
+frontend/web/dist/
+frontend/mobile/node_modules/
+frontend/mobile/.expo/

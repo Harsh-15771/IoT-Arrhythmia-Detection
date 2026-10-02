@@ -1,0 +1,6010 @@
+[
+  {
+    "id": "PAT001",
+    "name": "Anil Kulkarni",
+    "age": 65,
+    "gender": "male",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "vitals": {
+      "resting_hr": 72,
+      "systolic_bp": 152,
+      "diastolic_bp": 96,
+      "bp_treated": true,
+      "bmi": 24.0,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 243,
+      "hdl_cholesterol": 38,
+      "ldl_cholesterol": 175,
+      "triglycerides": 143,
+      "fasting_glucose": 132,
+      "hba1c": 8.4,
+      "hs_crp": 3.75
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Coronary Artery Disease (Post-PCI)",
+        "Hypertension Stage 2",
+        "Dyslipidemia"
+      ],
+      "medications": [
+        {
+          "name": "Metoprolol Succinate",
+          "dosage": "50mg OD",
+          "class": "Beta-Blocker",
+          "hr_effect": -12,
+          "bp_effect": -8
+        },
+        {
+          "name": "Atorvastatin",
+          "dosage": "40mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        },
+        {
+          "name": "Ramipril",
+          "dosage": "5mg OD",
+          "class": "ACE-Inhibitor",
+          "hr_effect": 0,
+          "bp_effect": -12
+        },
+        {
+          "name": "Aspirin",
+          "dosage": "75mg OD",
+          "class": "Antiplatelet",
+          "hr_effect": 0,
+          "bp_effect": 0
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 86.8,
+      "recalibrated_risk_pct": 99.0,
+      "risk_category": "High",
+      "vascular_age": 85,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT002",
+    "name": "Rekha Nair",
+    "age": 52,
+    "gender": "female",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "vitals": {
+      "resting_hr": 67,
+      "systolic_bp": 142,
+      "diastolic_bp": 85,
+      "bp_treated": true,
+      "bmi": 24.8,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 216,
+      "hdl_cholesterol": 48,
+      "ldl_cholesterol": 138,
+      "triglycerides": 194,
+      "fasting_glucose": 156,
+      "hba1c": 7.6,
+      "hs_crp": 1.12
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Type 2 Diabetes Mellitus",
+        "Hypertension Stage 1",
+        "Diabetic Dyslipidemia"
+      ],
+      "medications": [
+        {
+          "name": "Metformin",
+          "dosage": "500mg BD",
+          "class": "Biguanide",
+          "hr_effect": 0,
+          "bp_effect": 0
+        },
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        },
+        {
+          "name": "Rosuvastatin",
+          "dosage": "10mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 19.5,
+      "recalibrated_risk_pct": 28.3,
+      "risk_category": "High",
+      "vascular_age": 67,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT003",
+    "name": "Deepak Patel",
+    "age": 77,
+    "gender": "male",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 52,
+      "systolic_bp": 157,
+      "diastolic_bp": 83,
+      "bp_treated": true,
+      "bmi": 23.0,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 204,
+      "hdl_cholesterol": 47,
+      "ldl_cholesterol": 127,
+      "triglycerides": 232,
+      "fasting_glucose": 172,
+      "hba1c": 8.8,
+      "hs_crp": 0.5
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Paroxysmal Atrial Fibrillation",
+        "Hypertension Stage 2",
+        "Chronic Kidney Disease Stage 2"
+      ],
+      "medications": [
+        {
+          "name": "Bisoprolol",
+          "dosage": "5mg OD",
+          "class": "Beta-Blocker",
+          "hr_effect": -14,
+          "bp_effect": -8
+        },
+        {
+          "name": "Apixaban",
+          "dosage": "5mg BD",
+          "class": "DOAC Anticoagulant",
+          "hr_effect": 0,
+          "bp_effect": 0
+        },
+        {
+          "name": "Amlodipine",
+          "dosage": "5mg OD",
+          "class": "CCB",
+          "hr_effect": 2,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 71.9,
+      "recalibrated_risk_pct": 99.0,
+      "risk_category": "High",
+      "vascular_age": 85,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT004",
+    "name": "Sunita Iyer",
+    "age": 28,
+    "gender": "female",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 83,
+      "systolic_bp": 120,
+      "diastolic_bp": 74,
+      "bp_treated": false,
+      "bmi": 27.4,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 151,
+      "hdl_cholesterol": 55,
+      "ldl_cholesterol": 66,
+      "triglycerides": 168,
+      "fasting_glucose": 87,
+      "hba1c": 5.4,
+      "hs_crp": 0.77
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy Baseline)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 1.0,
+      "recalibrated_risk_pct": 1.4,
+      "risk_category": "Low",
+      "vascular_age": 28,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT005",
+    "name": "Sunita Sen",
+    "age": 60,
+    "gender": "female",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 84,
+      "systolic_bp": 135,
+      "diastolic_bp": 87,
+      "bp_treated": true,
+      "bmi": 29.0,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 245,
+      "hdl_cholesterol": 49,
+      "ldl_cholesterol": 166,
+      "triglycerides": 194,
+      "fasting_glucose": 87,
+      "hba1c": 5.5,
+      "hs_crp": 1.11
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        },
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 14.0,
+      "recalibrated_risk_pct": 20.3,
+      "risk_category": "High",
+      "vascular_age": 68,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT006",
+    "name": "Sanjay Sharma",
+    "age": 63,
+    "gender": "male",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "vitals": {
+      "resting_hr": 77,
+      "systolic_bp": 129,
+      "diastolic_bp": 85,
+      "bp_treated": false,
+      "bmi": 29.1,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 207,
+      "hdl_cholesterol": 39,
+      "ldl_cholesterol": 138,
+      "triglycerides": 212,
+      "fasting_glucose": 97,
+      "hba1c": 5.5,
+      "hs_crp": 0.96
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 20.5,
+      "recalibrated_risk_pct": 29.7,
+      "risk_category": "High",
+      "vascular_age": 79,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT007",
+    "name": "Amit Verma",
+    "age": 42,
+    "gender": "male",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "vitals": {
+      "resting_hr": 71,
+      "systolic_bp": 124,
+      "diastolic_bp": 77,
+      "bp_treated": false,
+      "bmi": 26.3,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 202,
+      "hdl_cholesterol": 55,
+      "ldl_cholesterol": 117,
+      "triglycerides": 216,
+      "fasting_glucose": 90,
+      "hba1c": 5.3,
+      "hs_crp": 0.41
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 4.2,
+      "recalibrated_risk_pct": 6.1,
+      "risk_category": "Low",
+      "vascular_age": 42,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT008",
+    "name": "Vikram Iyer",
+    "age": 56,
+    "gender": "male",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "vitals": {
+      "resting_hr": 82,
+      "systolic_bp": 119,
+      "diastolic_bp": 74,
+      "bp_treated": false,
+      "bmi": 22.5,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 229,
+      "hdl_cholesterol": 54,
+      "ldl_cholesterol": 145,
+      "triglycerides": 158,
+      "fasting_glucose": 98,
+      "hba1c": 5.2,
+      "hs_crp": 0.64
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Sedentary",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 19.6,
+      "recalibrated_risk_pct": 28.4,
+      "risk_category": "High",
+      "vascular_age": 71,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT009",
+    "name": "Vikram Kulkarni",
+    "age": 36,
+    "gender": "male",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 82,
+      "systolic_bp": 120,
+      "diastolic_bp": 70,
+      "bp_treated": false,
+      "bmi": 29.7,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 181,
+      "hdl_cholesterol": 45,
+      "ldl_cholesterol": 106,
+      "triglycerides": 219,
+      "fasting_glucose": 133,
+      "hba1c": 8.3,
+      "hs_crp": 0.96
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 8.8,
+      "recalibrated_risk_pct": 12.8,
+      "risk_category": "Moderate",
+      "vascular_age": 38,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT010",
+    "name": "Radha Choudhury",
+    "age": 55,
+    "gender": "female",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 74,
+      "systolic_bp": 125,
+      "diastolic_bp": 78,
+      "bp_treated": false,
+      "bmi": 28.3,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 188,
+      "hdl_cholesterol": 50,
+      "ldl_cholesterol": 108,
+      "triglycerides": 206,
+      "fasting_glucose": 177,
+      "hba1c": 7.2,
+      "hs_crp": 1.34
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 10.0,
+      "recalibrated_risk_pct": 14.5,
+      "risk_category": "Moderate",
+      "vascular_age": 59,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT011",
+    "name": "Amit Reddy",
+    "age": 54,
+    "gender": "male",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "vitals": {
+      "resting_hr": 62,
+      "systolic_bp": 135,
+      "diastolic_bp": 81,
+      "bp_treated": false,
+      "bmi": 26.4,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 199,
+      "hdl_cholesterol": 40,
+      "ldl_cholesterol": 129,
+      "triglycerides": 219,
+      "fasting_glucose": 83,
+      "hba1c": 5.3,
+      "hs_crp": 1.06
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Sedentary",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 24.5,
+      "recalibrated_risk_pct": 35.5,
+      "risk_category": "High",
+      "vascular_age": 74,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT012",
+    "name": "Kavita Patel",
+    "age": 63,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 67,
+      "systolic_bp": 154,
+      "diastolic_bp": 99,
+      "bp_treated": true,
+      "bmi": 23.9,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 195,
+      "hdl_cholesterol": 35,
+      "ldl_cholesterol": 130,
+      "triglycerides": 181,
+      "fasting_glucose": 132,
+      "hba1c": 7.6,
+      "hs_crp": 0.55
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 37.6,
+      "recalibrated_risk_pct": 54.5,
+      "risk_category": "High",
+      "vascular_age": 85,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT013",
+    "name": "Kavita Sen",
+    "age": 33,
+    "gender": "female",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 83,
+      "systolic_bp": 134,
+      "diastolic_bp": 81,
+      "bp_treated": false,
+      "bmi": 26.3,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 218,
+      "hdl_cholesterol": 58,
+      "ldl_cholesterol": 130,
+      "triglycerides": 197,
+      "fasting_glucose": 91,
+      "hba1c": 5.2,
+      "hs_crp": 1.07
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.5,
+      "recalibrated_risk_pct": 5.1,
+      "risk_category": "Low",
+      "vascular_age": 33,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT014",
+    "name": "Archana Mehta",
+    "age": 55,
+    "gender": "female",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 69,
+      "systolic_bp": 130,
+      "diastolic_bp": 77,
+      "bp_treated": false,
+      "bmi": 24.9,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 161,
+      "hdl_cholesterol": 35,
+      "ldl_cholesterol": 96,
+      "triglycerides": 203,
+      "fasting_glucose": 87,
+      "hba1c": 5.1,
+      "hs_crp": 0.59
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 6.1,
+      "recalibrated_risk_pct": 8.8,
+      "risk_category": "Low",
+      "vascular_age": 55,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT015",
+    "name": "Geeta Iyer",
+    "age": 41,
+    "gender": "female",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 69,
+      "systolic_bp": 130,
+      "diastolic_bp": 77,
+      "bp_treated": false,
+      "bmi": 23.3,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 235,
+      "hdl_cholesterol": 53,
+      "ldl_cholesterol": 152,
+      "triglycerides": 175,
+      "fasting_glucose": 96,
+      "hba1c": 5.1,
+      "hs_crp": 0.57
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.7,
+      "recalibrated_risk_pct": 5.4,
+      "risk_category": "Low",
+      "vascular_age": 41,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT016",
+    "name": "Priya Sharma",
+    "age": 30,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 70,
+      "systolic_bp": 143,
+      "diastolic_bp": 84,
+      "bp_treated": true,
+      "bmi": 22.7,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 160,
+      "hdl_cholesterol": 46,
+      "ldl_cholesterol": 84,
+      "triglycerides": 168,
+      "fasting_glucose": 130,
+      "hba1c": 7.1,
+      "hs_crp": 0.92
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 4.3,
+      "recalibrated_risk_pct": 6.2,
+      "risk_category": "Low",
+      "vascular_age": 30,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT017",
+    "name": "Ramesh Iyer",
+    "age": 31,
+    "gender": "male",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 78,
+      "systolic_bp": 135,
+      "diastolic_bp": 89,
+      "bp_treated": true,
+      "bmi": 28.3,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 228,
+      "hdl_cholesterol": 35,
+      "ldl_cholesterol": 163,
+      "triglycerides": 161,
+      "fasting_glucose": 157,
+      "hba1c": 7.3,
+      "hs_crp": 0.67
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Type 2 Diabetes Mellitus",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        },
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 8.3,
+      "recalibrated_risk_pct": 12.0,
+      "risk_category": "Moderate",
+      "vascular_age": 33,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT018",
+    "name": "Deepa Iyer",
+    "age": 40,
+    "gender": "female",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 75,
+      "systolic_bp": 152,
+      "diastolic_bp": 95,
+      "bp_treated": false,
+      "bmi": 29.3,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 214,
+      "hdl_cholesterol": 49,
+      "ldl_cholesterol": 135,
+      "triglycerides": 139,
+      "fasting_glucose": 92,
+      "hba1c": 5.5,
+      "hs_crp": 0.45
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 5.0,
+      "recalibrated_risk_pct": 7.2,
+      "risk_category": "Low",
+      "vascular_age": 40,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT019",
+    "name": "Nandini Choudhury",
+    "age": 43,
+    "gender": "female",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 76,
+      "systolic_bp": 150,
+      "diastolic_bp": 89,
+      "bp_treated": true,
+      "bmi": 21.7,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 175,
+      "hdl_cholesterol": 45,
+      "ldl_cholesterol": 100,
+      "triglycerides": 160,
+      "fasting_glucose": 89,
+      "hba1c": 5.5,
+      "hs_crp": 1.22
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 6.4,
+      "recalibrated_risk_pct": 9.3,
+      "risk_category": "Low",
+      "vascular_age": 43,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT020",
+    "name": "Deepa Mehta",
+    "age": 32,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 68,
+      "systolic_bp": 135,
+      "diastolic_bp": 80,
+      "bp_treated": false,
+      "bmi": 23.8,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 234,
+      "hdl_cholesterol": 44,
+      "ldl_cholesterol": 160,
+      "triglycerides": 238,
+      "fasting_glucose": 91,
+      "hba1c": 5.4,
+      "hs_crp": 0.94
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 2.6,
+      "recalibrated_risk_pct": 3.8,
+      "risk_category": "Low",
+      "vascular_age": 32,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT021",
+    "name": "Anjali Singh",
+    "age": 43,
+    "gender": "female",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 66,
+      "systolic_bp": 136,
+      "diastolic_bp": 89,
+      "bp_treated": false,
+      "bmi": 28.9,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 221,
+      "hdl_cholesterol": 50,
+      "ldl_cholesterol": 141,
+      "triglycerides": 180,
+      "fasting_glucose": 149,
+      "hba1c": 7.7,
+      "hs_crp": 1.09
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Type 2 Diabetes Mellitus",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 14.4,
+      "recalibrated_risk_pct": 20.9,
+      "risk_category": "High",
+      "vascular_age": 52,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT022",
+    "name": "Shalini Patel",
+    "age": 65,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 82,
+      "systolic_bp": 142,
+      "diastolic_bp": 88,
+      "bp_treated": true,
+      "bmi": 24.0,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 191,
+      "hdl_cholesterol": 55,
+      "ldl_cholesterol": 106,
+      "triglycerides": 240,
+      "fasting_glucose": 84,
+      "hba1c": 5.5,
+      "hs_crp": 0.47
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 13.3,
+      "recalibrated_risk_pct": 19.3,
+      "risk_category": "Moderate",
+      "vascular_age": 72,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT023",
+    "name": "Radha Sen",
+    "age": 63,
+    "gender": "female",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 74,
+      "systolic_bp": 127,
+      "diastolic_bp": 75,
+      "bp_treated": false,
+      "bmi": 25.0,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 214,
+      "hdl_cholesterol": 47,
+      "ldl_cholesterol": 137,
+      "triglycerides": 133,
+      "fasting_glucose": 100,
+      "hba1c": 5.3,
+      "hs_crp": 0.44
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 8.8,
+      "recalibrated_risk_pct": 12.8,
+      "risk_category": "Moderate",
+      "vascular_age": 65,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT024",
+    "name": "Meera Reddy",
+    "age": 34,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 83,
+      "systolic_bp": 121,
+      "diastolic_bp": 71,
+      "bp_treated": false,
+      "bmi": 27.1,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 218,
+      "hdl_cholesterol": 41,
+      "ldl_cholesterol": 147,
+      "triglycerides": 190,
+      "fasting_glucose": 98,
+      "hba1c": 5.2,
+      "hs_crp": 1.2
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 2.1,
+      "recalibrated_risk_pct": 3.0,
+      "risk_category": "Low",
+      "vascular_age": 34,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT025",
+    "name": "Devendra Nair",
+    "age": 68,
+    "gender": "male",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 78,
+      "systolic_bp": 134,
+      "diastolic_bp": 89,
+      "bp_treated": false,
+      "bmi": 29.2,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 226,
+      "hdl_cholesterol": 46,
+      "ldl_cholesterol": 150,
+      "triglycerides": 149,
+      "fasting_glucose": 92,
+      "hba1c": 5.3,
+      "hs_crp": 1.44
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 25.6,
+      "recalibrated_risk_pct": 37.1,
+      "risk_category": "High",
+      "vascular_age": 85,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT026",
+    "name": "Anita Reddy",
+    "age": 41,
+    "gender": "female",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 71,
+      "systolic_bp": 139,
+      "diastolic_bp": 85,
+      "bp_treated": false,
+      "bmi": 27.3,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 169,
+      "hdl_cholesterol": 36,
+      "ldl_cholesterol": 103,
+      "triglycerides": 153,
+      "fasting_glucose": 83,
+      "hba1c": 5.4,
+      "hs_crp": 0.94
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.9,
+      "recalibrated_risk_pct": 5.7,
+      "risk_category": "Low",
+      "vascular_age": 41,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT027",
+    "name": "Anita Nair",
+    "age": 56,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 69,
+      "systolic_bp": 146,
+      "diastolic_bp": 89,
+      "bp_treated": true,
+      "bmi": 24.5,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 228,
+      "hdl_cholesterol": 42,
+      "ldl_cholesterol": 156,
+      "triglycerides": 175,
+      "fasting_glucose": 87,
+      "hba1c": 5.5,
+      "hs_crp": 1.13
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        },
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 15.1,
+      "recalibrated_risk_pct": 21.9,
+      "risk_category": "High",
+      "vascular_age": 66,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT028",
+    "name": "Anjali Reddy",
+    "age": 46,
+    "gender": "female",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 72,
+      "systolic_bp": 124,
+      "diastolic_bp": 76,
+      "bp_treated": false,
+      "bmi": 26.5,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 213,
+      "hdl_cholesterol": 53,
+      "ldl_cholesterol": 130,
+      "triglycerides": 204,
+      "fasting_glucose": 92,
+      "hba1c": 5.3,
+      "hs_crp": 1.36
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.7,
+      "recalibrated_risk_pct": 5.4,
+      "risk_category": "Low",
+      "vascular_age": 46,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT029",
+    "name": "Archana Deshmukh",
+    "age": 39,
+    "gender": "female",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 71,
+      "systolic_bp": 118,
+      "diastolic_bp": 69,
+      "bp_treated": false,
+      "bmi": 22.6,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 180,
+      "hdl_cholesterol": 54,
+      "ldl_cholesterol": 96,
+      "triglycerides": 145,
+      "fasting_glucose": 97,
+      "hba1c": 5.5,
+      "hs_crp": 0.7
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 1.8,
+      "recalibrated_risk_pct": 2.6,
+      "risk_category": "Low",
+      "vascular_age": 39,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT030",
+    "name": "Priya Verma",
+    "age": 47,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 67,
+      "systolic_bp": 132,
+      "diastolic_bp": 82,
+      "bp_treated": false,
+      "bmi": 30.8,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 179,
+      "hdl_cholesterol": 37,
+      "ldl_cholesterol": 112,
+      "triglycerides": 128,
+      "fasting_glucose": 91,
+      "hba1c": 5.1,
+      "hs_crp": 1.16
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 4.9,
+      "recalibrated_risk_pct": 7.1,
+      "risk_category": "Low",
+      "vascular_age": 47,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT031",
+    "name": "Sunil Choudhury",
+    "age": 43,
+    "gender": "male",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 76,
+      "systolic_bp": 153,
+      "diastolic_bp": 93,
+      "bp_treated": false,
+      "bmi": 22.3,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 229,
+      "hdl_cholesterol": 39,
+      "ldl_cholesterol": 160,
+      "triglycerides": 172,
+      "fasting_glucose": 96,
+      "hba1c": 5.3,
+      "hs_crp": 0.75
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 10.5,
+      "recalibrated_risk_pct": 15.2,
+      "risk_category": "Moderate",
+      "vascular_age": 47,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT032",
+    "name": "Deepa Bose",
+    "age": 64,
+    "gender": "female",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 84,
+      "systolic_bp": 130,
+      "diastolic_bp": 78,
+      "bp_treated": false,
+      "bmi": 27.4,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 231,
+      "hdl_cholesterol": 41,
+      "ldl_cholesterol": 160,
+      "triglycerides": 232,
+      "fasting_glucose": 95,
+      "hba1c": 5.2,
+      "hs_crp": 0.58
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 11.7,
+      "recalibrated_risk_pct": 17.0,
+      "risk_category": "Moderate",
+      "vascular_age": 70,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT033",
+    "name": "Anita Sharma",
+    "age": 34,
+    "gender": "female",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 63,
+      "systolic_bp": 115,
+      "diastolic_bp": 76,
+      "bp_treated": false,
+      "bmi": 26.6,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 206,
+      "hdl_cholesterol": 42,
+      "ldl_cholesterol": 134,
+      "triglycerides": 226,
+      "fasting_glucose": 88,
+      "hba1c": 5.5,
+      "hs_crp": 1.16
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 1.7,
+      "recalibrated_risk_pct": 2.5,
+      "risk_category": "Low",
+      "vascular_age": 34,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT034",
+    "name": "Ramesh Sen",
+    "age": 40,
+    "gender": "male",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 67,
+      "systolic_bp": 121,
+      "diastolic_bp": 78,
+      "bp_treated": false,
+      "bmi": 30.7,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 181,
+      "hdl_cholesterol": 58,
+      "ldl_cholesterol": 93,
+      "triglycerides": 123,
+      "fasting_glucose": 97,
+      "hba1c": 5.5,
+      "hs_crp": 1.43
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.0,
+      "recalibrated_risk_pct": 4.3,
+      "risk_category": "Low",
+      "vascular_age": 40,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT035",
+    "name": "Vikram Choudhury",
+    "age": 52,
+    "gender": "male",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 65,
+      "systolic_bp": 127,
+      "diastolic_bp": 78,
+      "bp_treated": false,
+      "bmi": 27.7,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 239,
+      "hdl_cholesterol": 35,
+      "ldl_cholesterol": 174,
+      "triglycerides": 211,
+      "fasting_glucose": 87,
+      "hba1c": 5.2,
+      "hs_crp": 0.65
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Active",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 26.6,
+      "recalibrated_risk_pct": 38.6,
+      "risk_category": "High",
+      "vascular_age": 75,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT036",
+    "name": "Archana Verma",
+    "age": 48,
+    "gender": "female",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "vitals": {
+      "resting_hr": 73,
+      "systolic_bp": 133,
+      "diastolic_bp": 83,
+      "bp_treated": false,
+      "bmi": 27.8,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 243,
+      "hdl_cholesterol": 48,
+      "ldl_cholesterol": 165,
+      "triglycerides": 186,
+      "fasting_glucose": 88,
+      "hba1c": 5.4,
+      "hs_crp": 0.98
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 6.2,
+      "recalibrated_risk_pct": 9.0,
+      "risk_category": "Low",
+      "vascular_age": 48,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT037",
+    "name": "Anjali Verma",
+    "age": 55,
+    "gender": "female",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 73,
+      "systolic_bp": 125,
+      "diastolic_bp": 81,
+      "bp_treated": false,
+      "bmi": 25.2,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 170,
+      "hdl_cholesterol": 57,
+      "ldl_cholesterol": 83,
+      "triglycerides": 232,
+      "fasting_glucose": 172,
+      "hba1c": 8.7,
+      "hs_crp": 1.34
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 8.2,
+      "recalibrated_risk_pct": 11.9,
+      "risk_category": "Moderate",
+      "vascular_age": 57,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT038",
+    "name": "Shalini Nair",
+    "age": 47,
+    "gender": "female",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 70,
+      "systolic_bp": 119,
+      "diastolic_bp": 77,
+      "bp_treated": false,
+      "bmi": 30.2,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 180,
+      "hdl_cholesterol": 36,
+      "ldl_cholesterol": 114,
+      "triglycerides": 194,
+      "fasting_glucose": 95,
+      "hba1c": 5.2,
+      "hs_crp": 1.23
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 6.3,
+      "recalibrated_risk_pct": 9.1,
+      "risk_category": "Low",
+      "vascular_age": 47,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT039",
+    "name": "Sunil Choudhury",
+    "age": 51,
+    "gender": "male",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 67,
+      "systolic_bp": 128,
+      "diastolic_bp": 82,
+      "bp_treated": false,
+      "bmi": 23.9,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 217,
+      "hdl_cholesterol": 38,
+      "ldl_cholesterol": 149,
+      "triglycerides": 233,
+      "fasting_glucose": 97,
+      "hba1c": 5.4,
+      "hs_crp": 1.1
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 12.0,
+      "recalibrated_risk_pct": 17.4,
+      "risk_category": "Moderate",
+      "vascular_age": 57,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT040",
+    "name": "Sunita Deshmukh",
+    "age": 57,
+    "gender": "female",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "vitals": {
+      "resting_hr": 82,
+      "systolic_bp": 145,
+      "diastolic_bp": 87,
+      "bp_treated": false,
+      "bmi": 30.8,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 223,
+      "hdl_cholesterol": 56,
+      "ldl_cholesterol": 137,
+      "triglycerides": 219,
+      "fasting_glucose": 87,
+      "hba1c": 5.6,
+      "hs_crp": 1.38
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 9.4,
+      "recalibrated_risk_pct": 13.6,
+      "risk_category": "Moderate",
+      "vascular_age": 60,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT041",
+    "name": "Anil Verma",
+    "age": 36,
+    "gender": "male",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 82,
+      "systolic_bp": 142,
+      "diastolic_bp": 87,
+      "bp_treated": true,
+      "bmi": 27.4,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 219,
+      "hdl_cholesterol": 45,
+      "ldl_cholesterol": 144,
+      "triglycerides": 173,
+      "fasting_glucose": 163,
+      "hba1c": 9.0,
+      "hs_crp": 0.63
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 19.7,
+      "recalibrated_risk_pct": 28.6,
+      "risk_category": "High",
+      "vascular_age": 51,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT042",
+    "name": "Vikram Iyer",
+    "age": 55,
+    "gender": "male",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "vitals": {
+      "resting_hr": 78,
+      "systolic_bp": 131,
+      "diastolic_bp": 80,
+      "bp_treated": false,
+      "bmi": 22.5,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 230,
+      "hdl_cholesterol": 35,
+      "ldl_cholesterol": 165,
+      "triglycerides": 156,
+      "fasting_glucose": 175,
+      "hba1c": 8.8,
+      "hs_crp": 0.51
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Type 2 Diabetes Mellitus",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 29.2,
+      "recalibrated_risk_pct": 42.3,
+      "risk_category": "High",
+      "vascular_age": 81,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT043",
+    "name": "Sneha Sen",
+    "age": 57,
+    "gender": "female",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "vitals": {
+      "resting_hr": 84,
+      "systolic_bp": 155,
+      "diastolic_bp": 101,
+      "bp_treated": true,
+      "bmi": 27.5,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 249,
+      "hdl_cholesterol": 56,
+      "ldl_cholesterol": 163,
+      "triglycerides": 233,
+      "fasting_glucose": 98,
+      "hba1c": 5.4,
+      "hs_crp": 0.82
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        },
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 16.8,
+      "recalibrated_risk_pct": 24.4,
+      "risk_category": "High",
+      "vascular_age": 69,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT044",
+    "name": "Rekha Rao",
+    "age": 31,
+    "gender": "female",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 72,
+      "systolic_bp": 116,
+      "diastolic_bp": 76,
+      "bp_treated": false,
+      "bmi": 22.1,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 190,
+      "hdl_cholesterol": 50,
+      "ldl_cholesterol": 110,
+      "triglycerides": 177,
+      "fasting_glucose": 95,
+      "hba1c": 5.2,
+      "hs_crp": 0.71
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 1.1,
+      "recalibrated_risk_pct": 1.6,
+      "risk_category": "Low",
+      "vascular_age": 31,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT045",
+    "name": "Archana Gupta",
+    "age": 60,
+    "gender": "female",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 75,
+      "systolic_bp": 143,
+      "diastolic_bp": 90,
+      "bp_treated": true,
+      "bmi": 28.9,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 205,
+      "hdl_cholesterol": 46,
+      "ldl_cholesterol": 129,
+      "triglycerides": 131,
+      "fasting_glucose": 185,
+      "hba1c": 7.7,
+      "hs_crp": 1.19
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 25.9,
+      "recalibrated_risk_pct": 37.6,
+      "risk_category": "High",
+      "vascular_age": 82,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT046",
+    "name": "Radha Sharma",
+    "age": 30,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 75,
+      "systolic_bp": 144,
+      "diastolic_bp": 94,
+      "bp_treated": false,
+      "bmi": 29.7,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 242,
+      "hdl_cholesterol": 45,
+      "ldl_cholesterol": 167,
+      "triglycerides": 126,
+      "fasting_glucose": 152,
+      "hba1c": 7.8,
+      "hs_crp": 0.94
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Type 2 Diabetes Mellitus",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 5.4,
+      "recalibrated_risk_pct": 7.8,
+      "risk_category": "Low",
+      "vascular_age": 30,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT047",
+    "name": "Anil Patel",
+    "age": 46,
+    "gender": "male",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 77,
+      "systolic_bp": 151,
+      "diastolic_bp": 89,
+      "bp_treated": true,
+      "bmi": 27.7,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 235,
+      "hdl_cholesterol": 58,
+      "ldl_cholesterol": 147,
+      "triglycerides": 196,
+      "fasting_glucose": 85,
+      "hba1c": 5.1,
+      "hs_crp": 0.65
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        },
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 12.3,
+      "recalibrated_risk_pct": 17.8,
+      "risk_category": "Moderate",
+      "vascular_age": 52,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT048",
+    "name": "Praveen Mehta",
+    "age": 34,
+    "gender": "male",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 83,
+      "systolic_bp": 129,
+      "diastolic_bp": 85,
+      "bp_treated": false,
+      "bmi": 30.0,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 168,
+      "hdl_cholesterol": 46,
+      "ldl_cholesterol": 92,
+      "triglycerides": 211,
+      "fasting_glucose": 91,
+      "hba1c": 5.2,
+      "hs_crp": 0.86
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Sedentary",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 4.4,
+      "recalibrated_risk_pct": 6.4,
+      "risk_category": "Low",
+      "vascular_age": 34,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT049",
+    "name": "Sanjay Mehta",
+    "age": 44,
+    "gender": "male",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 64,
+      "systolic_bp": 123,
+      "diastolic_bp": 74,
+      "bp_treated": false,
+      "bmi": 28.2,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 212,
+      "hdl_cholesterol": 35,
+      "ldl_cholesterol": 147,
+      "triglycerides": 168,
+      "fasting_glucose": 170,
+      "hba1c": 9.2,
+      "hs_crp": 1.16
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 13.1,
+      "recalibrated_risk_pct": 19.0,
+      "risk_category": "Moderate",
+      "vascular_age": 51,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT050",
+    "name": "Suresh Iyer",
+    "age": 33,
+    "gender": "male",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 71,
+      "systolic_bp": 127,
+      "diastolic_bp": 74,
+      "bp_treated": false,
+      "bmi": 22.4,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 167,
+      "hdl_cholesterol": 58,
+      "ldl_cholesterol": 79,
+      "triglycerides": 175,
+      "fasting_glucose": 82,
+      "hba1c": 5.1,
+      "hs_crp": 0.66
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 1.7,
+      "recalibrated_risk_pct": 2.5,
+      "risk_category": "Low",
+      "vascular_age": 33,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT051",
+    "name": "Deepa Patel",
+    "age": 63,
+    "gender": "female",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 71,
+      "systolic_bp": 129,
+      "diastolic_bp": 84,
+      "bp_treated": false,
+      "bmi": 30.2,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 180,
+      "hdl_cholesterol": 40,
+      "ldl_cholesterol": 110,
+      "triglycerides": 222,
+      "fasting_glucose": 92,
+      "hba1c": 5.4,
+      "hs_crp": 0.49
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Active",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 13.9,
+      "recalibrated_risk_pct": 20.2,
+      "risk_category": "High",
+      "vascular_age": 71,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT052",
+    "name": "Kavita Gupta",
+    "age": 38,
+    "gender": "female",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "vitals": {
+      "resting_hr": 71,
+      "systolic_bp": 117,
+      "diastolic_bp": 76,
+      "bp_treated": false,
+      "bmi": 22.3,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 199,
+      "hdl_cholesterol": 39,
+      "ldl_cholesterol": 130,
+      "triglycerides": 169,
+      "fasting_glucose": 96,
+      "hba1c": 5.5,
+      "hs_crp": 0.43
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 2.4,
+      "recalibrated_risk_pct": 3.5,
+      "risk_category": "Low",
+      "vascular_age": 38,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT053",
+    "name": "Shalini Sen",
+    "age": 40,
+    "gender": "female",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 62,
+      "systolic_bp": 124,
+      "diastolic_bp": 82,
+      "bp_treated": false,
+      "bmi": 22.9,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 160,
+      "hdl_cholesterol": 49,
+      "ldl_cholesterol": 81,
+      "triglycerides": 183,
+      "fasting_glucose": 88,
+      "hba1c": 5.2,
+      "hs_crp": 0.63
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 2.0,
+      "recalibrated_risk_pct": 2.9,
+      "risk_category": "Low",
+      "vascular_age": 40,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT054",
+    "name": "Anjali Gupta",
+    "age": 64,
+    "gender": "female",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "vitals": {
+      "resting_hr": 67,
+      "systolic_bp": 127,
+      "diastolic_bp": 74,
+      "bp_treated": false,
+      "bmi": 24.4,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 183,
+      "hdl_cholesterol": 56,
+      "ldl_cholesterol": 97,
+      "triglycerides": 145,
+      "fasting_glucose": 89,
+      "hba1c": 5.3,
+      "hs_crp": 1.13
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Sedentary",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 11.2,
+      "recalibrated_risk_pct": 16.2,
+      "risk_category": "Moderate",
+      "vascular_age": 69,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT055",
+    "name": "Anjali Choudhury",
+    "age": 42,
+    "gender": "female",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 75,
+      "systolic_bp": 137,
+      "diastolic_bp": 89,
+      "bp_treated": true,
+      "bmi": 25.7,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 170,
+      "hdl_cholesterol": 48,
+      "ldl_cholesterol": 92,
+      "triglycerides": 231,
+      "fasting_glucose": 87,
+      "hba1c": 5.3,
+      "hs_crp": 1.01
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 4.4,
+      "recalibrated_risk_pct": 6.4,
+      "risk_category": "Low",
+      "vascular_age": 42,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT056",
+    "name": "Deepa Verma",
+    "age": 59,
+    "gender": "female",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 78,
+      "systolic_bp": 143,
+      "diastolic_bp": 87,
+      "bp_treated": true,
+      "bmi": 28.7,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 193,
+      "hdl_cholesterol": 36,
+      "ldl_cholesterol": 127,
+      "triglycerides": 204,
+      "fasting_glucose": 89,
+      "hba1c": 5.5,
+      "hs_crp": 0.95
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 14.7,
+      "recalibrated_risk_pct": 21.3,
+      "risk_category": "High",
+      "vascular_age": 68,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT057",
+    "name": "Vikram Deshmukh",
+    "age": 43,
+    "gender": "male",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 69,
+      "systolic_bp": 139,
+      "diastolic_bp": 92,
+      "bp_treated": false,
+      "bmi": 24.1,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 169,
+      "hdl_cholesterol": 52,
+      "ldl_cholesterol": 87,
+      "triglycerides": 150,
+      "fasting_glucose": 86,
+      "hba1c": 5.3,
+      "hs_crp": 0.66
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 4.9,
+      "recalibrated_risk_pct": 7.1,
+      "risk_category": "Low",
+      "vascular_age": 43,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT058",
+    "name": "Rekha Reddy",
+    "age": 45,
+    "gender": "female",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 73,
+      "systolic_bp": 135,
+      "diastolic_bp": 82,
+      "bp_treated": true,
+      "bmi": 24.8,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 170,
+      "hdl_cholesterol": 40,
+      "ldl_cholesterol": 100,
+      "triglycerides": 239,
+      "fasting_glucose": 94,
+      "hba1c": 5.4,
+      "hs_crp": 1.39
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 5.6,
+      "recalibrated_risk_pct": 8.1,
+      "risk_category": "Low",
+      "vascular_age": 45,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT059",
+    "name": "Pooja Bose",
+    "age": 33,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 81,
+      "systolic_bp": 118,
+      "diastolic_bp": 70,
+      "bp_treated": false,
+      "bmi": 30.0,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 234,
+      "hdl_cholesterol": 45,
+      "ldl_cholesterol": 159,
+      "triglycerides": 237,
+      "fasting_glucose": 174,
+      "hba1c": 7.1,
+      "hs_crp": 0.72
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Type 2 Diabetes Mellitus",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.8,
+      "recalibrated_risk_pct": 5.5,
+      "risk_category": "Low",
+      "vascular_age": 33,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT060",
+    "name": "Anita Choudhury",
+    "age": 33,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 77,
+      "systolic_bp": 141,
+      "diastolic_bp": 86,
+      "bp_treated": false,
+      "bmi": 23.7,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 163,
+      "hdl_cholesterol": 41,
+      "ldl_cholesterol": 92,
+      "triglycerides": 204,
+      "fasting_glucose": 95,
+      "hba1c": 5.4,
+      "hs_crp": 1.38
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 2.2,
+      "recalibrated_risk_pct": 3.2,
+      "risk_category": "Low",
+      "vascular_age": 33,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT061",
+    "name": "Geeta Patel",
+    "age": 64,
+    "gender": "female",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 66,
+      "systolic_bp": 133,
+      "diastolic_bp": 88,
+      "bp_treated": false,
+      "bmi": 22.9,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 169,
+      "hdl_cholesterol": 48,
+      "ldl_cholesterol": 91,
+      "triglycerides": 168,
+      "fasting_glucose": 89,
+      "hba1c": 5.2,
+      "hs_crp": 1.44
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 7.8,
+      "recalibrated_risk_pct": 11.3,
+      "risk_category": "Moderate",
+      "vascular_age": 65,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT062",
+    "name": "Alok Deshmukh",
+    "age": 57,
+    "gender": "male",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 75,
+      "systolic_bp": 149,
+      "diastolic_bp": 88,
+      "bp_treated": true,
+      "bmi": 24.9,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 171,
+      "hdl_cholesterol": 49,
+      "ldl_cholesterol": 92,
+      "triglycerides": 129,
+      "fasting_glucose": 174,
+      "hba1c": 8.5,
+      "hs_crp": 0.48
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 30.2,
+      "recalibrated_risk_pct": 43.8,
+      "risk_category": "High",
+      "vascular_age": 84,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT063",
+    "name": "Devendra Verma",
+    "age": 55,
+    "gender": "male",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 74,
+      "systolic_bp": 135,
+      "diastolic_bp": 79,
+      "bp_treated": false,
+      "bmi": 23.0,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 199,
+      "hdl_cholesterol": 56,
+      "ldl_cholesterol": 113,
+      "triglycerides": 169,
+      "fasting_glucose": 86,
+      "hba1c": 5.6,
+      "hs_crp": 0.79
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 10.7,
+      "recalibrated_risk_pct": 15.5,
+      "risk_category": "Moderate",
+      "vascular_age": 59,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT064",
+    "name": "Arjun Nair",
+    "age": 56,
+    "gender": "male",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 84,
+      "systolic_bp": 141,
+      "diastolic_bp": 93,
+      "bp_treated": true,
+      "bmi": 22.0,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 203,
+      "hdl_cholesterol": 40,
+      "ldl_cholesterol": 133,
+      "triglycerides": 234,
+      "fasting_glucose": 100,
+      "hba1c": 5.2,
+      "hs_crp": 0.58
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 38.4,
+      "recalibrated_risk_pct": 55.7,
+      "risk_category": "High",
+      "vascular_age": 85,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT065",
+    "name": "Anil Patel",
+    "age": 44,
+    "gender": "male",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 62,
+      "systolic_bp": 123,
+      "diastolic_bp": 72,
+      "bp_treated": false,
+      "bmi": 30.2,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 226,
+      "hdl_cholesterol": 48,
+      "ldl_cholesterol": 148,
+      "triglycerides": 234,
+      "fasting_glucose": 99,
+      "hba1c": 5.5,
+      "hs_crp": 0.49
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 6.2,
+      "recalibrated_risk_pct": 9.0,
+      "risk_category": "Low",
+      "vascular_age": 44,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT066",
+    "name": "Sunil Singh",
+    "age": 62,
+    "gender": "male",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "vitals": {
+      "resting_hr": 84,
+      "systolic_bp": 144,
+      "diastolic_bp": 88,
+      "bp_treated": true,
+      "bmi": 29.8,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 180,
+      "hdl_cholesterol": 38,
+      "ldl_cholesterol": 112,
+      "triglycerides": 181,
+      "fasting_glucose": 96,
+      "hba1c": 5.3,
+      "hs_crp": 1.06
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 46.9,
+      "recalibrated_risk_pct": 68.0,
+      "risk_category": "High",
+      "vascular_age": 85,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT067",
+    "name": "Kavita Kulkarni",
+    "age": 61,
+    "gender": "female",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "vitals": {
+      "resting_hr": 76,
+      "systolic_bp": 135,
+      "diastolic_bp": 80,
+      "bp_treated": false,
+      "bmi": 26.5,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 163,
+      "hdl_cholesterol": 40,
+      "ldl_cholesterol": 93,
+      "triglycerides": 206,
+      "fasting_glucose": 142,
+      "hba1c": 7.7,
+      "hs_crp": 1.09
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 15.1,
+      "recalibrated_risk_pct": 21.9,
+      "risk_category": "High",
+      "vascular_age": 71,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT068",
+    "name": "Anjali Sen",
+    "age": 65,
+    "gender": "female",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 68,
+      "systolic_bp": 138,
+      "diastolic_bp": 90,
+      "bp_treated": false,
+      "bmi": 22.6,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 169,
+      "hdl_cholesterol": 43,
+      "ldl_cholesterol": 96,
+      "triglycerides": 199,
+      "fasting_glucose": 100,
+      "hba1c": 5.5,
+      "hs_crp": 0.86
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 9.5,
+      "recalibrated_risk_pct": 13.8,
+      "risk_category": "Moderate",
+      "vascular_age": 68,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT069",
+    "name": "Priya Bose",
+    "age": 39,
+    "gender": "female",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 71,
+      "systolic_bp": 134,
+      "diastolic_bp": 79,
+      "bp_treated": false,
+      "bmi": 28.2,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 200,
+      "hdl_cholesterol": 37,
+      "ldl_cholesterol": 133,
+      "triglycerides": 161,
+      "fasting_glucose": 89,
+      "hba1c": 5.2,
+      "hs_crp": 0.77
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.8,
+      "recalibrated_risk_pct": 5.5,
+      "risk_category": "Low",
+      "vascular_age": 39,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT070",
+    "name": "Geeta Nair",
+    "age": 32,
+    "gender": "female",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 80,
+      "systolic_bp": 144,
+      "diastolic_bp": 85,
+      "bp_treated": true,
+      "bmi": 22.7,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 228,
+      "hdl_cholesterol": 53,
+      "ldl_cholesterol": 145,
+      "triglycerides": 213,
+      "fasting_glucose": 97,
+      "hba1c": 5.3,
+      "hs_crp": 1.18
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        },
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.6,
+      "recalibrated_risk_pct": 5.2,
+      "risk_category": "Low",
+      "vascular_age": 32,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT071",
+    "name": "Rekha Verma",
+    "age": 45,
+    "gender": "female",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 69,
+      "systolic_bp": 120,
+      "diastolic_bp": 73,
+      "bp_treated": false,
+      "bmi": 28.8,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 180,
+      "hdl_cholesterol": 39,
+      "ldl_cholesterol": 111,
+      "triglycerides": 122,
+      "fasting_glucose": 88,
+      "hba1c": 5.6,
+      "hs_crp": 0.52
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.3,
+      "recalibrated_risk_pct": 4.8,
+      "risk_category": "Low",
+      "vascular_age": 45,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT072",
+    "name": "Shalini Iyer",
+    "age": 60,
+    "gender": "female",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "vitals": {
+      "resting_hr": 68,
+      "systolic_bp": 128,
+      "diastolic_bp": 84,
+      "bp_treated": false,
+      "bmi": 29.2,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 233,
+      "hdl_cholesterol": 49,
+      "ldl_cholesterol": 154,
+      "triglycerides": 202,
+      "fasting_glucose": 91,
+      "hba1c": 5.5,
+      "hs_crp": 0.68
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 8.7,
+      "recalibrated_risk_pct": 12.6,
+      "risk_category": "Moderate",
+      "vascular_age": 62,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT073",
+    "name": "Meera Kulkarni",
+    "age": 53,
+    "gender": "female",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 67,
+      "systolic_bp": 136,
+      "diastolic_bp": 86,
+      "bp_treated": true,
+      "bmi": 22.7,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 170,
+      "hdl_cholesterol": 57,
+      "ldl_cholesterol": 83,
+      "triglycerides": 123,
+      "fasting_glucose": 96,
+      "hba1c": 5.6,
+      "hs_crp": 0.4
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 6.5,
+      "recalibrated_risk_pct": 9.4,
+      "risk_category": "Low",
+      "vascular_age": 53,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT074",
+    "name": "Anjali Rao",
+    "age": 59,
+    "gender": "female",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 71,
+      "systolic_bp": 139,
+      "diastolic_bp": 91,
+      "bp_treated": true,
+      "bmi": 28.6,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 240,
+      "hdl_cholesterol": 49,
+      "ldl_cholesterol": 161,
+      "triglycerides": 192,
+      "fasting_glucose": 137,
+      "hba1c": 7.6,
+      "hs_crp": 0.63
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Type 2 Diabetes Mellitus",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        },
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 26.4,
+      "recalibrated_risk_pct": 38.3,
+      "risk_category": "High",
+      "vascular_age": 82,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT075",
+    "name": "Suresh Sharma",
+    "age": 63,
+    "gender": "male",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 65,
+      "systolic_bp": 149,
+      "diastolic_bp": 97,
+      "bp_treated": false,
+      "bmi": 25.9,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 244,
+      "hdl_cholesterol": 35,
+      "ldl_cholesterol": 179,
+      "triglycerides": 234,
+      "fasting_glucose": 139,
+      "hba1c": 9.2,
+      "hs_crp": 1.05
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Active",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Type 2 Diabetes Mellitus",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 74.8,
+      "recalibrated_risk_pct": 99.0,
+      "risk_category": "High",
+      "vascular_age": 85,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT076",
+    "name": "Meera Singh",
+    "age": 59,
+    "gender": "female",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "vitals": {
+      "resting_hr": 77,
+      "systolic_bp": 133,
+      "diastolic_bp": 85,
+      "bp_treated": false,
+      "bmi": 25.4,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 230,
+      "hdl_cholesterol": 43,
+      "ldl_cholesterol": 157,
+      "triglycerides": 142,
+      "fasting_glucose": 100,
+      "hba1c": 5.2,
+      "hs_crp": 1.19
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 10.0,
+      "recalibrated_risk_pct": 14.5,
+      "risk_category": "Moderate",
+      "vascular_age": 63,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT077",
+    "name": "Pooja Singh",
+    "age": 41,
+    "gender": "female",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 71,
+      "systolic_bp": 121,
+      "diastolic_bp": 81,
+      "bp_treated": false,
+      "bmi": 26.4,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 218,
+      "hdl_cholesterol": 54,
+      "ldl_cholesterol": 134,
+      "triglycerides": 177,
+      "fasting_glucose": 88,
+      "hba1c": 5.2,
+      "hs_crp": 1.16
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 2.7,
+      "recalibrated_risk_pct": 3.9,
+      "risk_category": "Low",
+      "vascular_age": 41,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT078",
+    "name": "Rajesh Verma",
+    "age": 45,
+    "gender": "male",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "vitals": {
+      "resting_hr": 72,
+      "systolic_bp": 118,
+      "diastolic_bp": 77,
+      "bp_treated": false,
+      "bmi": 28.5,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 227,
+      "hdl_cholesterol": 36,
+      "ldl_cholesterol": 161,
+      "triglycerides": 233,
+      "fasting_glucose": 87,
+      "hba1c": 5.5,
+      "hs_crp": 0.91
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 7.9,
+      "recalibrated_risk_pct": 11.5,
+      "risk_category": "Moderate",
+      "vascular_age": 46,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT079",
+    "name": "Anjali Singh",
+    "age": 44,
+    "gender": "female",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 69,
+      "systolic_bp": 155,
+      "diastolic_bp": 92,
+      "bp_treated": true,
+      "bmi": 30.1,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 160,
+      "hdl_cholesterol": 37,
+      "ldl_cholesterol": 93,
+      "triglycerides": 192,
+      "fasting_glucose": 155,
+      "hba1c": 7.9,
+      "hs_crp": 0.64
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 14.6,
+      "recalibrated_risk_pct": 21.2,
+      "risk_category": "High",
+      "vascular_age": 53,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT080",
+    "name": "Anil Sharma",
+    "age": 37,
+    "gender": "male",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 79,
+      "systolic_bp": 128,
+      "diastolic_bp": 76,
+      "bp_treated": false,
+      "bmi": 29.5,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 214,
+      "hdl_cholesterol": 43,
+      "ldl_cholesterol": 141,
+      "triglycerides": 151,
+      "fasting_glucose": 83,
+      "hba1c": 5.4,
+      "hs_crp": 0.83
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 4.1,
+      "recalibrated_risk_pct": 5.9,
+      "risk_category": "Low",
+      "vascular_age": 37,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT081",
+    "name": "Archana Patel",
+    "age": 55,
+    "gender": "female",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "vitals": {
+      "resting_hr": 72,
+      "systolic_bp": 136,
+      "diastolic_bp": 90,
+      "bp_treated": true,
+      "bmi": 22.1,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 214,
+      "hdl_cholesterol": 37,
+      "ldl_cholesterol": 147,
+      "triglycerides": 125,
+      "fasting_glucose": 144,
+      "hba1c": 7.2,
+      "hs_crp": 0.55
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 22.9,
+      "recalibrated_risk_pct": 33.2,
+      "risk_category": "High",
+      "vascular_age": 74,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT082",
+    "name": "Sanjay Singh",
+    "age": 47,
+    "gender": "male",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "vitals": {
+      "resting_hr": 80,
+      "systolic_bp": 127,
+      "diastolic_bp": 78,
+      "bp_treated": false,
+      "bmi": 29.6,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 164,
+      "hdl_cholesterol": 42,
+      "ldl_cholesterol": 92,
+      "triglycerides": 129,
+      "fasting_glucose": 91,
+      "hba1c": 5.5,
+      "hs_crp": 1.15
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Active",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 11.8,
+      "recalibrated_risk_pct": 17.1,
+      "risk_category": "Moderate",
+      "vascular_age": 53,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT083",
+    "name": "Archana Reddy",
+    "age": 47,
+    "gender": "female",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 73,
+      "systolic_bp": 126,
+      "diastolic_bp": 80,
+      "bp_treated": false,
+      "bmi": 27.1,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 169,
+      "hdl_cholesterol": 43,
+      "ldl_cholesterol": 96,
+      "triglycerides": 209,
+      "fasting_glucose": 87,
+      "hba1c": 5.1,
+      "hs_crp": 0.94
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 6.0,
+      "recalibrated_risk_pct": 8.7,
+      "risk_category": "Low",
+      "vascular_age": 47,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT084",
+    "name": "Deepa Nair",
+    "age": 48,
+    "gender": "female",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 84,
+      "systolic_bp": 125,
+      "diastolic_bp": 77,
+      "bp_treated": false,
+      "bmi": 28.9,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 172,
+      "hdl_cholesterol": 35,
+      "ldl_cholesterol": 107,
+      "triglycerides": 233,
+      "fasting_glucose": 98,
+      "hba1c": 5.4,
+      "hs_crp": 1.27
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Sedentary",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 4.4,
+      "recalibrated_risk_pct": 6.4,
+      "risk_category": "Low",
+      "vascular_age": 48,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT085",
+    "name": "Pooja Sharma",
+    "age": 35,
+    "gender": "female",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 70,
+      "systolic_bp": 143,
+      "diastolic_bp": 85,
+      "bp_treated": false,
+      "bmi": 24.6,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 210,
+      "hdl_cholesterol": 38,
+      "ldl_cholesterol": 142,
+      "triglycerides": 172,
+      "fasting_glucose": 155,
+      "hba1c": 8.2,
+      "hs_crp": 0.43
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 7.2,
+      "recalibrated_risk_pct": 10.4,
+      "risk_category": "Moderate",
+      "vascular_age": 35,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT086",
+    "name": "Manoj Rao",
+    "age": 31,
+    "gender": "male",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 80,
+      "systolic_bp": 124,
+      "diastolic_bp": 80,
+      "bp_treated": false,
+      "bmi": 26.7,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 209,
+      "hdl_cholesterol": 49,
+      "ldl_cholesterol": 130,
+      "triglycerides": 219,
+      "fasting_glucose": 159,
+      "hba1c": 9.1,
+      "hs_crp": 1.36
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.5,
+      "recalibrated_risk_pct": 5.1,
+      "risk_category": "Low",
+      "vascular_age": 31,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT087",
+    "name": "Deepak Gupta",
+    "age": 49,
+    "gender": "male",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "vitals": {
+      "resting_hr": 77,
+      "systolic_bp": 123,
+      "diastolic_bp": 79,
+      "bp_treated": false,
+      "bmi": 26.7,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 164,
+      "hdl_cholesterol": 45,
+      "ldl_cholesterol": 89,
+      "triglycerides": 184,
+      "fasting_glucose": 133,
+      "hba1c": 7.3,
+      "hs_crp": 0.92
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 20.0,
+      "recalibrated_risk_pct": 29.0,
+      "risk_category": "High",
+      "vascular_age": 64,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT088",
+    "name": "Sunita Bose",
+    "age": 32,
+    "gender": "female",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "vitals": {
+      "resting_hr": 83,
+      "systolic_bp": 146,
+      "diastolic_bp": 95,
+      "bp_treated": false,
+      "bmi": 26.2,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 233,
+      "hdl_cholesterol": 35,
+      "ldl_cholesterol": 168,
+      "triglycerides": 141,
+      "fasting_glucose": 134,
+      "hba1c": 8.8,
+      "hs_crp": 1.13
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Type 2 Diabetes Mellitus",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 7.4,
+      "recalibrated_risk_pct": 10.7,
+      "risk_category": "Moderate",
+      "vascular_age": 33,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT089",
+    "name": "Meera Singh",
+    "age": 47,
+    "gender": "female",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 70,
+      "systolic_bp": 117,
+      "diastolic_bp": 72,
+      "bp_treated": false,
+      "bmi": 22.6,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 242,
+      "hdl_cholesterol": 40,
+      "ldl_cholesterol": 172,
+      "triglycerides": 184,
+      "fasting_glucose": 89,
+      "hba1c": 5.6,
+      "hs_crp": 1.35
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 4.7,
+      "recalibrated_risk_pct": 6.8,
+      "risk_category": "Low",
+      "vascular_age": 47,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT090",
+    "name": "Deepa Sen",
+    "age": 41,
+    "gender": "female",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 63,
+      "systolic_bp": 127,
+      "diastolic_bp": 74,
+      "bp_treated": false,
+      "bmi": 25.2,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 167,
+      "hdl_cholesterol": 58,
+      "ldl_cholesterol": 79,
+      "triglycerides": 143,
+      "fasting_glucose": 87,
+      "hba1c": 5.3,
+      "hs_crp": 0.71
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 2.2,
+      "recalibrated_risk_pct": 3.2,
+      "risk_category": "Low",
+      "vascular_age": 41,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT091",
+    "name": "Suresh Reddy",
+    "age": 47,
+    "gender": "male",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 77,
+      "systolic_bp": 146,
+      "diastolic_bp": 86,
+      "bp_treated": true,
+      "bmi": 22.3,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 178,
+      "hdl_cholesterol": 36,
+      "ldl_cholesterol": 112,
+      "triglycerides": 235,
+      "fasting_glucose": 88,
+      "hba1c": 5.5,
+      "hs_crp": 1.12
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 13.9,
+      "recalibrated_risk_pct": 20.2,
+      "risk_category": "High",
+      "vascular_age": 55,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT092",
+    "name": "Geeta Iyer",
+    "age": 58,
+    "gender": "female",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 74,
+      "systolic_bp": 151,
+      "diastolic_bp": 99,
+      "bp_treated": true,
+      "bmi": 26.1,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 196,
+      "hdl_cholesterol": 58,
+      "ldl_cholesterol": 108,
+      "triglycerides": 123,
+      "fasting_glucose": 82,
+      "hba1c": 5.5,
+      "hs_crp": 0.97
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Jain Diet"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 12.2,
+      "recalibrated_risk_pct": 17.7,
+      "risk_category": "Moderate",
+      "vascular_age": 64,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT093",
+    "name": "Kavita Kulkarni",
+    "age": 31,
+    "gender": "female",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "vitals": {
+      "resting_hr": 77,
+      "systolic_bp": 127,
+      "diastolic_bp": 83,
+      "bp_treated": false,
+      "bmi": 25.5,
+      "spo2_baseline": 96
+    },
+    "labs": {
+      "total_cholesterol": 190,
+      "hdl_cholesterol": 46,
+      "ldl_cholesterol": 114,
+      "triglycerides": 230,
+      "fasting_glucose": 85,
+      "hba1c": 5.3,
+      "hs_crp": 1.43
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Sedentary",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 2.6,
+      "recalibrated_risk_pct": 3.8,
+      "risk_category": "Low",
+      "vascular_age": 31,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT094",
+    "name": "Anil Iyer",
+    "age": 60,
+    "gender": "male",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "vitals": {
+      "resting_hr": 62,
+      "systolic_bp": 127,
+      "diastolic_bp": 75,
+      "bp_treated": false,
+      "bmi": 23.4,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 166,
+      "hdl_cholesterol": 47,
+      "ldl_cholesterol": 89,
+      "triglycerides": 193,
+      "fasting_glucose": 94,
+      "hba1c": 5.5,
+      "hs_crp": 0.73
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Balanced"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 11.8,
+      "recalibrated_risk_pct": 17.1,
+      "risk_category": "Moderate",
+      "vascular_age": 66,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT095",
+    "name": "Deepak Reddy",
+    "age": 44,
+    "gender": "male",
+    "city": "Delhi",
+    "state": "NCR",
+    "vitals": {
+      "resting_hr": 72,
+      "systolic_bp": 117,
+      "diastolic_bp": 73,
+      "bp_treated": false,
+      "bmi": 29.1,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 221,
+      "hdl_cholesterol": 47,
+      "ldl_cholesterol": 144,
+      "triglycerides": 215,
+      "fasting_glucose": 94,
+      "hba1c": 5.4,
+      "hs_crp": 1.4
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 10.4,
+      "recalibrated_risk_pct": 15.1,
+      "risk_category": "Moderate",
+      "vascular_age": 48,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT096",
+    "name": "Ramesh Iyer",
+    "age": 58,
+    "gender": "male",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "vitals": {
+      "resting_hr": 72,
+      "systolic_bp": 135,
+      "diastolic_bp": 81,
+      "bp_treated": true,
+      "bmi": 28.0,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 170,
+      "hdl_cholesterol": 57,
+      "ldl_cholesterol": 83,
+      "triglycerides": 203,
+      "fasting_glucose": 146,
+      "hba1c": 8.8,
+      "hs_crp": 0.84
+    },
+    "lifestyle": {
+      "smoker": true,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 1",
+        "Type 2 Diabetes Mellitus"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 40.3,
+      "recalibrated_risk_pct": 58.4,
+      "risk_category": "High",
+      "vascular_age": 85,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Smoking",
+          "impact": "High",
+          "recommendation": "Smoking cessation"
+        },
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Diabetes",
+          "impact": "High",
+          "recommendation": "Glycemic control (HbA1c < 7.0%)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT097",
+    "name": "Alok Deshmukh",
+    "age": 48,
+    "gender": "male",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "vitals": {
+      "resting_hr": 65,
+      "systolic_bp": 154,
+      "diastolic_bp": 94,
+      "bp_treated": true,
+      "bmi": 30.5,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 213,
+      "hdl_cholesterol": 50,
+      "ldl_cholesterol": 133,
+      "triglycerides": 141,
+      "fasting_glucose": 84,
+      "hba1c": 5.4,
+      "hs_crp": 0.93
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2"
+      ],
+      "medications": [
+        {
+          "name": "Telmisartan",
+          "dosage": "40mg OD",
+          "class": "ARB",
+          "hr_effect": 0,
+          "bp_effect": -10
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 14.8,
+      "recalibrated_risk_pct": 21.5,
+      "risk_category": "High",
+      "vascular_age": 57,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PAT098",
+    "name": "Ramesh Sen",
+    "age": 33,
+    "gender": "male",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 81,
+      "systolic_bp": 119,
+      "diastolic_bp": 78,
+      "bp_treated": false,
+      "bmi": 30.9,
+      "spo2_baseline": 97
+    },
+    "labs": {
+      "total_cholesterol": 165,
+      "hdl_cholesterol": 55,
+      "ldl_cholesterol": 80,
+      "triglycerides": 183,
+      "fasting_glucose": 98,
+      "hba1c": 5.5,
+      "hs_crp": 1.26
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 1.5,
+      "recalibrated_risk_pct": 2.2,
+      "risk_category": "Low",
+      "vascular_age": 33,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT099",
+    "name": "Manoj Deshmukh",
+    "age": 44,
+    "gender": "male",
+    "city": "Kochi",
+    "state": "Kerala",
+    "vitals": {
+      "resting_hr": 70,
+      "systolic_bp": 118,
+      "diastolic_bp": 70,
+      "bp_treated": false,
+      "bmi": 22.6,
+      "spo2_baseline": 98
+    },
+    "labs": {
+      "total_cholesterol": 168,
+      "hdl_cholesterol": 56,
+      "ldl_cholesterol": 82,
+      "triglycerides": 128,
+      "fasting_glucose": 94,
+      "hba1c": 5.2,
+      "hs_crp": 1.5
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Active",
+      "diet": "Vegetarian (High Carb)"
+    },
+    "clinical_history": {
+      "conditions": [
+        "None (Healthy)"
+      ],
+      "medications": [],
+      "allergies": [
+        "Penicillin"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 3.6,
+      "recalibrated_risk_pct": 5.2,
+      "risk_category": "Low",
+      "vascular_age": 44,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": []
+    }
+  },
+  {
+    "id": "PAT100",
+    "name": "Radha Iyer",
+    "age": 47,
+    "gender": "female",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "vitals": {
+      "resting_hr": 80,
+      "systolic_bp": 151,
+      "diastolic_bp": 95,
+      "bp_treated": false,
+      "bmi": 30.2,
+      "spo2_baseline": 99
+    },
+    "labs": {
+      "total_cholesterol": 224,
+      "hdl_cholesterol": 46,
+      "ldl_cholesterol": 148,
+      "triglycerides": 138,
+      "fasting_glucose": 87,
+      "hba1c": 5.5,
+      "hs_crp": 1.01
+    },
+    "lifestyle": {
+      "smoker": false,
+      "physical_activity": "Moderate (Walking)",
+      "diet": "Non-Vegetarian"
+    },
+    "clinical_history": {
+      "conditions": [
+        "Hypertension Stage 2",
+        "Hypercholesterolemia"
+      ],
+      "medications": [
+        {
+          "name": "Atorvastatin",
+          "dosage": "20mg HS",
+          "class": "Statin",
+          "hr_effect": 0,
+          "bp_effect": -2
+        }
+      ],
+      "allergies": [
+        "None known"
+      ]
+    },
+    "cardiovascular_risk": {
+      "base_10yr_risk_pct": 7.8,
+      "recalibrated_risk_pct": 11.3,
+      "risk_category": "Moderate",
+      "vascular_age": 48,
+      "south_asian_factor_applied": true,
+      "modifiable_factors": [
+        {
+          "factor": "Blood Pressure",
+          "impact": "High",
+          "recommendation": "Target SBP < 125 mmHg with ACE-i / ARB"
+        },
+        {
+          "factor": "Cholesterol Ratio",
+          "impact": "Moderate",
+          "recommendation": "Statin therapy (Atorvastatin 20mg)"
+        }
+      ]
+    }
+  }
+]
