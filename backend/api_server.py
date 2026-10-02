@@ -365,31 +365,115 @@ def trigger_scenario():
             "bpm": 138, "rmssd": 12.0, "sdnn": 18.0, "spo2": 95, "signal_quality": 0.90,
             "arrhythmia_predicted": "Tachycardia",
             "arrhythmia_probabilities": {"Tachycardia": 0.88, "Normal": 0.08, "Bradycardia": 0.02, "V_Tachycardia": 0.02},
-            "data_source": "SIMULATION"
-        },
-        "hypoxia_event": {
-            "bpm": 96, "rmssd": 24.0, "sdnn": 32.0, "spo2": 87, "signal_quality": 0.88,
-            "arrhythmia_predicted": "Normal",
-            "arrhythmia_probabilities": {"Normal": 0.80, "Tachycardia": 0.15, "Bradycardia": 0.05},
-            "data_source": "SIMULATION"
-        },
-        "critical_v_tach": {
-            "bpm": 165, "rmssd": 8.0, "sdnn": 12.0, "spo2": 91, "signal_quality": 0.92,
-            "arrhythmia_predicted": "V_Tachycardia",
-            "arrhythmia_probabilities": {"V_Tachycardia": 0.91, "Tachycardia": 0.06, "Normal": 0.03},
-            "data_source": "SIMULATION"
+            "data_source": "SIMULATION",
+            "signal_gate": {
+                "status": "RELIABLE",
+                "reason": "Simulated telemetry passed 5-part clinical gate",
+                "ai_screening_enabled": True,
+                "consecutive_good_windows": 3,
+                "stability_threshold": 3,
+                "sample_rate_estimate": 100.0,
+                "bpm": 138.0,
+                "peak_coverage": 0.95,
+                "rr_cv": 0.08,
+                "clipping_ratio": 0.0,
+                "checks": {"contact_amplitude": True, "sample_timing": True, "peak_regularity": True, "physiological_plausibility": True, "window_stability": True}
+            }
         },
         "afib_episode": {
             "bpm": 118, "rmssd": 78.0, "sdnn": 84.0, "spo2": 96, "signal_quality": 0.92,
             "arrhythmia_predicted": "AFib",
             "arrhythmia_probabilities": {"AFib": 0.84, "Normal": 0.08, "Tachycardia": 0.05, "Bradycardia": 0.03},
-            "data_source": "SIMULATION"
+            "data_source": "SIMULATION",
+            "signal_gate": {
+                "status": "RELIABLE",
+                "reason": "Simulated optical pulse passed 5-part clinical gate",
+                "ai_screening_enabled": True,
+                "consecutive_good_windows": 3,
+                "stability_threshold": 3,
+                "sample_rate_estimate": 100.0,
+                "bpm": 118.0,
+                "peak_coverage": 0.92,
+                "rr_cv": 0.22,
+                "clipping_ratio": 0.0,
+                "checks": {"contact_amplitude": True, "sample_timing": True, "peak_regularity": True, "physiological_plausibility": True, "window_stability": True}
+            }
+        },
+        "hypoxia_event": {
+            "bpm": 96, "rmssd": 24.0, "sdnn": 32.0, "spo2": 87, "signal_quality": 0.88,
+            "arrhythmia_predicted": "Normal",
+            "arrhythmia_probabilities": {"Normal": 0.80, "Tachycardia": 0.15, "Bradycardia": 0.05},
+            "data_source": "SIMULATION",
+            "signal_gate": {
+                "status": "RELIABLE",
+                "reason": "Simulated telemetry passed 5-part clinical gate",
+                "ai_screening_enabled": True,
+                "consecutive_good_windows": 3,
+                "stability_threshold": 3,
+                "sample_rate_estimate": 100.0,
+                "bpm": 96.0,
+                "peak_coverage": 0.94,
+                "rr_cv": 0.09,
+                "clipping_ratio": 0.0,
+                "checks": {"contact_amplitude": True, "sample_timing": True, "peak_regularity": True, "physiological_plausibility": True, "window_stability": True}
+            }
         },
         "calm_normal": {
             "bpm": 72, "rmssd": 44.0, "sdnn": 52.0, "spo2": 99, "signal_quality": 0.95,
             "arrhythmia_predicted": "Normal",
             "arrhythmia_probabilities": {"Normal": 0.96, "Tachycardia": 0.02, "Bradycardia": 0.02},
-            "data_source": "SIMULATION"
+            "data_source": "SIMULATION",
+            "signal_gate": {
+                "status": "RELIABLE",
+                "reason": "Simulated clean baseline passed 5-part clinical gate",
+                "ai_screening_enabled": True,
+                "consecutive_good_windows": 3,
+                "stability_threshold": 3,
+                "sample_rate_estimate": 100.0,
+                "bpm": 72.0,
+                "peak_coverage": 0.98,
+                "rr_cv": 0.05,
+                "clipping_ratio": 0.0,
+                "checks": {"contact_amplitude": True, "sample_timing": True, "peak_regularity": True, "physiological_plausibility": True, "window_stability": True}
+            }
+        },
+        "motion_artifact": {
+            "bpm": 142, "rmssd": 88.0, "sdnn": 92.0, "spo2": 93, "signal_quality": 0.28,
+            "arrhythmia_predicted": "Verification: POOR_REGULARITY",
+            "arrhythmia_probabilities": {"POOR_REGULARITY": 1.0},
+            "data_source": "SIMULATION",
+            "signal_gate": {
+                "status": "POOR_REGULARITY",
+                "reason": "Low pulse regularity (Coverage: 48.0% < 65%, RR CV: 0.44 > 0.35)",
+                "ai_screening_enabled": False,
+                "consecutive_good_windows": 0,
+                "stability_threshold": 3,
+                "sample_rate_estimate": 100.0,
+                "bpm": 142.0,
+                "peak_coverage": 0.48,
+                "rr_cv": 0.44,
+                "clipping_ratio": 0.02,
+                "checks": {"contact_amplitude": True, "sample_timing": True, "peak_regularity": False, "physiological_plausibility": True, "window_stability": False}
+            }
+        },
+        "sensor_liftoff": {
+            "bpm": 0, "rmssd": 0.0, "sdnn": 0.0, "spo2": 0, "signal_quality": 0.0,
+            "arrhythmia_predicted": "Verification: FINGER_OFF",
+            "arrhythmia_probabilities": {"FINGER_OFF": 1.0},
+            "data_source": "SIMULATION",
+            "signal_gate": {
+                "status": "FINGER_OFF",
+                "reason": "Sensor liftoff or flatline detected (amplitude below optical threshold)",
+                "ai_screening_enabled": False,
+                "consecutive_good_windows": 0,
+                "stability_threshold": 3,
+                "sample_rate_estimate": 100.0,
+                "bpm": 0.0,
+                "peak_coverage": 0.0,
+                "rr_cv": 1.0,
+                "clipping_ratio": 0.0,
+                "checks": {"contact_amplitude": False, "sample_timing": True, "peak_regularity": False, "physiological_plausibility": False, "window_stability": False}
+            }
         }
     }
 
@@ -426,12 +510,13 @@ def receive_sensor_data():
 
     with state_lock:
         for i, val in enumerate(ppg_chunk):
+            sample_time_ms = now_ms - (len(ppg_chunk) - 1 - i) * dt_ms
             state["waveform_buffer"].append(float(val))
             state["analysis_buffer"].append(float(val))
-            state["timestamp_buffer"].append(now_ms - (len(ppg_chunk) - 1 - i) * dt_ms)
+            state["timestamp_buffer"].append(sample_time_ms)
             state["sample_count"] += 1
             if state["is_recording"] and state["csv_writer"]:
-                state["csv_writer"].writerow([val, time.strftime("%Y-%m-%d %H:%M:%S")])
+                state["csv_writer"].writerow([int(sample_time_ms), int(val)])
 
     buf_len = len(state["analysis_buffer"])
 
@@ -505,7 +590,26 @@ def receive_sensor_data():
             "signal_quality": 0.50,
             "arrhythmia_predicted": f"Buffering ({buffering_sec}/10s)",
             "arrhythmia_probabilities": {"Buffering": 1.0},
-            "data_source": "LIVE_HARDWARE"
+            "data_source": "LIVE_HARDWARE",
+            "signal_gate": {
+                "status": "BUFFERING",
+                "reason": f"Accumulating 10-second baseline ({buffering_sec}/10s)",
+                "ai_screening_enabled": False,
+                "consecutive_good_windows": 0,
+                "stability_threshold": 3,
+                "sample_rate_estimate": 100.0,
+                "bpm": 0.0,
+                "peak_coverage": 0.0,
+                "rr_cv": 0.0,
+                "clipping_ratio": 0.0,
+                "checks": {
+                    "contact_amplitude": True,
+                    "sample_timing": True,
+                    "peak_regularity": False,
+                    "physiological_plausibility": False,
+                    "window_stability": False
+                }
+            }
         }
         with twin_lock:
             twin_status = active_twin.update_telemetry(buffering_payload)
@@ -552,7 +656,7 @@ def start_session():
         filepath = os.path.join(CSV_DIR, filename)
         f = open(filepath, "w", newline="")
         writer = csv.writer(f)
-        writer.writerow(["ppg_value", "timestamp"])
+        writer.writerow(["timestamp_ms", "ppg_value"])
         state["csv_file"] = f
         state["csv_writer"] = writer
         state["csv_path"] = filepath

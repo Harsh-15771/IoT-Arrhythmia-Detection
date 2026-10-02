@@ -177,9 +177,19 @@ export default function App() {
     return 'badge-optimal';
   };
 
-  // v3 8-Class Rhythm Helpers
+  const handleResetGate = () => {
+    fetch(`${API_BASE}/signal/gate/reset`, { method: 'POST' })
+      .then(res => res.json())
+      .then(() => fetchStatus())
+      .catch(err => console.error("Gate reset failed:", err));
+  };
+
+  // v3 8-Class Rhythm Helpers & Gate Annotations
   const formatArrhythmiaLabel = (label) => {
     if (!label) return 'Normal Sinus Rhythm';
+    if (label.startsWith('Verification:')) {
+      return `Gated: ${label.replace('Verification: ', '')}`;
+    }
     if (label === 'AFib') return 'Atrial Fibrillation (AFib)';
     if (label === 'Cardiac_Paced') return 'Cardiac Paced / AV Block';
     if (label === 'V_Tachycardia') return 'Ventricular Tachycardia (VT)';
@@ -193,7 +203,7 @@ export default function App() {
 
   const getArrhythmiaColor = (label) => {
     if (!label || label === 'Normal') return '#34D399';
-    if (label.includes('Buffering') || label.includes('Insufficient') || label.includes('Sensor Disconnected')) return '#FBBF24';
+    if (label.startsWith('Verification:') || label.includes('Buffering') || label.includes('Insufficient') || label.includes('Sensor Disconnected')) return '#FBBF24';
     if (label === 'AFib') return '#C084FC';
     if (label === 'Cardiac_Paced') return '#38BDF8';
     if (label === 'Bradycardia' || label === 'Tachycardia') return '#F59E0B';
@@ -433,6 +443,36 @@ export default function App() {
             >
               ✅ Calm Normal
             </button>
+            <button
+              onClick={() => handleScenario('motion_artifact')}
+              title="Test Gate Suppression of Motion Noise"
+              style={{
+                background: 'rgba(245, 158, 11, 0.12)',
+                color: '#FBBF24',
+                border: '1px dashed rgba(245, 158, 11, 0.4)',
+                padding: '6px 10px',
+                borderRadius: '8px',
+                fontSize: '0.72rem',
+                fontWeight: 600
+              }}
+            >
+              🚫 Test Motion Gate
+            </button>
+            <button
+              onClick={() => handleScenario('sensor_liftoff')}
+              title="Test Gate Suppression of Lead-Off"
+              style={{
+                background: 'rgba(239, 68, 68, 0.12)',
+                color: '#F87171',
+                border: '1px dashed rgba(239, 68, 68, 0.4)',
+                padding: '6px 10px',
+                borderRadius: '8px',
+                fontSize: '0.72rem',
+                fontWeight: 600
+              }}
+            >
+              👆 Test Finger-Off
+            </button>
           </div>
         </div>
       </header>
@@ -621,6 +661,220 @@ export default function App() {
               <span style={{ fontSize: '0.68rem', color: 'var(--text-dim)' }}>
                 Investigational prototype • Requires 12-lead ECG
               </span>
+            </div>
+          </div>
+
+          {/* ── 5-PART SIGNAL RELIABILITY GATE HUD (PHASE 1) ── */}
+          <div className="glass-panel" style={{ 
+            padding: '16px 20px', 
+            border: (v.signal_gate?.ai_screening_enabled ?? true) 
+              ? '1px solid rgba(16, 185, 129, 0.4)' 
+              : '1px solid rgba(245, 158, 11, 0.45)',
+            boxShadow: (v.signal_gate?.ai_screening_enabled ?? true)
+              ? '0 0 20px rgba(16, 185, 129, 0.12)'
+              : '0 0 20px rgba(245, 158, 11, 0.12)'
+          }}>
+            {/* HUD Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShieldCheck size={20} color={(v.signal_gate?.ai_screening_enabled ?? true) ? '#10B981' : '#F59E0B'} />
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.01em' }}>
+                      5-Part Signal Reliability Gate (Clinical Safety Pipeline)
+                    </span>
+                    <span style={{ 
+                      fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', 
+                      background: 'rgba(56, 75, 112, 0.35)', color: '#CBD5E1', fontFamily: 'var(--font-mono)' 
+                    }}>
+                      Stability: {v.signal_gate?.consecutive_good_windows ?? 3}/{v.signal_gate?.stability_threshold ?? 3} Windows
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    {v.signal_gate?.reason || 'Continuous 10-second physiological stability and quality verification'}
+                  </span>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span className={(v.signal_gate?.ai_screening_enabled ?? true) ? 'badge badge-optimal' : 'badge badge-caution'} style={{ fontSize: '0.72rem', padding: '4px 10px' }}>
+                  {(v.signal_gate?.ai_screening_enabled ?? true) ? '● AI SCREENING ACTIVE' : `● GATED: ${v.signal_gate?.status || 'VERIFYING'}`}
+                </span>
+                <button
+                  onClick={handleResetGate}
+                  title="Reset stability gate and clear buffer"
+                  style={{
+                    background: 'rgba(56, 75, 112, 0.25)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '7px',
+                    padding: '4px 10px',
+                    cursor: 'pointer',
+                    color: 'var(--text-main)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: 600
+                  }}
+                >
+                  <RefreshCw size={12} /> Reset Gate
+                </button>
+              </div>
+            </div>
+
+            {/* 5 Core Verification Metrics Bar */}
+            <div style={{ 
+              display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', 
+              background: 'rgba(10, 15, 29, 0.65)', borderRadius: '10px', padding: '12px 14px', 
+              border: '1px solid rgba(56, 75, 112, 0.25)', marginBottom: '14px' 
+            }}>
+              <div>
+                <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  Sampling Rate
+                </span>
+                <span style={{ 
+                  fontSize: '1.2rem', fontWeight: 800, fontFamily: 'var(--font-mono)', 
+                  color: Math.abs((v.signal_gate?.sample_rate_estimate ?? 100) - 100) <= 5 ? '#34D399' : '#FBBF24' 
+                }}>
+                  {(v.signal_gate?.sample_rate_estimate ?? 100.0).toFixed(1)} <span style={{ fontSize: '0.7rem' }}>Hz</span>
+                </span>
+                <span style={{ display: 'block', fontSize: '0.64rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+                  Target: 100 Hz (±5)
+                </span>
+              </div>
+
+              <div>
+                <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  Pulse Rate (BPM)
+                </span>
+                <span style={{ 
+                  fontSize: '1.2rem', fontWeight: 800, fontFamily: 'var(--font-mono)', 
+                  color: ((v.signal_gate?.bpm ?? v.bpm ?? 72) >= 40 && (v.signal_gate?.bpm ?? v.bpm ?? 72) <= 180) ? '#34D399' : '#F87171' 
+                }}>
+                  {(v.signal_gate?.bpm ?? v.bpm ?? 72) > 0 ? (v.signal_gate?.bpm ?? v.bpm ?? 72).toFixed(1) : '--'} <span style={{ fontSize: '0.7rem' }}>BPM</span>
+                </span>
+                <span style={{ display: 'block', fontSize: '0.64rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+                  Accept: 40–180
+                </span>
+              </div>
+
+              <div>
+                <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  Peak Coverage
+                </span>
+                <span style={{ 
+                  fontSize: '1.2rem', fontWeight: 800, fontFamily: 'var(--font-mono)', 
+                  color: (v.signal_gate?.peak_coverage ?? 0.94) >= 0.65 ? '#34D399' : '#FBBF24' 
+                }}>
+                  {((v.signal_gate?.peak_coverage ?? 0.94) * 100).toFixed(1)}%
+                </span>
+                <span style={{ display: 'block', fontSize: '0.64rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+                  Threshold: ≥65%
+                </span>
+              </div>
+
+              <div>
+                <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  RR Interval CV
+                </span>
+                <span style={{ 
+                  fontSize: '1.2rem', fontWeight: 800, fontFamily: 'var(--font-mono)', 
+                  color: (v.signal_gate?.rr_cv ?? 0.082) <= 0.35 ? '#34D399' : '#F87171' 
+                }}>
+                  {(v.signal_gate?.rr_cv ?? 0.082).toFixed(3)}
+                </span>
+                <span style={{ display: 'block', fontSize: '0.64rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+                  Threshold: ≤0.35
+                </span>
+              </div>
+
+              <div>
+                <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  ADC Clipping
+                </span>
+                <span style={{ 
+                  fontSize: '1.2rem', fontWeight: 800, fontFamily: 'var(--font-mono)', 
+                  color: (v.signal_gate?.clipping_ratio ?? 0.0) <= 0.05 ? '#34D399' : '#EF4444' 
+                }}>
+                  {((v.signal_gate?.clipping_ratio ?? 0.0) * 100).toFixed(1)}%
+                </span>
+                <span style={{ display: 'block', fontSize: '0.64rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+                  Ceiling: ≤5.0%
+                </span>
+              </div>
+            </div>
+
+            {/* 5 Sequential Gate Stage Check Badges */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+              {/* Check 1 */}
+              <div style={{ 
+                padding: '6px 10px', borderRadius: '7px', 
+                background: (v.signal_gate?.checks?.contact_amplitude ?? true) ? 'rgba(16, 185, 129, 0.10)' : 'rgba(239, 68, 68, 0.14)',
+                border: `1px solid ${(v.signal_gate?.checks?.contact_amplitude ?? true) ? 'rgba(16, 185, 129, 0.30)' : 'rgba(239, 68, 68, 0.35)'}` 
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.72rem', fontWeight: 700, color: (v.signal_gate?.checks?.contact_amplitude ?? true) ? '#34D399' : '#F87171' }}>
+                  {(v.signal_gate?.checks?.contact_amplitude ?? true) ? '✓' : '✗'} 1. Contact / Amp
+                </div>
+                <span style={{ fontSize: '0.62rem', color: 'var(--text-dim)', display: 'block', marginTop: '1px' }}>
+                  {(v.signal_gate?.checks?.contact_amplitude ?? true) ? 'Optical contact OK' : 'Liftoff / Saturated'}
+                </span>
+              </div>
+
+              {/* Check 2 */}
+              <div style={{ 
+                padding: '6px 10px', borderRadius: '7px', 
+                background: (v.signal_gate?.checks?.sample_timing ?? true) ? 'rgba(16, 185, 129, 0.10)' : 'rgba(245, 158, 11, 0.14)',
+                border: `1px solid ${(v.signal_gate?.checks?.sample_timing ?? true) ? 'rgba(16, 185, 129, 0.30)' : 'rgba(245, 158, 11, 0.35)'}` 
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.72rem', fontWeight: 700, color: (v.signal_gate?.checks?.sample_timing ?? true) ? '#34D399' : '#FBBF24' }}>
+                  {(v.signal_gate?.checks?.sample_timing ?? true) ? '✓' : '✗'} 2. Sample Timing
+                </div>
+                <span style={{ fontSize: '0.62rem', color: 'var(--text-dim)', display: 'block', marginTop: '1px' }}>
+                  {(v.signal_gate?.checks?.sample_timing ?? true) ? 'Cadence ~10ms' : 'Packet jitter / drop'}
+                </span>
+              </div>
+
+              {/* Check 3 */}
+              <div style={{ 
+                padding: '6px 10px', borderRadius: '7px', 
+                background: (v.signal_gate?.checks?.peak_regularity ?? true) ? 'rgba(16, 185, 129, 0.10)' : 'rgba(245, 158, 11, 0.14)',
+                border: `1px solid ${(v.signal_gate?.checks?.peak_regularity ?? true) ? 'rgba(16, 185, 129, 0.30)' : 'rgba(245, 158, 11, 0.35)'}` 
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.72rem', fontWeight: 700, color: (v.signal_gate?.checks?.peak_regularity ?? true) ? '#34D399' : '#FBBF24' }}>
+                  {(v.signal_gate?.checks?.peak_regularity ?? true) ? '✓' : '✗'} 3. Peak Regularity
+                </div>
+                <span style={{ fontSize: '0.62rem', color: 'var(--text-dim)', display: 'block', marginTop: '1px' }}>
+                  {(v.signal_gate?.checks?.peak_regularity ?? true) ? 'Systolic peaks verified' : 'Low coverage / noise'}
+                </span>
+              </div>
+
+              {/* Check 4 */}
+              <div style={{ 
+                padding: '6px 10px', borderRadius: '7px', 
+                background: (v.signal_gate?.checks?.physiological_plausibility ?? true) ? 'rgba(16, 185, 129, 0.10)' : 'rgba(245, 158, 11, 0.14)',
+                border: `1px solid ${(v.signal_gate?.checks?.physiological_plausibility ?? true) ? 'rgba(16, 185, 129, 0.30)' : 'rgba(245, 158, 11, 0.35)'}` 
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.72rem', fontWeight: 700, color: (v.signal_gate?.checks?.physiological_plausibility ?? true) ? '#34D399' : '#FBBF24' }}>
+                  {(v.signal_gate?.checks?.physiological_plausibility ?? true) ? '✓' : '✗'} 4. Plausibility
+                </div>
+                <span style={{ fontSize: '0.62rem', color: 'var(--text-dim)', display: 'block', marginTop: '1px' }}>
+                  {(v.signal_gate?.checks?.physiological_plausibility ?? true) ? '40–180 BPM range' : 'VERIFY_SIGNAL'}
+                </span>
+              </div>
+
+              {/* Check 5 */}
+              <div style={{ 
+                padding: '6px 10px', borderRadius: '7px', 
+                background: (v.signal_gate?.checks?.window_stability ?? true) ? 'rgba(16, 185, 129, 0.10)' : 'rgba(56, 75, 112, 0.25)',
+                border: `1px solid ${(v.signal_gate?.checks?.window_stability ?? true) ? 'rgba(16, 185, 129, 0.30)' : 'rgba(56, 75, 112, 0.35)'}` 
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.72rem', fontWeight: 700, color: (v.signal_gate?.checks?.window_stability ?? true) ? '#34D399' : '#94A3B8' }}>
+                  {(v.signal_gate?.checks?.window_stability ?? true) ? '✓' : '⏳'} 5. Stability (30s)
+                </div>
+                <span style={{ fontSize: '0.62rem', color: 'var(--text-dim)', display: 'block', marginTop: '1px' }}>
+                  {(v.signal_gate?.checks?.window_stability ?? true) ? '3/3 Windows Pass' : `${v.signal_gate?.consecutive_good_windows ?? 0}/3 Windows`}
+                </span>
+              </div>
             </div>
           </div>
 

@@ -90,8 +90,17 @@ class CardioTwin:
         arrhythmia = str(self.current_vitals.get("arrhythmia_predicted", "Normal"))
         probs = self.current_vitals.get("arrhythmia_probabilities", {})
 
-        # SQI Gating: If signal quality is insufficient or finger disconnected, do not trigger acute arrhythmia alarms
-        is_signal_reliable = (sqi >= 0.40) and ("Insufficient" not in arrhythmia) and ("Disconnected" not in arrhythmia) and ("Buffering" not in arrhythmia)
+        # Signal Reliability Gating: If signal quality is insufficient, finger disconnected, or 5-part gate failed, do not trigger acute arrhythmia alarms
+        gate_info = sensor_data.get("signal_gate") or self.current_vitals.get("signal_gate")
+        gate_enabled = gate_info.get("ai_screening_enabled", True) if isinstance(gate_info, dict) else True
+        is_signal_reliable = (
+            (sqi >= 0.40) and 
+            gate_enabled and 
+            ("Verification:" not in arrhythmia) and 
+            ("Insufficient" not in arrhythmia) and 
+            ("Disconnected" not in arrhythmia) and 
+            ("Buffering" not in arrhythmia)
+        )
 
         # 1. Acute Rhythm Risk Modulator (Layer 2)
         if is_signal_reliable:

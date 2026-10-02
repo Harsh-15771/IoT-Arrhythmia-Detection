@@ -386,6 +386,7 @@ class SignalReliabilityGate:
         result = {
             "status": status,
             "reason": reason,
+            "passed": is_pass or (status in ("RELIABLE", "STABILIZING")),
             "ai_screening_enabled": is_pass and (consec >= self.stability_threshold),
             "consecutive_good_windows": consec,
             "stability_threshold": self.stability_threshold,
