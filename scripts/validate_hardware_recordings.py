@@ -16,7 +16,10 @@ import pandas as pd
 from scipy.signal import find_peaks, butter, filtfilt
 from scipy.stats import skew, kurtosis
 
+import sys
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 RECORDINGS_DIR = os.path.join(ROOT_DIR, "recordings")
 MODEL_DIR = os.path.join(ROOT_DIR, "model")
 
@@ -28,6 +31,8 @@ def bandpass_filter(signal, lowcut=0.5, highcut=8.0, fs=100, order=4):
     b, a = butter(order, [low, high], btype='band')
     return filtfilt(b, a, signal)
 
+from backend.signal_gate import SignalReliabilityGate
+
 def evaluate_session_recording(filepath):
     try:
         df = pd.read_csv(filepath)
@@ -35,7 +40,10 @@ def evaluate_session_recording(filepath):
         return {"file": os.path.basename(filepath), "status": f"Read error: {e}"}
 
     val_col = 'ppg_value' if 'ppg_value' in df.columns else df.columns[-1]
+    ts_col = 'timestamp_ms' if 'timestamp_ms' in df.columns else None
+
     sig = df[val_col].dropna().values.astype(float)
+    ts = df[ts_col].values if ts_col is not None else None
     n_samples = len(sig)
 
     if n_samples < 300:
@@ -43,53 +51,30 @@ def evaluate_session_recording(filepath):
             "file": os.path.basename(filepath),
             "samples": n_samples,
             "duration_sec": round(n_samples / 100.0, 1),
-            "status": "Short recording (< 3 seconds)"
-        }
-
-    # Filter signal
-    try:
-        filtered = bandpass_filter(sig, fs=100)
-    except Exception:
-        filtered = sig
-
-    std_val = float(np.std(filtered))
-    mean_val = float(np.mean(filtered))
-
-    if std_val < 0.05:
-        return {
-            "file": os.path.basename(filepath),
-            "samples": n_samples,
-            "duration_sec": round(n_samples / 100.0, 1),
-            "sqi": 0.0,
-            "screening_status": "Sensor Disconnected / Flatline (Gated)",
+            "status": "Short recording (< 3 seconds)",
             "safe_gate_active": True
         }
 
-    norm_sig = (filtered - mean_val) / std_val
-    peaks, _ = find_peaks(norm_sig, distance=30, prominence=0.25)
-    sig_kurt = float(kurtosis(norm_sig))
+    gate = SignalReliabilityGate(target_fs=100.0, window_sec=10.0, stability_threshold=3, min_bpm=40.0, max_bpm=180.0)
+    res = gate.evaluate_window(sig[:1000], timestamps_ms=ts[:1000] if ts is not None else None)
+    m = res["metrics"]
 
-    if len(peaks) >= 2:
-        rr = np.diff(peaks) / 100.0 * 1000.0
-        bpm = float(60000.0 / np.mean(rr)) if np.mean(rr) > 0 else 0.0
-        peak_amps = norm_sig[peaks]
-        peak_amp_cv = float(np.std(peak_amps) / (abs(np.mean(peak_amps)) + 1e-6))
-        sqi = float(max(0.0, min(1.0, (abs(sig_kurt) / 6.0) * (1.0 / (peak_amp_cv + 0.5)))))
-    else:
-        bpm = 0.0
-        sqi = 0.1
-
-    gated = sqi < 0.40
-    screening_status = "Signal Insufficient / Motion Artifact (Gated)" if gated else "Clean PPG (Screening Eligible)"
+    gated = not res["ai_screening_enabled"]
+    screening_status = f"{res['status']} ({'Screening Eligible' if not gated else 'Gated'})"
 
     return {
         "file": os.path.basename(filepath),
         "samples": n_samples,
         "duration_sec": round(n_samples / 100.0, 1),
-        "estimated_bpm": round(bpm, 1),
-        "sqi": round(sqi, 3),
+        "estimated_bpm": round(m["bpm"], 1),
+        "sqi": round(m["sqi"], 3),
+        "sample_rate_estimate": m["sample_rate_estimate"],
+        "peak_coverage": m["peak_coverage"],
+        "rr_cv": m["rr_cv"],
+        "clipping_ratio": m["clipping_ratio"],
         "screening_status": screening_status,
-        "safe_gate_active": gated
+        "safe_gate_active": gated,
+        "reason": res["reason"]
     }
 
 def run_hardware_audit():

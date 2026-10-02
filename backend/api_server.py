@@ -29,9 +29,11 @@ from scipy.stats import skew, kurtosis
 try:
     from digital_twin_engine import CardioTwin
     from framingham_risk import calculate_framingham_cvd_risk
+    from signal_gate import SignalReliabilityGate
 except ModuleNotFoundError:
     from backend.digital_twin_engine import CardioTwin
     from backend.framingham_risk import calculate_framingham_cvd_risk
+    from backend.signal_gate import SignalReliabilityGate
 
 # -------------------------------------------------------
 # CONFIGURATION
@@ -94,6 +96,15 @@ active_patient_id = "PAT001" if "PAT001" in patients_db else list(patients_db.ke
 active_twin = CardioTwin(patients_db[active_patient_id])
 twin_lock = threading.Lock()
 
+# Initialize 5-Part Signal Reliability Gate (Phase 1 Clinical Safety Pipeline)
+live_signal_gate = SignalReliabilityGate(
+    target_fs=TARGET_FS,
+    window_sec=WINDOW_SEC,
+    stability_threshold=3,
+    min_bpm=40.0,
+    max_bpm=180.0
+)
+
 # -------------------------------------------------------
 # STREAMING & BUFFER STATE
 # -------------------------------------------------------
@@ -102,12 +113,14 @@ state = {
     "active_patient_id": active_patient_id,
     "waveform_buffer": deque(maxlen=400), # 4 seconds live buffer for display
     "analysis_buffer": deque(maxlen=WINDOW_SAMPLES), # 10 seconds for feature extraction
+    "timestamp_buffer": deque(maxlen=WINDOW_SAMPLES), # Timestamps for sample jitter check
     "sample_count": 0,
     "last_prediction_time": 0.0,
     "csv_file": None,
     "csv_writer": None,
     "csv_path": None,
-    "status_msg": "System Ready - Digital Twin Active"
+    "status_msg": "System Ready - Digital Twin Active",
+    "last_gate_result": None
 }
 state_lock = threading.Lock()
 
@@ -310,6 +323,37 @@ def simulate_treatment():
         result = active_twin.simulate_treatment(data)
     return jsonify({"success": True, "simulation": result})
 
+# 4b. 5-Part Signal Reliability Gate Status & Metrics
+@app.route("/signal/gate", methods=["GET"])
+def get_signal_gate():
+    gate_data = state.get("last_gate_result")
+    if gate_data is None:
+        return jsonify({
+            "status": "IDLE",
+            "reason": "Awaiting live sensor stream (10s window needed)",
+            "ai_screening_enabled": False,
+            "consecutive_good_windows": live_signal_gate.consecutive_good_windows,
+            "stability_threshold": live_signal_gate.stability_threshold,
+            "metrics": {
+                "sample_rate_estimate": float(TARGET_FS),
+                "bpm": 0.0,
+                "peak_coverage": 0.0,
+                "rr_cv": 1.0,
+                "clipping_ratio": 0.0,
+                "sqi": 0.0
+            }
+        })
+    return jsonify(gate_data)
+
+@app.route("/signal/gate/reset", methods=["POST"])
+def reset_signal_gate():
+    live_signal_gate.reset()
+    with state_lock:
+        state["analysis_buffer"].clear()
+        state["timestamp_buffer"].clear()
+        state["last_gate_result"] = None
+    return jsonify({"success": True, "message": "Signal Reliability Gate reset to baseline."})
+
 # 5. Scenario Injector for Demonstrations (Explicitly Provenanced as Simulation)
 @app.route("/twin/scenario", methods=["POST"])
 def trigger_scenario():
@@ -377,10 +421,14 @@ def receive_sensor_data():
         return jsonify({"error": "No values or samples received"}), 400
 
     now_ts = time.time()
+    now_ms = now_ts * 1000.0
+    dt_ms = 1000.0 / TARGET_FS
+
     with state_lock:
-        for val in ppg_chunk:
+        for i, val in enumerate(ppg_chunk):
             state["waveform_buffer"].append(float(val))
             state["analysis_buffer"].append(float(val))
+            state["timestamp_buffer"].append(now_ms - (len(ppg_chunk) - 1 - i) * dt_ms)
             state["sample_count"] += 1
             if state["is_recording"] and state["csv_writer"]:
                 state["csv_writer"].writerow([val, time.strftime("%Y-%m-%d %H:%M:%S")])
@@ -391,22 +439,23 @@ def receive_sensor_data():
     if buf_len >= WINDOW_SAMPLES and (now_ts - state["last_prediction_time"] >= 2.5):
         state["last_prediction_time"] = now_ts
         sig_window = np.array(state["analysis_buffer"])
+        ts_window = np.array(state["timestamp_buffer"]) if len(state["timestamp_buffer"]) == buf_len else None
+
+        # Execute 5-Part Signal Reliability Gate
+        gate_res = live_signal_gate.evaluate_window(sig_window, timestamps_ms=ts_window)
+        state["last_gate_result"] = gate_res
+        m = gate_res["metrics"]
+
         feats = extract_live_features(sig_window, fs=TARGET_FS)
-        
         pred_label = "Normal"
         probs = {"Normal": 0.90}
-        sqi_val = feats.get("sqi", 0.0) if feats else 0.0
-        sig_std = feats.get("sig_std", 0.0) if feats else 0.0
 
-        # SQI GATING & ARTIFACT REJECTION
-        if sig_std < 0.05:
-            # Amplitude near zero — finger off sensor
-            pred_label = "Sensor Disconnected / Lead Off"
-            probs = {"Sensor_Off": 1.0}
-        elif sqi_val < 0.40:
-            # Significant motion artifact or poor optical perfusion
-            pred_label = "Signal Insufficient (Motion Artifact)"
-            probs = {"Artifact": 1.0}
+        # 5-Part Gate Decision Logic:
+        # If gate is NOT passed (FINGER_OFF, SENSOR_SATURATED, POOR_TIMING, POOR_CONTACT, VERIFY_SIGNAL, or STABILIZING)
+        # -> Strictly block AI screening to prevent spurious critical alerts!
+        if not gate_res["ai_screening_enabled"]:
+            pred_label = f"Verification: {gate_res['status']}"
+            probs = {gate_res["status"]: 1.0}
         elif feats is not None and model_loaded:
             feat_vector = np.array([feats[col] for col in feature_names]).reshape(1, -1)
             feat_scaled = scaler.transform(feat_vector)
@@ -415,16 +464,29 @@ def receive_sensor_data():
             pred_probs_arr = xgb_model.predict_proba(feat_scaled)[0]
             probs = {cls_name: float(pred_probs_arr[i]) for i, cls_name in enumerate(label_encoder.classes_)}
 
-        # Update Digital Twin with LIVE_HARDWARE provenance
+        # Update Digital Twin with LIVE_HARDWARE provenance & 5 Gate Metrics
         telemetry_payload = {
-            "bpm": round(float(raw_bpm) if raw_bpm is not None else (feats["bpm"] if feats else 72.0), 1),
+            "bpm": round(float(raw_bpm) if raw_bpm is not None else (m["bpm"] if m["bpm"] > 0 else (feats["bpm"] if feats else 72.0)), 1),
             "rmssd": round(feats["rmssd"] if feats else 35.0, 1),
             "sdnn": round(feats["sdnn"] if feats else 40.0, 1),
             "spo2": round(float(raw_spo2) if raw_spo2 is not None else 98.0, 1),
-            "signal_quality": round(sqi_val, 2),
+            "signal_quality": round(m["sqi"], 2),
             "arrhythmia_predicted": pred_label,
             "arrhythmia_probabilities": probs,
-            "data_source": "LIVE_HARDWARE"
+            "data_source": "LIVE_HARDWARE",
+            "signal_gate": {
+                "status": gate_res["status"],
+                "reason": gate_res["reason"],
+                "ai_screening_enabled": gate_res["ai_screening_enabled"],
+                "consecutive_good_windows": gate_res["consecutive_good_windows"],
+                "stability_threshold": gate_res["stability_threshold"],
+                "sample_rate_estimate": m["sample_rate_estimate"],
+                "bpm": m["bpm"],
+                "peak_coverage": m["peak_coverage"],
+                "rr_cv": m["rr_cv"],
+                "clipping_ratio": m["clipping_ratio"],
+                "checks": gate_res["checks"]
+            }
         }
         with twin_lock:
             twin_status = active_twin.update_telemetry(telemetry_payload)

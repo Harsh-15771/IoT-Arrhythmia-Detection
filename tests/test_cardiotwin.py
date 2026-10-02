@@ -24,6 +24,7 @@ if BACKEND_DIR not in sys.path:
 
 from framingham_risk import calculate_framingham_cvd_risk
 from digital_twin_engine import CardioTwin
+from signal_gate import SignalReliabilityGate
 import api_server
 
 class TestCardioTwinClinicalEngine(unittest.TestCase):
@@ -224,6 +225,97 @@ class TestAPIServerContract(unittest.TestCase):
 
 
 
+
+
+class TestSignalReliabilityGate(unittest.TestCase):
+    def setUp(self):
+        self.gate = SignalReliabilityGate(
+            target_fs=100.0,
+            window_sec=10.0,
+            stability_threshold=3,
+            min_bpm=40.0,
+            max_bpm=180.0
+        )
+
+    def test_finger_off_detection(self):
+        # Flatline / zero amplitude
+        flat_signal = np.zeros(1000)
+        res = self.gate.evaluate_window(flat_signal)
+        self.assertEqual(res["status"], "FINGER_OFF")
+        self.assertFalse(res["ai_screening_enabled"])
+        self.assertEqual(res["metrics"]["bpm"], 0.0)
+
+    def test_adc_saturation_detection(self):
+        # Clipped / saturated raw samples
+        saturated_signal = np.full(1000, 262143.0)
+        res = self.gate.evaluate_window(saturated_signal)
+        self.assertEqual(res["status"], "SENSOR_SATURATED")
+        self.assertFalse(res["ai_screening_enabled"])
+
+    def test_sample_timing_drop_detection(self):
+        # High jitter / dropped samples (40ms gaps instead of 10ms)
+        t = np.linspace(0, 10, 1000)
+        clean_pulse = 2000.0 + 300.0 * np.sin(2 * np.pi * 1.2 * t)
+        jittery_timestamps = np.cumsum(np.random.choice([10.0, 45.0], size=1000, p=[0.7, 0.3]))
+        res = self.gate.evaluate_window(clean_pulse, timestamps_ms=jittery_timestamps)
+        self.assertEqual(res["status"], "POOR_TIMING")
+        self.assertFalse(res["ai_screening_enabled"])
+
+    def test_physiological_plausibility_verify_signal(self):
+        # Pulse at 240 BPM (4 Hz) -> exceeds 180 BPM resting demo bound
+        t = np.linspace(0, 10, 1000)
+        tachy_pulse = 2000.0 + 300.0 * np.sin(2 * np.pi * 4.0 * t)
+        ts = np.linspace(0, 10000, 1000)
+        res = self.gate.evaluate_window(tachy_pulse, timestamps_ms=ts)
+        self.assertEqual(res["status"], "VERIFY_SIGNAL")
+        self.assertFalse(res["ai_screening_enabled"])
+        self.assertIn("outside plausible resting range", res["reason"])
+
+    def test_window_stability_escalation(self):
+        # Clean 72 BPM pulse (1.2 Hz) across 3 consecutive windows
+        t = np.linspace(0, 10, 1000)
+        clean_pulse = 2000.0 + 400.0 * np.sin(2 * np.pi * 1.2 * t)
+        ts = np.linspace(0, 10000, 1000)
+
+        # Window 1: STABILIZING (1/3)
+        res1 = self.gate.evaluate_window(clean_pulse, timestamps_ms=ts)
+        self.assertEqual(res1["status"], "STABILIZING")
+        self.assertFalse(res1["ai_screening_enabled"])
+        self.assertEqual(res1["consecutive_good_windows"], 1)
+
+        # Window 2: STABILIZING (2/3)
+        res2 = self.gate.evaluate_window(clean_pulse, timestamps_ms=ts)
+        self.assertEqual(res2["status"], "STABILIZING")
+        self.assertFalse(res2["ai_screening_enabled"])
+        self.assertEqual(res2["consecutive_good_windows"], 2)
+
+        # Window 3: RELIABLE (3/3) -> AI SCREENING ENABLED!
+        res3 = self.gate.evaluate_window(clean_pulse, timestamps_ms=ts)
+        self.assertEqual(res3["status"], "RELIABLE")
+        self.assertTrue(res3["ai_screening_enabled"])
+        self.assertEqual(res3["consecutive_good_windows"], 3)
+
+        # Verify all 5 core metrics present
+        m = res3["metrics"]
+        self.assertIn("sample_rate_estimate", m)
+        self.assertIn("bpm", m)
+        self.assertIn("peak_coverage", m)
+        self.assertIn("rr_cv", m)
+        self.assertIn("clipping_ratio", m)
+        self.assertAlmostEqual(m["sample_rate_estimate"], 100.0, delta=2.0)
+        self.assertAlmostEqual(m["bpm"], 72.0, delta=5.0)
+        self.assertGreater(m["peak_coverage"], 0.70)
+        self.assertLess(m["rr_cv"], 0.20)
+        self.assertEqual(m["clipping_ratio"], 0.0)
+
+    def test_signal_gate_rest_endpoint(self):
+        client = api_server.app.test_client()
+        res = client.get("/signal/gate")
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertIn("status", data)
+        self.assertIn("metrics", data)
+        self.assertIn("sample_rate_estimate", data["metrics"])
 
 
 class TestModelArtifactsAndManifest(unittest.TestCase):
