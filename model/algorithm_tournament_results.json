@@ -1,0 +1,54 @@
+{
+  "dataset": "2,271 Patients | 4,683 Windows (10s @ 100 Hz)",
+  "protocol": "5-Fold StratifiedGroupKFold on Patient IDs (Zero Patient-Leakage)",
+  "leaderboard": [
+    {
+      "rank": 1,
+      "model": "Soft_Voting_Ensemble",
+      "accuracy": 0.5731,
+      "macro_f1": 0.4739,
+      "weighted_f1": 0.576,
+      "training_time_sec": 17.4
+    },
+    {
+      "rank": 2,
+      "model": "Extra_Trees",
+      "accuracy": 0.5687,
+      "macro_f1": 0.4732,
+      "weighted_f1": 0.5746,
+      "training_time_sec": 3.1
+    },
+    {
+      "rank": 3,
+      "model": "Random_Forest",
+      "accuracy": 0.5614,
+      "macro_f1": 0.4713,
+      "weighted_f1": 0.5711,
+      "training_time_sec": 4.0
+    },
+    {
+      "rank": 4,
+      "model": "XGBoost",
+      "accuracy": 0.5697,
+      "macro_f1": 0.4671,
+      "weighted_f1": 0.5685,
+      "training_time_sec": 10.4
+    },
+    {
+      "rank": 5,
+      "model": "Hist_Gradient_Boosting",
+      "accuracy": 0.5565,
+      "macro_f1": 0.4668,
+      "weighted_f1": 0.5601,
+      "training_time_sec": 24.9
+    },
+    {
+      "rank": 6,
+      "model": "MLP_Neural_Net",
+      "accuracy": 0.5708,
+      "macro_f1": 0.4436,
+      "weighted_f1": 0.5572,
+      "training_time_sec": 9.8
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "benchmark_title": "CardioTwin Phase 2 Dual-Modality Fusion Benchmark",
+  "dataset": "2,271 Patients | 4,683 Windows (10s @ 100 Hz)",
+  "protocol": "5-Fold StratifiedGroupKFold on Patient IDs (Zero Leakage)",
+  "champion_strategy": "30% Classical + 70% Inception",
+  "champion_metrics": {
+    "accuracy": 0.6414691437112962,
+    "macro_f1": 0.6257108607945261,
+    "weighted_f1": 0.6545059138014161,
+    "per_class": {
+      "AFib": {
+        "precision": 0.4582043343653251,
+        "recall": 0.74,
+        "f1-score": 0.5659655831739961,
+        "support": 400.0
+      },
+      "Asystole": {
+        "precision": 0.6824034334763949,
+        "recall": 0.7794117647058824,
+        "f1-score": 0.7276887871853547,
+        "support": 204.0
+      },
+      "Bradycardia": {
+        "precision": 0.7039877300613497,
+        "recall": 0.7239747634069401,
+        "f1-score": 0.713841368584759,
+        "support": 634.0
+      },
+      "Cardiac_Paced": {
+        "precision": 0.293888166449935,
+        "recall": 0.565,
+        "f1-score": 0.3866552609067579,
+        "support": 400.0
+      },
+      "Normal": {
+        "precision": 0.9608540925266904,
+        "recall": 0.6789606035205364,
+        "f1-score": 0.7956777996070727,
+        "support": 1193.0
+      },
+      "Tachycardia": {
+        "precision": 0.7309697601668405,
+        "recall": 0.6688931297709924,
+        "f1-score": 0.6985550572994519,
+        "support": 1048.0
+      },
+      "V_Flutter_Fib": {
+        "precision": 0.4666666666666667,
+        "recall": 0.9722222222222222,
+        "f1-score": 0.6306306306306306,
+        "support": 72.0
+      },
+      "V_Tachycardia": {
+        "precision": 0.6566125290023201,
+        "recall": 0.3866120218579235,
+        "f1-score": 0.4866723989681857,
+        "support": 732.0
+      },
+      "accuracy": 0.6414691437112962,
+      "macro avg": {
+        "precision": 0.6191983390894402,
+        "recall": 0.6893843131855621,
+        "f1-score": 0.6257108607945261,
+        "support": 4683.0
+      },
+      "weighted avg": {
+        "precision": 0.7074463236991401,
+        "recall": 0.6414691437112962,
+        "f1-score": 0.6545059138014161,
+        "support": 4683.0
+      }
+    }
+  },
+  "leaderboard": [
+    {
+      "rank": 1,
+      "strategy": "30% Classical + 70% Inception",
+      "accuracy": 0.6415,
+      "macro_f1": 0.6257,
+      "weighted_f1": 0.6545
+    },
+    {
+      "rank": 2,
+      "strategy": "40% Classical + 60% Inception (DL-Leaning)",
+      "accuracy": 0.6428,
+      "macro_f1": 0.6216,
+      "weighted_f1": 0.6524
+    },
+    {
+      "rank": 3,
+      "strategy": "Clinical Specialization Adaptive Fusion",
+      "accuracy": 0.6374,
+      "macro_f1": 0.6167,
+      "weighted_f1": 0.6434
+    },
+    {
+      "rank": 4,
+      "strategy": "50% Classical + 50% Inception (Balanced Soft-Vote)",
+      "accuracy": 0.6366,
+      "macro_f1": 0.61,
+      "weighted_f1": 0.6435
+    },
+    {
+      "rank": 5,
+      "strategy": "100% Inception-1D Alone",
+      "accuracy": 0.6212,
+      "macro_f1": 0.6094,
+      "weighted_f1": 0.6437
+    },
+    {
+      "rank": 6,
+      "strategy": "70% Classical + 30% Inception",
+      "accuracy": 0.606,
+      "macro_f1": 0.5486,
+      "weighted_f1": 0.611
+    },
+    {
+      "rank": 7,
+      "strategy": "100% Classical (Super Ensemble)",
+      "accuracy": 0.5731,
+      "macro_f1": 0.4739,
+      "weighted_f1": 0.576
+    }
+  ]
+}

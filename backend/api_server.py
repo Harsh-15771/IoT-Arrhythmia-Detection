@@ -30,10 +30,16 @@ try:
     from digital_twin_engine import CardioTwin
     from framingham_risk import calculate_framingham_cvd_risk
     from signal_gate import SignalReliabilityGate
+    from dual_engine import DualModalityPredictor
+    from pulse_rules import PhysiologicalPulseRules, MultiWindowPersistenceEngine
+    from personal_baseline import PersonalBaselineManager
 except ModuleNotFoundError:
     from backend.digital_twin_engine import CardioTwin
     from backend.framingham_risk import calculate_framingham_cvd_risk
     from backend.signal_gate import SignalReliabilityGate
+    from backend.dual_engine import DualModalityPredictor
+    from backend.pulse_rules import PhysiologicalPulseRules, MultiWindowPersistenceEngine
+    from backend.personal_baseline import PersonalBaselineManager
 
 # -------------------------------------------------------
 # CONFIGURATION
@@ -42,7 +48,7 @@ PORT         = 5000
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR     = os.path.dirname(BASE_DIR) if os.path.basename(BASE_DIR) == 'backend' else BASE_DIR
 MODEL_DIR    = os.path.join(ROOT_DIR, "model")
-CSV_DIR      = os.path.join(ROOT_DIR, "recordings")
+CSV_DIR      = os.path.join(ROOT_DIR, "recordings", "new_session", "recordings")
 PATIENTS_FILE = os.path.join(BASE_DIR, "synthetic_patients.json")
 if not os.path.exists(PATIENTS_FILE):
     PATIENTS_FILE = os.path.join(ROOT_DIR, "synthetic_patients.json")
@@ -74,6 +80,12 @@ except Exception as e:
     print(f"[WARN] Could not load XGBoost model: {e}. Running in heuristic fallback mode.")
     xgb_model, scaler, label_encoder, feature_names = None, None, None, []
 
+# Initialize Phase 2 Dual-Modality Pipeline & Clinical Decision Engines
+print("[INFO] Initializing Phase 2 Dual-Modality Predictor & Clinical Decision Layers...")
+dual_predictor = DualModalityPredictor(MODEL_DIR)
+live_pulse_rules = PhysiologicalPulseRules(sustained_window_count=3)
+live_persistence_engine = MultiWindowPersistenceEngine(memory_windows=4, consensus_threshold=3)
+
 # -------------------------------------------------------
 # LOAD SYNTHETIC EHR PATIENTS COHORT
 # -------------------------------------------------------
@@ -94,6 +106,7 @@ else:
 # Initialize Default Digital Twin (PAT001: High Risk Indian Male Post-PCI)
 active_patient_id = "PAT001" if "PAT001" in patients_db else list(patients_db.keys())[0]
 active_twin = CardioTwin(patients_db[active_patient_id])
+live_baseline_manager = PersonalBaselineManager(active_patient_id)
 twin_lock = threading.Lock()
 
 # Initialize 5-Part Signal Reliability Gate (Phase 1 Clinical Safety Pipeline)
@@ -102,7 +115,8 @@ live_signal_gate = SignalReliabilityGate(
     window_sec=WINDOW_SEC,
     stability_threshold=3,
     min_bpm=40.0,
-    max_bpm=180.0
+    max_bpm=180.0,
+    adc_min_limit=20000.0
 )
 
 # -------------------------------------------------------
@@ -120,7 +134,11 @@ state = {
     "csv_writer": None,
     "csv_path": None,
     "status_msg": "System Ready - Digital Twin Active",
-    "last_gate_result": None
+    "last_gate_result": None,
+    "last_sequence": None,
+    "sequence_gaps": 0,
+    "last_device_id": None,
+    "last_sample_interval_us": 10000
 }
 state_lock = threading.Lock()
 
@@ -289,7 +307,7 @@ def get_patient_detail(pid):
 
 @app.route("/patient/select", methods=["POST"])
 def select_patient():
-    global active_twin, state
+    global active_twin, state, live_baseline_manager
     data = request.get_json() or {}
     pid = data.get("patient_id")
     if pid not in patients_db:
@@ -297,6 +315,7 @@ def select_patient():
     
     with twin_lock:
         active_twin = CardioTwin(patients_db[pid])
+        live_baseline_manager = PersonalBaselineManager(pid)
         state["active_patient_id"] = pid
         state["status_msg"] = f"Active Digital Twin switched to {active_twin.name}"
     
@@ -313,6 +332,18 @@ def select_patient():
 def get_twin_status():
     with twin_lock:
         status = active_twin.get_status()
+    status["has_calibrated_baseline"] = live_baseline_manager.baseline is not None
+    status["personal_baseline"] = live_baseline_manager.baseline
+    status["is_calibrating"] = live_baseline_manager.is_calibrating
+    if live_baseline_manager.is_calibrating:
+        elapsed = time.time() - live_baseline_manager.calibration_start_time
+        status["calibration_status"] = {
+            "is_calibrating": True,
+            "elapsed_sec": round(elapsed, 1),
+            "target_duration_sec": live_baseline_manager.target_calibration_duration_sec,
+            "stabilization_duration_sec": live_baseline_manager.stabilization_duration_sec,
+            "windows_collected": len(live_baseline_manager.calibration_windows)
+        }
     return jsonify(status)
 
 # 4. Interactive "What-If" Treatment Simulator
@@ -344,6 +375,26 @@ def get_signal_gate():
             }
         })
     return jsonify(gate_data)
+
+# 4c. Personal Baseline Calibration & Retrieval Endpoints
+@app.route("/baseline/calibrate", methods=["POST"])
+def start_baseline_calibration():
+    res = live_baseline_manager.start_calibration()
+    return jsonify({"success": True, "calibration": res})
+
+@app.route("/baseline/cancel", methods=["POST"])
+def cancel_baseline_calibration():
+    live_baseline_manager.cancel_calibration()
+    return jsonify({"success": True, "status": "CALIBRATION_CANCELLED"})
+
+@app.route("/baseline/<pid>", methods=["GET"])
+def get_personal_baseline(pid):
+    mgr = PersonalBaselineManager(pid)
+    return jsonify({
+        "patient_id": pid,
+        "has_calibrated_baseline": mgr.baseline is not None,
+        "baseline": mgr.baseline
+    })
 
 @app.route("/signal/gate/reset", methods=["POST"])
 def reset_signal_gate():
@@ -498,19 +549,41 @@ def trigger_scenario():
 def receive_sensor_data():
     raw_json = request.get_json(silent=True) or {}
     ppg_chunk = raw_json.get("values") or raw_json.get("samples") or []
-    raw_bpm = raw_json.get("bpm", None)
+    # Accept device_bpm if provided, otherwise raw bpm (never fabricate)
+    raw_bpm = raw_json.get("device_bpm") if "device_bpm" in raw_json else raw_json.get("bpm", None)
     raw_spo2 = raw_json.get("spo2", None)
+    seq = raw_json.get("sequence", None)
+    device_id = raw_json.get("device_id", None)
+    first_sample_ms = raw_json.get("first_sample_ms", None)
+    sample_interval_us = raw_json.get("sample_interval_us", None)
 
     if not ppg_chunk:
         return jsonify({"error": "No values or samples received"}), 400
 
     now_ts = time.time()
     now_ms = now_ts * 1000.0
-    dt_ms = 1000.0 / TARGET_FS
+
+    # Step 1.2: Reconstruct timestamps from device timing if available
+    dt_ms = (sample_interval_us / 1000.0) if sample_interval_us else (1000.0 / TARGET_FS)
 
     with state_lock:
+        if device_id:
+            state["last_device_id"] = device_id
+        if sample_interval_us:
+            state["last_sample_interval_us"] = sample_interval_us
+        
+        # Track sequence continuity
+        if seq is not None:
+            if state["last_sequence"] is not None and seq > (state["last_sequence"] + 1):
+                gap = seq - (state["last_sequence"] + 1)
+                state["sequence_gaps"] += gap
+            state["last_sequence"] = seq
+
         for i, val in enumerate(ppg_chunk):
-            sample_time_ms = now_ms - (len(ppg_chunk) - 1 - i) * dt_ms
+            if first_sample_ms is not None:
+                sample_time_ms = first_sample_ms + i * dt_ms
+            else:
+                sample_time_ms = now_ms - (len(ppg_chunk) - 1 - i) * dt_ms
             state["waveform_buffer"].append(float(val))
             state["analysis_buffer"].append(float(val))
             state["timestamp_buffer"].append(sample_time_ms)
@@ -541,32 +614,108 @@ def receive_sensor_data():
         if not gate_res["ai_screening_enabled"]:
             pred_label = f"Verification: {gate_res['status']}"
             probs = {gate_res["status"]: 1.0}
-        elif feats is not None and model_loaded:
-            feat_vector = np.array([feats[col] for col in feature_names]).reshape(1, -1)
-            feat_scaled = scaler.transform(feat_vector)
-            pred_code = xgb_model.predict(feat_scaled)[0]
-            pred_label = label_encoder.classes_[pred_code]
-            pred_probs_arr = xgb_model.predict_proba(feat_scaled)[0]
-            probs = {cls_name: float(pred_probs_arr[i]) for i, cls_name in enumerate(label_encoder.classes_)}
+            dual_meta = {"pipeline_mode": f"GATED_{gate_res['status']}"}
+            live_persistence_engine.reset()
+            pulse_eval = live_pulse_rules.evaluate(0.0, None, signal_reliable=False)
+            consensus_eval = {
+                "screening_status": "GATED",
+                "alert_state": "CLEAR",
+                "alert_message": f"Screening Paused ({gate_res['status']})",
+                "consensus_class": pred_label,
+                "is_persistent": False,
+                "history_summary": ["Verification"]
+            }
+        else:
+            # Clean window -> Execute Dual-Modality Prediction (30% Classical + 70% Inception-1D)
+            dual_res = dual_predictor.predict_window(sig_window, feats=feats, w_classical=0.30, w_dl=0.70)
+            raw_pred_label = dual_res["predicted_label"]
+            probs = dual_res["probabilities"]
+            dual_meta = {
+                "pipeline_mode": dual_res["pipeline_mode"],
+                "confidence": dual_res["confidence"],
+                "fusion_weights": dual_res["fusion_weights"]
+            }
 
-        # Update Digital Twin with LIVE_HARDWARE provenance & 5 Gate Metrics
+            # Layer 1: Deterministic Physiological Pulse Rules
+            # Compute real pulse rate from gate or features (never fabricate)
+            computed_bpm = m["bpm"] if (m and m.get("bpm", 0) > 0) else (feats["bpm"] if (feats and feats.get("bpm", 0) > 0) else 0.0)
+            cal_bpm = float(raw_bpm) if (raw_bpm is not None and float(raw_bpm) > 0) else computed_bpm
+            # Hardware telemetry transmits single-channel IR; do NOT fabricate SpO2
+            cal_spo2 = float(raw_spo2) if (raw_spo2 is not None and float(raw_spo2) > 0) else None
+            pulse_eval = live_pulse_rules.evaluate(cal_bpm, cal_spo2, signal_reliable=True)
+
+            # Layer 2: Multi-Window Persistence Consensus Engine
+            consensus_eval = live_persistence_engine.process_window(
+                predicted_class=raw_pred_label,
+                class_probabilities=probs,
+                signal_reliable=True
+            )
+            # Use persistence-filtered consensus class
+            pred_label = consensus_eval["consensus_class"]
+
+        # Determine verified BPM: only real measurement or None
+        computed_bpm = m["bpm"] if (m and m.get("bpm", 0) > 0) else (feats["bpm"] if (feats and feats.get("bpm", 0) > 0) else 0.0)
+        live_bpm = None
+        if raw_bpm is not None and float(raw_bpm) > 0:
+            live_bpm = round(float(raw_bpm), 1)
+        elif computed_bpm > 0:
+            live_bpm = round(computed_bpm, 1)
+
+        live_spo2 = round(float(raw_spo2), 1) if (raw_spo2 is not None and float(raw_spo2) > 0) else None
+        spo2_status = "VALIDATED" if live_spo2 is not None else "UNAVAILABLE_NO_RED_CHANNEL"
+
+        # Step 3: Compute Personalized Cardiovascular Instability (Relative to personal baseline)
+        if live_baseline_manager.is_calibrating:
+            calib_status = live_baseline_manager.process_calibration_window(
+                bpm=live_bpm,
+                rmssd=feats.get("rmssd") if feats else 35.0,
+                rr_cv=m.get("rr_cv", 0.10),
+                sqi=m.get("sqi", 0.85),
+                is_quality_ok=gate_res["signal_quality"]["screening_allowed"]
+            )
+        else:
+            calib_status = None
+
+        instability_eval = live_baseline_manager.compute_instability(
+            current_bpm=live_bpm,
+            current_rmssd=feats.get("rmssd") if feats else None,
+            current_rr_cv=m.get("rr_cv") if m else None,
+            is_quality_reliable=gate_res["signal_quality"]["screening_allowed"]
+        )
+
+        # Update Digital Twin with LIVE_HARDWARE provenance, Personal Instability & Research Reframing
         telemetry_payload = {
-            "bpm": round(float(raw_bpm) if raw_bpm is not None else (m["bpm"] if m["bpm"] > 0 else (feats["bpm"] if feats else 72.0)), 1),
-            "rmssd": round(feats["rmssd"] if feats else 35.0, 1),
-            "sdnn": round(feats["sdnn"] if feats else 40.0, 1),
-            "spo2": round(float(raw_spo2) if raw_spo2 is not None else 98.0, 1),
+            "bpm": live_bpm,
+            "rmssd": round(feats["rmssd"], 1) if feats else None,
+            "sdnn": round(feats["sdnn"], 1) if feats else None,
+            "spo2": live_spo2,
+            "spo2_status": spo2_status,
             "signal_quality": round(m["sqi"], 2),
+            "personal_instability": instability_eval,
+            "calibration_status": calib_status,
             "arrhythmia_predicted": pred_label,
+            "research_waveform_pattern": pred_label,
+            "research_disclaimer": "Investigational screening prototype. Optical patterns cannot substitute for 12-lead diagnostic ECG.",
             "arrhythmia_probabilities": probs,
             "data_source": "LIVE_HARDWARE",
+            "device_id": state["last_device_id"],
+            "sequence": state["last_sequence"],
+            "sequence_gaps": state["sequence_gaps"],
+            "dual_modality": dual_meta,
+            "layer1_pulse_rules": pulse_eval,
+            "layer2_persistence": consensus_eval,
+            "physiological_observation": gate_res.get("physiological_observation"),
             "signal_gate": {
                 "status": gate_res["status"],
                 "reason": gate_res["reason"],
                 "ai_screening_enabled": gate_res["ai_screening_enabled"],
+                "screening_allowed": gate_res.get("screening_allowed", gate_res["ai_screening_enabled"]),
                 "consecutive_good_windows": gate_res["consecutive_good_windows"],
                 "stability_threshold": gate_res["stability_threshold"],
+                "signal_quality": gate_res.get("signal_quality"),
+                "physiological_observation": gate_res.get("physiological_observation"),
                 "sample_rate_estimate": m["sample_rate_estimate"],
-                "bpm": m["bpm"],
+                "bpm": live_bpm,
                 "peak_coverage": m["peak_coverage"],
                 "rr_cv": m["rr_cv"],
                 "clipping_ratio": m["clipping_ratio"],
@@ -575,6 +724,14 @@ def receive_sensor_data():
         }
         with twin_lock:
             twin_status = active_twin.update_telemetry(telemetry_payload)
+            if instability_eval.get("instability_score") is not None:
+                active_twin.physiological_instability_score = instability_eval["instability_score"]
+                active_twin.current_dynamic_risk = instability_eval["instability_score"]
+                twin_status["current_dynamic_risk"] = instability_eval["instability_score"]
+                twin_status["physiological_instability_score"] = instability_eval["instability_score"]
+            twin_status["has_calibrated_baseline"] = live_baseline_manager.baseline is not None
+            twin_status["personal_baseline"] = live_baseline_manager.baseline
+            twin_status["is_calibrating"] = live_baseline_manager.is_calibrating
         
         # Broadcast full twin status to WebSocket
         socketio.emit("telemetry_update", twin_status)
@@ -583,14 +740,26 @@ def receive_sensor_data():
         # Buffer filling notification
         buffering_sec = buf_len // TARGET_FS
         buffering_payload = {
-            "bpm": round(float(raw_bpm) if raw_bpm is not None else 72.0, 1),
-            "rmssd": 35.0,
-            "sdnn": 40.0,
-            "spo2": round(float(raw_spo2) if raw_spo2 is not None else 98.0, 1),
+            "bpm": round(float(raw_bpm), 1) if (raw_bpm is not None and float(raw_bpm) > 0) else None,
+            "rmssd": None,
+            "sdnn": None,
+            "spo2": round(float(raw_spo2), 1) if (raw_spo2 is not None and float(raw_spo2) > 0) else None,
+            "spo2_status": "UNAVAILABLE_NO_RED_CHANNEL" if raw_spo2 is None else "VALIDATED",
             "signal_quality": 0.50,
+            "personal_instability": {
+                "instability_score": None,
+                "status_label": f"Buffering Baseline ({buffering_sec}/10s)",
+                "review_recommended": False,
+                "departure_flags": ["BUFFERING"]
+            },
             "arrhythmia_predicted": f"Buffering ({buffering_sec}/10s)",
+            "research_waveform_pattern": f"Buffering ({buffering_sec}/10s)",
+            "research_disclaimer": "Investigational screening prototype. Optical patterns cannot substitute for 12-lead diagnostic ECG.",
             "arrhythmia_probabilities": {"Buffering": 1.0},
             "data_source": "LIVE_HARDWARE",
+            "device_id": state["last_device_id"],
+            "sequence": state["last_sequence"],
+            "sequence_gaps": state["sequence_gaps"],
             "signal_gate": {
                 "status": "BUFFERING",
                 "reason": f"Accumulating 10-second baseline ({buffering_sec}/10s)",
@@ -623,7 +792,12 @@ def receive_sensor_data():
         "data_source": "LIVE_HARDWARE"
     })
 
-    return jsonify({"status": "ok", "samples_received": len(ppg_chunk)}), 200
+    return jsonify({
+        "status": "ok",
+        "last_accepted_seq": state["last_sequence"],
+        "samples_received": len(ppg_chunk),
+        "run": state["is_recording"]
+    }), 200
 
 # 6. Legacy/Mobile App Polling Support
 @app.route("/stream", methods=["GET"])
@@ -684,6 +858,7 @@ def stop_session():
     return jsonify({
         "status": "stopped",
         "saved_to": rec_path,
+        "file": os.path.basename(rec_path) if rec_path else None,
         "final_twin_status": final_status
     })
 

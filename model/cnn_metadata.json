@@ -1,0 +1,129 @@
+{
+  "model_name": "CardioTwin_Inception_1D",
+  "architecture": "Inception_1D",
+  "augmented": true,
+  "version": "2.0.0-deep-champion",
+  "input_shape": [
+    1,
+    1000
+  ],
+  "total_parameters": 393224,
+  "validation_scheme": "5-Fold StratifiedGroupKFold on Patient IDs (Zero Patient-Leakage)",
+  "total_patients": 2271,
+  "total_windows": 4683,
+  "classes": [
+    "AFib",
+    "Asystole",
+    "Bradycardia",
+    "Cardiac_Paced",
+    "Normal",
+    "Tachycardia",
+    "V_Flutter_Fib",
+    "V_Tachycardia"
+  ],
+  "metrics": {
+    "overall_accuracy": 0.5686525731368781,
+    "macro_f1": 0.5140576959611994,
+    "weighted_f1": 0.579308768527455,
+    "fold_f1_scores": [
+      0.517951094514489,
+      0.5144945014362121,
+      0.5219976673879845,
+      0.42358209359125965,
+      0.5185511859508922
+    ]
+  },
+  "per_class_metrics": {
+    "AFib": {
+      "precision": 0.39896373056994816,
+      "recall": 0.5775,
+      "f1-score": 0.47191011235955055,
+      "support": 400.0
+    },
+    "Asystole": {
+      "precision": 0.4166666666666667,
+      "recall": 0.6617647058823529,
+      "f1-score": 0.5113636363636364,
+      "support": 204.0
+    },
+    "Bradycardia": {
+      "precision": 0.6459537572254336,
+      "recall": 0.7050473186119873,
+      "f1-score": 0.6742081447963801,
+      "support": 634.0
+    },
+    "Cardiac_Paced": {
+      "precision": 0.26187050359712233,
+      "recall": 0.455,
+      "f1-score": 0.3324200913242009,
+      "support": 400.0
+    },
+    "Normal": {
+      "precision": 0.9851301115241635,
+      "recall": 0.6663872590108969,
+      "f1-score": 0.795,
+      "support": 1193.0
+    },
+    "Tachycardia": {
+      "precision": 0.6293103448275862,
+      "recall": 0.6269083969465649,
+      "f1-score": 0.6281070745697896,
+      "support": 1048.0
+    },
+    "V_Flutter_Fib": {
+      "precision": 0.2894736842105263,
+      "recall": 0.6111111111111112,
+      "f1-score": 0.39285714285714285,
+      "support": 72.0
+    },
+    "V_Tachycardia": {
+      "precision": 0.441025641025641,
+      "recall": 0.23497267759562843,
+      "f1-score": 0.3065953654188948,
+      "support": 732.0
+    },
+    "accuracy": 0.5686525731368781,
+    "macro avg": {
+      "precision": 0.508549304955886,
+      "recall": 0.5673364336448177,
+      "f1-score": 0.5140576959611994,
+      "support": 4683.0
+    },
+    "weighted avg": {
+      "precision": 0.6272301333908431,
+      "recall": 0.5686525731368781,
+      "f1-score": 0.579308768527455,
+      "support": 4683.0
+    }
+  },
+  "tournament_leaderboard": [
+    {
+      "rank": 1,
+      "architecture": "Inception_1D",
+      "macro_f1": 0.5140576959611994,
+      "accuracy": 0.5686525731368781,
+      "time_seconds": 104.60035634040833
+    },
+    {
+      "rank": 2,
+      "architecture": "ResNet_1D",
+      "macro_f1": 0.5080945673856312,
+      "accuracy": 0.5622464232329704,
+      "time_seconds": 78.91219520568848
+    },
+    {
+      "rank": 3,
+      "architecture": "Standard_1D_CNN",
+      "macro_f1": 0.4871684297913101,
+      "accuracy": 0.5413196668802049,
+      "time_seconds": 58.673399448394775
+    },
+    {
+      "rank": 4,
+      "architecture": "CRNN_BiLSTM",
+      "macro_f1": 0.45041788789425713,
+      "accuracy": 0.5139867606235319,
+      "time_seconds": 39.88709616661072
+    }
+  ]
+}

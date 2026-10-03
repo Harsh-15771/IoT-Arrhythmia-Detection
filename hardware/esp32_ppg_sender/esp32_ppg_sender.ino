@@ -25,7 +25,7 @@ U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(
 const char* ssid       = "YOUR_WIFI_SSID";
 const char* password   = "YOUR_WIFI_PASSWORD";
 
-const char* serverIP   = "192.168.1.100"; // Local WiFi workstation IP (update to your machine's LAN IP)
+const char* serverIP   = "192.168.1.100"; // Local WiFi workstation IP (update to match your machine's LAN IP)
 const int   serverPort = 5000;
 
 
@@ -45,6 +45,8 @@ bool          isRunning   = false;
 
 long          sampleBuf[CHUNK_SIZE];
 int           sampleIdx   = 0;
+uint32_t      chunkSequence = 0;
+unsigned long chunkFirstSampleMs = 0;
 
 unsigned long lastSample  = 0;
 unsigned long lastPoll    = 0;
@@ -98,6 +100,7 @@ void setup() {
 
   // OLED
   u8g2.begin();
+  u8g2.setBusClock(400000);
 
   showMessage("PPG Monitor", "Booting...");
 
@@ -113,7 +116,7 @@ void setup() {
 
   particleSensor.setup(
     60,
-    4,
+    1,
     2,
     100,
     411,
@@ -161,15 +164,15 @@ void loop() {
 
   unsigned long now = millis();
 
-  // Poll command
-  if (now - lastPoll >= 1000) {
+  // Poll command: only when IDLE (when streaming, sendChunk response synchronizes run state)
+  if (!isRunning && (now - lastPoll >= 1000)) {
 
     lastPoll = now;
 
     pollCommand();
   }
 
-  // Sample sensor
+  // Sample sensor at 100 Hz (10 ms)
   if (now - lastSample >= 10) {
 
     lastSample = now;
@@ -187,6 +190,10 @@ void loop() {
     // Send to server
     if (isRunning) {
 
+      if (sampleIdx == 0) {
+        chunkFirstSampleMs = now;
+      }
+
       sampleBuf[sampleIdx++] = irValue;
 
       if (sampleIdx >= CHUNK_SIZE) {
@@ -198,8 +205,8 @@ void loop() {
     }
   }
 
-  // OLED refresh
-  if (now - lastDisplay >= 50) {
+  // OLED refresh at smooth ~8 FPS (120ms) to free I2C bus bandwidth for MAX30102
+  if (now - lastDisplay >= 120) {
 
     lastDisplay = now;
 
@@ -458,39 +465,57 @@ void sendChunk() {
   if (WiFi.status() != WL_CONNECTED)
     return;
 
-  // Build dual-contract payload for seamless backend ingestion
-  String json = "{\"samples\":[";
+  chunkSequence++;
+
+  // Build truthful payload with hardware provenance & timing
+  String json = "{\"device_id\":\"cardiotwin-esp32-01\",\"sequence\":" + String(chunkSequence) +
+                ",\"first_sample_ms\":" + String(chunkFirstSampleMs) +
+                ",\"sample_interval_us\":10000,\"values\":[";
   for (int i = 0; i < CHUNK_SIZE; i++) {
     json += String(sampleBuf[i]);
     if (i < CHUNK_SIZE - 1)
       json += ",";
   }
-  json += "],\"values\":[";
-  for (int i = 0; i < CHUNK_SIZE; i++) {
-    json += String(sampleBuf[i]);
-    if (i < CHUNK_SIZE - 1)
-      json += ",";
+  json += "]";
+
+  if (irValue > 50000 && bpm > 0) {
+    json += ",\"device_bpm\":" + String(round(bpm * 10.0) / 10.0, 1);
+  } else {
+    json += ",\"device_bpm\":null";
   }
-  json += "],\"bpm\":" + String((int)round(bpm > 0 ? bpm : 72)) + ",\"spo2\":98}";
+  json += "}";
 
-  HTTPClient http;
+  static HTTPClient dataHttp;
+  static bool dataHttpOpen = false;
 
-  http.begin(dataURL);
-
-  http.addHeader(
-    "Content-Type",
-    "application/json"
-  );
-
-  int code = http.POST(json);
-
-  if (code != 200) {
-
-    Serial.printf(
-      "POST ERROR %d\n",
-      code
-    );
+  if (!dataHttpOpen) {
+    dataHttp.begin(dataURL);
+    dataHttp.setReuse(true);
+    dataHttp.setTimeout(800);
+    dataHttp.addHeader("Content-Type", "application/json");
+    dataHttp.addHeader("Connection", "keep-alive");
+    dataHttpOpen = true;
   }
 
-  http.end();
+  int code = dataHttp.POST(json);
+
+  if (code == 200) {
+    String resp = dataHttp.getString();
+    if (resp.length() > 0) {
+      DynamicJsonDocument doc(128);
+      if (deserializeJson(doc, resp) == DeserializationError::Ok) {
+        if (doc.containsKey("run")) {
+          bool serverRun = doc["run"];
+          if (serverRun != isRunning) {
+            isRunning = serverRun;
+            sampleIdx = 0;
+            Serial.println(isRunning ? "STARTED" : "STOPPED");
+          }
+        }
+      }
+    }
+  } else {
+    dataHttp.end();
+    dataHttpOpen = false;
+  }
 }

@@ -1,24 +1,60 @@
+/* ==========================================================================
+   CardioTwin — Clinical Medical Design System (Light Clinical Mode)
+   Clean, sterile, trustworthy medical portal aesthetics with authentic clinical hierarchy.
+   ========================================================================== */
+
 :root {
-  --bg-primary: #0A0F1D;
-  --bg-secondary: #111827;
-  --bg-card: rgba(23, 32, 54, 0.7);
-  --bg-card-hover: rgba(30, 41, 69, 0.85);
-  --border-color: rgba(56, 75, 112, 0.35);
-  --border-glow: rgba(59, 130, 246, 0.3);
+  /* Canvas & Surfaces */
+  --bg-primary: #F8FAFC;       /* Soft clinical off-white canvas */
+  --bg-secondary: #F1F5F9;     /* Slate-100 secondary background */
+  --bg-card: #FFFFFF;          /* Pure clinical white card surface */
+  --bg-card-hover: #FAFCFF;    /* Subtle hover tint */
+  --bg-surface-alt: #F8FAFC;   /* Inset well / sub-card background */
   
-  --text-main: #F3F4F6;
-  --text-muted: #9CA3AF;
-  --text-dim: #6B7280;
+  /* Borders & Gridlines */
+  --border-color: #E2E8F0;     /* Crisp Slate-200 border */
+  --border-subtle: #EDF2F7;    /* Delicate interior divider */
+  --border-focus: #3B82F6;     /* Active focus ring */
+  --grid-line: rgba(226, 232, 240, 0.8);
+  --grid-medical: rgba(14, 165, 233, 0.08);
 
-  --accent-cyan: #06B6D4;
-  --accent-blue: #3B82F6;
-  --accent-emerald: #10B981;
-  --accent-amber: #F59E0B;
-  --accent-rose: #EF4444;
-  --accent-purple: #8B5CF6;
+  /* Typography Scale */
+  --text-main: #0F172A;        /* Slate-900: Crisp deep ink for maximum clinical readability */
+  --text-secondary: #334155;   /* Slate-700: Body text & values */
+  --text-muted: #64748B;       /* Slate-500: Field titles, units, metadata */
+  --text-dim: #94A3B8;         /* Slate-400: Micro-captions & inactive labels */
 
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Clinical Accents & Status Tones */
+  --medical-blue: #1D4ED8;     /* Clinical Blue (Primary actions, key metrics) */
+  --medical-blue-light: #EFF6FF; /* Blue-50 background tint */
+  --medical-teal: #0D9488;     /* Clinical Teal (Stable vitals, pulse) */
+  --medical-teal-light: #F0FDFA; /* Teal-50 background tint */
+  
+  --status-normal: #059669;    /* Normal / Optimal (Emerald) */
+  --status-normal-bg: #ECFDF5;
+  --status-normal-border: #A7F3D0;
+  
+  --status-caution: #D97706;   /* Moderate / Caution / Gated (Amber) */
+  --status-caution-bg: #FFFBEB;
+  --status-caution-border: #FDE68A;
+  
+  --status-critical: #DC2626;  /* Urgent Alert / High Risk (Crimson) */
+  --status-critical-bg: #FEF2F2;
+  --status-critical-border: #FECACA;
+
+  --status-info: #0284C7;      /* Info / Screening / AFib */
+  --status-info-bg: #F0F9FF;
+  --status-info-border: #BAE6FD;
+
+  /* Font Families */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+  /* Shadows (Natural, soft medical elevation) */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
 }
 
 * {
@@ -32,108 +68,181 @@ body {
   color: var(--text-main);
   font-family: var(--font-sans);
   min-height: 100vh;
-  overflow-x: hidden;
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background-image: 
-    radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(239, 68, 68, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.04) 0%, transparent 60%);
+    radial-gradient(circle at 10% 0%, rgba(29, 78, 216, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 90% 100%, rgba(13, 148, 136, 0.02) 0%, transparent 50%);
 }
 
-/* Glassmorphic Panel Container */
-.glass-panel {
+/* Clinical Card Surface */
+.clinical-card {
   background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  transition: all 0.25s ease;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.glass-panel:hover {
-  border-color: rgba(59, 130, 246, 0.45);
+.clinical-card:hover {
+  border-color: #CBD5E1;
+  box-shadow: var(--shadow-md);
 }
 
-/* Pulse Animation */
-@keyframes heart-pulse {
-  0% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.4)); }
-  14% { transform: scale(1.15); filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.8)); }
-  28% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.5)); }
-  42% { transform: scale(1.22); filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.9)); }
-  70% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.4)); }
+/* Clinical Tabs Navigation */
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 8px;
+  background: transparent;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
 }
 
-.pulsing-heart {
-  animation: heart-pulse 1.2s infinite ease-in-out;
-  transform-origin: center;
+.nav-tab:hover {
+  color: var(--text-main);
+  background: var(--bg-secondary);
 }
 
-/* Glowing Neon Badges */
+.nav-tab.active {
+  color: var(--medical-blue);
+  background: var(--medical-blue-light);
+  border-color: rgba(37, 99, 235, 0.25);
+  font-weight: 700;
+}
+
+/* Clinical Badges */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
-.badge-critical {
-  background: rgba(239, 68, 68, 0.15);
-  color: #F87171;
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+.badge-normal {
+  background: var(--status-normal-bg);
+  color: var(--status-normal);
+  border: 1px solid var(--status-normal-border);
 }
 
 .badge-caution {
-  background: rgba(245, 158, 11, 0.15);
-  color: #FBBF24;
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: var(--status-caution-bg);
+  color: var(--status-caution);
+  border: 1px solid var(--status-caution-border);
 }
 
-.badge-optimal {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34D399;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+.badge-critical {
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+  border: 1px solid var(--status-critical-border);
 }
 
 .badge-info {
-  background: rgba(6, 182, 212, 0.15);
-  color: #38BDF8;
-  border: 1px solid rgba(6, 182, 212, 0.4);
+  background: var(--status-info-bg);
+  color: var(--status-info);
+  border: 1px solid var(--status-info-border);
 }
 
-/* Custom Scrollbars */
+/* Pulsing Heart Animation */
+@keyframes heart-pulse {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.18); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.24); }
+  70% { transform: scale(1); }
+}
+
+.pulsing-heart {
+  animation: heart-pulse 1.25s infinite ease-in-out;
+  transform-origin: center;
+}
+
+/* Live Waveform Canvas Container */
+.oscilloscope-container {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+/* Subtle Medical Grid Background for Oscilloscope */
+.medical-grid {
+  background-size: 20px 20px, 100px 100px;
+  background-image: 
+    linear-gradient(to right, rgba(14, 165, 233, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(14, 165, 233, 0.05) 1px, transparent 1px),
+    linear-gradient(to right, rgba(14, 165, 233, 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(14, 165, 233, 0.12) 1px, transparent 1px);
+}
+
+/* Subtle Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(10, 15, 29, 0.5);
+  background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(56, 75, 112, 0.5);
+  background: #CBD5E1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.6);
+  background: #94A3B8;
 }
 
-/* Button & Input Reset */
+/* Buttons & Inputs */
 button {
   font-family: var(--font-sans);
   cursor: pointer;
   border: none;
   outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+}
+
+button:active {
+  transform: scale(0.98);
 }
 
 input, select {
   font-family: var(--font-sans);
   outline: none;
 }
+
+/* Progress and Calibration Meters */
+.progress-container {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+@keyframes pulse-calib {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.calibrating-pulse {
+  animation: pulse-calib 1.5s infinite ease-in-out;
+}
+

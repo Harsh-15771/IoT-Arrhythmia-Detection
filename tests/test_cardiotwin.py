@@ -13,6 +13,7 @@ import sys
 import json
 import unittest
 import numpy as np
+import time
 
 # Add project root and backend to path
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,6 +26,8 @@ if BACKEND_DIR not in sys.path:
 from framingham_risk import calculate_framingham_cvd_risk
 from digital_twin_engine import CardioTwin
 from signal_gate import SignalReliabilityGate
+from dual_engine import DualModalityPredictor
+from pulse_rules import PhysiologicalPulseRules, MultiWindowPersistenceEngine
 import api_server
 
 class TestCardioTwinClinicalEngine(unittest.TestCase):
@@ -166,6 +169,28 @@ class TestAPIServerContract(unittest.TestCase):
         res = self.client.post("/ingest_telemetry", json=payload)
         self.assertEqual(res.status_code, 200)
 
+    def test_truthful_telemetry_hardware_contract(self):
+        # Hardware sends sequence, first_sample_ms, device_bpm, no fake SpO2
+        payload = {
+            "device_id": "cardiotwin-esp32-01",
+            "sequence": 142,
+            "first_sample_ms": 105432,
+            "sample_interval_us": 10000,
+            "values": [82000.0, 82100.0, 82050.0],
+            "device_bpm": None
+        }
+        res = self.client.post("/data", json=payload)
+        self.assertEqual(res.status_code, 200)
+        body = res.get_json()
+        self.assertEqual(body["samples_received"], 3)
+        self.assertEqual(body["last_accepted_seq"], 142)
+
+        # Check twin telemetry did NOT fabricate SpO2
+        twin_res = self.client.get("/twin/status")
+        vitals = twin_res.get_json()["current_vitals"]
+        self.assertIsNone(vitals.get("spo2"))
+        self.assertEqual(vitals.get("spo2_status"), "UNAVAILABLE_NO_RED_CHANNEL")
+
     def test_scenario_explicit_provenance(self):
         res = self.client.post("/twin/scenario", json={"scenario": "calm_normal"})
         self.assertEqual(res.status_code, 200)
@@ -262,14 +287,61 @@ class TestSignalReliabilityGate(unittest.TestCase):
         self.assertFalse(res["ai_screening_enabled"])
 
     def test_physiological_plausibility_verify_signal(self):
-        # Pulse at 240 BPM (4 Hz) -> exceeds 180 BPM resting demo bound
+        # Pulse at 240 BPM (4 Hz) -> exceeds 180 BPM resting bound
         t = np.linspace(0, 10, 1000)
         tachy_pulse = 2000.0 + 300.0 * np.sin(2 * np.pi * 4.0 * t)
         ts = np.linspace(0, 10000, 1000)
-        res = self.gate.evaluate_window(tachy_pulse, timestamps_ms=ts)
-        self.assertEqual(res["status"], "VERIFY_SIGNAL")
-        self.assertFalse(res["ai_screening_enabled"])
-        self.assertIn("outside plausible resting range", res["reason"])
+        
+        # Window 1: quality ok, marked for recheck
+        res1 = self.gate.evaluate_window(tachy_pulse, timestamps_ms=ts)
+        self.assertTrue(res1["signal_quality"]["screening_allowed"])
+        self.assertTrue(res1["physiological_observation"]["recheck_recommended"])
+        self.assertEqual(res1["physiological_observation"]["rate_state"], "EXTREME_HIGH")
+        
+        # Stabilize to 3 windows -> RECHECK_REQUIRED with AI screening enabled (does NOT block pathology!)
+        self.gate.evaluate_window(tachy_pulse, timestamps_ms=ts)
+        res3 = self.gate.evaluate_window(tachy_pulse, timestamps_ms=ts)
+        self.assertEqual(res3["status"], "RECHECK_REQUIRED")
+        self.assertTrue(res3["ai_screening_enabled"])
+        self.assertIn("outside resting range", res3["reason"])
+
+    def test_synthetic_afib_passes_quality_gate(self):
+        # Synthetic irregular rhythm (AFib): variable RR intervals -> RR CV > 0.35
+        # Must NOT be blocked as noise; must pass quality gate and reach the screening model!
+        self.gate.reset()
+        t = np.linspace(0, 10, 1000)
+        peak_times = [0.5, 0.9, 1.8, 2.2, 3.5, 3.9, 5.2, 5.6, 7.0, 7.5, 8.8, 9.3]
+        irregular_pulse = np.full(1000, 2000.0)
+        for pt in peak_times:
+            irregular_pulse += 350.0 * np.exp(-((t - pt)**2) / (2 * (0.05**2)))
+        ts = np.linspace(0, 10000, 1000)
+
+        self.gate.evaluate_window(irregular_pulse, timestamps_ms=ts)
+        self.gate.evaluate_window(irregular_pulse, timestamps_ms=ts)
+        res = self.gate.evaluate_window(irregular_pulse, timestamps_ms=ts)
+
+        self.assertTrue(res["signal_quality"]["screening_allowed"])
+        self.assertTrue(res["ai_screening_enabled"])
+        self.assertEqual(res["status"], "IRREGULAR_RHYTHM")
+        self.assertEqual(res["physiological_observation"]["irregularity_state"], "IRREGULAR_PULSE_OBSERVATION")
+        self.assertGreater(res["metrics"]["rr_cv"], 0.35)
+
+    def test_synthetic_bradycardia_passes_quality_gate(self):
+        # Synthetic 38 BPM pulse (0.633 Hz) -> below 40 BPM resting bound
+        # Must pass quality gate and reach screening model with RECHECK_REQUIRED tag
+        self.gate.reset()
+        t = np.linspace(0, 10, 1000)
+        brady_pulse = 2000.0 + 400.0 * np.sin(2 * np.pi * 0.633 * t)
+        ts = np.linspace(0, 10000, 1000)
+
+        self.gate.evaluate_window(brady_pulse, timestamps_ms=ts)
+        self.gate.evaluate_window(brady_pulse, timestamps_ms=ts)
+        res = self.gate.evaluate_window(brady_pulse, timestamps_ms=ts)
+
+        self.assertTrue(res["signal_quality"]["screening_allowed"])
+        self.assertTrue(res["ai_screening_enabled"])
+        self.assertEqual(res["status"], "RECHECK_REQUIRED")
+        self.assertEqual(res["physiological_observation"]["rate_state"], "EXTREME_LOW")
 
     def test_window_stability_escalation(self):
         # Clean 72 BPM pulse (1.2 Hz) across 3 consecutive windows
@@ -349,5 +421,188 @@ class TestModelArtifactsAndManifest(unittest.TestCase):
         self.assertIn("leak_free_verification", meta)
         self.assertIn("ci_95_macro_f1", meta)
 
+class TestHierarchicalDecisionArchitecture(unittest.TestCase):
+    def setUp(self):
+        from backend.pulse_rules import PhysiologicalPulseRules, MultiWindowPersistenceEngine
+        self.pulse_rules = PhysiologicalPulseRules(sustained_window_count=3)
+        self.persistence = MultiWindowPersistenceEngine(memory_windows=4, consensus_threshold=3)
+
+    def test_deterministic_pulse_rules_low_and_typical(self):
+        # Low pulse rate (< 50 BPM)
+        res_low = self.pulse_rules.evaluate(bpm=44.0, spo2=98.0, signal_reliable=True)
+        self.assertEqual(res_low["pulse_state"], "LOW_PULSE_RATE")
+        self.assertIn("LOW_PULSE_RATE", res_low["observation_flags"])
+
+        # Typical resting range (50-100 BPM)
+        res_typ = self.pulse_rules.evaluate(bpm=72.0, spo2=98.0, signal_reliable=True)
+        self.assertEqual(res_typ["pulse_state"], "TYPICAL_RESTING")
+        self.assertEqual(res_typ["observation_flags"], [])
+
+    def test_deterministic_pulse_rules_sustained_elevated(self):
+        self.pulse_rules.reset()
+        # Window 1: Elevated (not yet sustained)
+        r1 = self.pulse_rules.evaluate(bpm=128.0, spo2=98.0, signal_reliable=True)
+        self.assertEqual(r1["pulse_state"], "ELEVATED_PULSE_RATE")
+
+        # Window 2: Elevated
+        r2 = self.pulse_rules.evaluate(bpm=130.0, spo2=97.0, signal_reliable=True)
+        self.assertEqual(r2["pulse_state"], "ELEVATED_PULSE_RATE")
+
+        # Window 3: Sustained Elevated (> 120 for 3 windows)
+        r3 = self.pulse_rules.evaluate(bpm=125.0, spo2=98.0, signal_reliable=True)
+        self.assertEqual(r3["pulse_state"], "SUSTAINED_ELEVATED")
+        self.assertIn("SUSTAINED_ELEVATED_PULSE_RATE", r3["observation_flags"])
+
+    def test_deterministic_oxygenation_review_flag(self):
+        self.pulse_rules.reset()
+        # 3 consecutive windows under 92% SpO2
+        self.pulse_rules.evaluate(bpm=75.0, spo2=90.0, signal_reliable=True)
+        self.pulse_rules.evaluate(bpm=75.0, spo2=89.0, signal_reliable=True)
+        r3 = self.pulse_rules.evaluate(bpm=75.0, spo2=91.0, signal_reliable=True)
+        self.assertEqual(r3["oxygenation_state"], "OXYGENATION_REVIEW_FLAG")
+        self.assertIn("OXYGENATION_REVIEW_FLAG", r3["observation_flags"])
+
+    def test_multi_window_persistence_suppresses_transient_spike(self):
+        self.persistence.reset()
+        probs_vt = {"V_Tachycardia": 0.85, "Normal": 0.10}
+        probs_normal = {"Normal": 0.85, "V_Tachycardia": 0.10}
+
+        # Window 1: Normal
+        r1 = self.persistence.process_window("Normal", probs_normal, signal_reliable=True)
+        self.assertEqual(r1["screening_status"], "STABLE_NORMAL")
+        self.assertFalse(r1["is_persistent"])
+
+        # Window 2: Transient single-window VT spike -> MUST BE SUPPRESSED!
+        r2 = self.persistence.process_window("V_Tachycardia", probs_vt, signal_reliable=True)
+        self.assertEqual(r2["screening_status"], "MONITORING_TRANSIENT")
+        self.assertFalse(r2["is_persistent"])
+        self.assertIn("Awaiting multi-window persistence", r2["alert_message"])
+
+    def test_multi_window_persistence_triggers_after_consensus(self):
+        self.persistence.reset()
+        probs_vt = {"V_Tachycardia": 0.85, "Normal": 0.05}
+
+        # Window 1: VT (1/4) -> Transient
+        r1 = self.persistence.process_window("V_Tachycardia", probs_vt, signal_reliable=True)
+        self.assertFalse(r1["is_persistent"])
+
+        # Window 2: VT (2/4) -> Transient
+        r2 = self.persistence.process_window("V_Tachycardia", probs_vt, signal_reliable=True)
+        self.assertFalse(r2["is_persistent"])
+
+        # Window 3: VT (3/4) -> CONSENSUS REACHED -> Persistent Alert!
+        r3 = self.persistence.process_window("V_Tachycardia", probs_vt, signal_reliable=True)
+        self.assertTrue(r3["is_persistent"])
+        self.assertEqual(r3["screening_status"], "PERSISTENT_NON_NORMAL")
+        self.assertIn("Persistent abnormal pulse pattern detected", r3["alert_message"])
+        self.assertIn("Obtain 12-lead ECG review", r3["alert_message"])
+
+    def test_asymmetric_evidentiary_threshold(self):
+        self.persistence.reset()
+        # VT with low confidence (0.60 < 0.75 threshold) -> demoted from critical alert!
+        weak_vt = {"V_Tachycardia": 0.60, "Normal": 0.35}
+        r = self.persistence.process_window("V_Tachycardia", weak_vt, signal_reliable=True)
+        self.assertNotEqual(r["current_window_label"], "V_Tachycardia")
+
+
+class TestDualModalityProductionEngine(unittest.TestCase):
+    def setUp(self):
+        model_dir = os.path.join(ROOT_DIR, "model")
+        self.predictor = DualModalityPredictor(model_dir)
+
+    def test_dual_predictor_initialization(self):
+        self.assertTrue(self.predictor.classical_loaded or self.predictor.dl_loaded)
+        self.assertEqual(len(self.predictor.classes), 8)
+
+    def test_dual_modality_window_fusion(self):
+        # 1,000 samples @ 100 Hz
+        sig_window = np.sin(np.linspace(0, 10 * 2 * np.pi, 1000))
+        dummy_feats = {
+            "bpm": 72.0, "rmssd": 35.0, "sdnn": 40.0, "pnn50": 0.15,
+            "hrv_cv": 0.05, "ibi_mean": 833.0, "sqi": 0.95
+        }
+        res = self.predictor.predict_window(sig_window, dummy_feats, w_classical=0.30, w_dl=0.70)
+        self.assertIn("predicted_label", res)
+        self.assertIn("confidence", res)
+        self.assertIn("probabilities", res)
+        self.assertEqual(len(res["probabilities"]), 8)
+        prob_sum = sum(res["probabilities"].values())
+        self.assertAlmostEqual(prob_sum, 1.0, places=2)
+        self.assertGreaterEqual(res["confidence"], 0.0)
+        self.assertLessEqual(res["confidence"], 1.0)
+
+
+class TestPersonalBaselineEngine(unittest.TestCase):
+    def setUp(self):
+        from backend.personal_baseline import PersonalBaselineManager, BASELINES_DIR
+        self.patient_id = "TEST_P999"
+        self.manager = PersonalBaselineManager(self.patient_id)
+        self.test_json = os.path.join(BASELINES_DIR, f"{self.patient_id}.json")
+
+    def tearDown(self):
+        if os.path.exists(self.test_json):
+            try:
+                os.remove(self.test_json)
+            except Exception:
+                pass
+
+    def test_calibration_and_persistence(self):
+        self.manager.start_calibration()
+        # Feed 6 quality windows (around 68-72 BPM, 35-40 RMSSD)
+        for bpm in [70.0, 72.0, 69.0, 71.0, 70.0, 73.0]:
+            self.manager.calibration_windows.append({
+                "bpm": bpm, "rmssd": 38.0, "rr_cv": 0.08, "sqi": 0.95, "timestamp": time.time()
+            })
+        res = self.manager.finalize_calibration()
+        self.assertEqual(res["status"], "CALIBRATION_COMPLETE")
+        b = res["baseline"]
+        self.assertEqual(b["patient_id"], self.patient_id)
+        self.assertAlmostEqual(b["median_bpm"], 70.5, delta=1.5)
+        self.assertTrue(os.path.exists(self.test_json))
+
+        # Test persistence across restarts
+        from backend.personal_baseline import PersonalBaselineManager
+        reloaded = PersonalBaselineManager(self.patient_id)
+        self.assertIsNotNone(reloaded.baseline)
+        self.assertEqual(reloaded.baseline["median_bpm"], b["median_bpm"])
+
+    def test_instability_resting_vs_departure(self):
+        # Establish known baseline
+        self.manager.baseline = {
+            "median_bpm": 70.0,
+            "mad_bpm": 3.0,
+            "median_rmssd": 40.0,
+            "mad_rmssd": 5.0,
+            "median_rr_cv": 0.08,
+            "mad_rr_cv": 0.02
+        }
+
+        # 1. Normal resting -> instability 0–20 (Stable)
+        res_stable = self.manager.compute_instability(current_bpm=71.0, current_rmssd=39.0, current_rr_cv=0.08, is_quality_reliable=True)
+        self.assertLessEqual(res_stable["instability_score"], 20.0)
+        self.assertEqual(res_stable["status_label"], "Stable")
+
+        # 2. 30%+ increase (105 BPM) -> sustained departure (instability 40–70)
+        # Feed 3 consecutive high windows to trigger sustained memory
+        self.manager.compute_instability(current_bpm=105.0, current_rmssd=20.0, current_rr_cv=0.15, is_quality_reliable=True)
+        self.manager.compute_instability(current_bpm=106.0, current_rmssd=18.0, current_rr_cv=0.16, is_quality_reliable=True)
+        res_dep = self.manager.compute_instability(current_bpm=104.0, current_rmssd=19.0, current_rr_cv=0.15, is_quality_reliable=True)
+        self.assertGreaterEqual(res_dep["instability_score"], 40.0)
+        self.assertTrue(res_dep["review_recommended"])
+
+        # 3. Return to baseline -> drops back to Stable within 3 windows
+        self.manager.compute_instability(current_bpm=70.0, current_rmssd=38.0, current_rr_cv=0.08, is_quality_reliable=True)
+        self.manager.compute_instability(current_bpm=71.0, current_rmssd=40.0, current_rr_cv=0.08, is_quality_reliable=True)
+        res_recovered = self.manager.compute_instability(current_bpm=70.0, current_rmssd=39.0, current_rr_cv=0.07, is_quality_reliable=True)
+        self.assertLessEqual(res_recovered["instability_score"], 20.0)
+        self.assertEqual(res_recovered["status_label"], "Stable")
+
+    def test_unreliable_signal_returns_none(self):
+        res = self.manager.compute_instability(current_bpm=72.0, current_rmssd=35.0, current_rr_cv=0.08, is_quality_reliable=False)
+        self.assertIsNone(res["instability_score"])
+        self.assertIn("Measurement Unreliable", res["status_label"])
+
+
 if __name__ == "__main__":
     unittest.main()
+

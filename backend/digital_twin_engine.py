@@ -83,9 +83,12 @@ class CardioTwin:
         self.current_vitals.update(sensor_data)
         self.data_source = sensor_data.get("data_source", self.data_source if self.data_source != "INITIALIZED" else "LIVE_HARDWARE")
         
-        bpm = float(self.current_vitals.get("bpm", 72))
-        rmssd = float(self.current_vitals.get("rmssd", 35.0))
-        spo2 = float(self.current_vitals.get("spo2", 98))
+        bpm_val = self.current_vitals.get("bpm")
+        bpm = float(bpm_val) if bpm_val is not None else 72.0
+        rmssd_val = self.current_vitals.get("rmssd")
+        rmssd = float(rmssd_val) if rmssd_val is not None else 35.0
+        raw_spo2 = self.current_vitals.get("spo2")
+        spo2 = float(raw_spo2) if raw_spo2 is not None else None
         sqi = float(self.current_vitals.get("signal_quality", 0.85))
         arrhythmia = str(self.current_vitals.get("arrhythmia_predicted", "Normal"))
         probs = self.current_vitals.get("arrhythmia_probabilities", {})
@@ -126,10 +129,11 @@ class CardioTwin:
 
         # 4. Peripheral Oxygen Desaturation (Hypoxia penalty)
         hypoxia_penalty = 0.0
-        if spo2 < 90 and spo2 > 50:
-            hypoxia_penalty += 25.0
-        elif spo2 < 94 and spo2 > 50:
-            hypoxia_penalty += 10.0
+        if spo2 is not None:
+            if 50 < spo2 < 90:
+                hypoxia_penalty += 25.0
+            elif 50 < spo2 < 94:
+                hypoxia_penalty += 10.0
 
         # Dynamic Physiological Instability Formulation:
         # Fuses patient baseline CVD predisposition (30%) with real-time acute distress components (70%)
@@ -152,7 +156,7 @@ class CardioTwin:
 
         return self.get_status()
 
-    def _check_alerts(self, bpm: float, spo2: float, arrhythmia: str, sqi: float, instability_score: float, is_reliable: bool):
+    def _check_alerts(self, bpm: float, spo2, arrhythmia: str, sqi: float, instability_score: float, is_reliable: bool):
         timestamp = time.strftime("%H:%M:%S")
         
         if not is_reliable:
@@ -195,7 +199,7 @@ class CardioTwin:
                 "category": "INSTABILITY",
                 "message": f"High Physiological Instability ({instability_score}/100): Marked autonomic stress and hemodynamic perturbation."
             })
-        elif spo2 < 92 and spo2 > 50:
+        elif spo2 is not None and 50 < spo2 < 92:
             self.alert_log.append({
                 "time": timestamp,
                 "severity": "MODERATE",
@@ -268,7 +272,8 @@ class CardioTwin:
 
         v["systolic_bp"] = max(100.0, v.get("systolic_bp", 125) - bp_reduction)
         l["total_cholesterol"] = max(110.0, l.get("total_cholesterol", 190) * (1.0 - chol_reduction_pct))
-        simulated_hr = max(50.0, self.current_vitals["bpm"] - hr_reduction)
+        current_hr = float(self.current_vitals.get("bpm") if self.current_vitals.get("bpm") is not None else self.patient.get("vitals", {}).get("resting_hr", 72.0))
+        simulated_hr = max(50.0, current_hr - hr_reduction)
 
         # Recalculate projected Layer 1 Framingham risk under sustained adherence
         sim_risk_data = calculate_framingham_cvd_risk(

@@ -1,0 +1,133 @@
+{
+  "total_windows": 4683,
+  "total_patients": 2271,
+  "source_classifier_accuracy": 0.770824434002563,
+  "source_classifier_balanced_accuracy": 0.8129680134680135,
+  "confounding_findings": [
+    {
+      "class": "AFib",
+      "total_windows": 400,
+      "unique_patients": 400,
+      "source_distribution": {
+        "MIMIC": 400
+      },
+      "primary_source": "MIMIC",
+      "primary_source_percentage": 100.0,
+      "status": "CRITICALLY CONFOUNDED (Single Source)"
+    },
+    {
+      "class": "Asystole",
+      "total_windows": 204,
+      "unique_patients": 17,
+      "source_distribution": {
+        "CinC": 204
+      },
+      "primary_source": "CinC",
+      "primary_source_percentage": 100.0,
+      "status": "CRITICALLY CONFOUNDED (Single Source)"
+    },
+    {
+      "class": "Bradycardia",
+      "total_windows": 634,
+      "unique_patients": 439,
+      "source_distribution": {
+        "MIMIC": 400,
+        "CinC": 234
+      },
+      "primary_source": "MIMIC",
+      "primary_source_percentage": 63.1,
+      "status": "Distributed Across Sources"
+    },
+    {
+      "class": "Cardiac_Paced",
+      "total_windows": 400,
+      "unique_patients": 400,
+      "source_distribution": {
+        "MIMIC": 400
+      },
+      "primary_source": "MIMIC",
+      "primary_source_percentage": 100.0,
+      "status": "CRITICALLY CONFOUNDED (Single Source)"
+    },
+    {
+      "class": "Normal",
+      "total_windows": 1193,
+      "unique_patients": 440,
+      "source_distribution": {
+        "BUT": 792,
+        "MIMIC": 400,
+        "BIDMC": 1
+      },
+      "primary_source": "BUT",
+      "primary_source_percentage": 66.4,
+      "status": "Distributed Across Sources"
+    },
+    {
+      "class": "Tachycardia",
+      "total_windows": 1048,
+      "unique_patients": 508,
+      "source_distribution": {
+        "CinC": 648,
+        "MIMIC": 400
+      },
+      "primary_source": "CinC",
+      "primary_source_percentage": 61.8,
+      "status": "Distributed Across Sources"
+    },
+    {
+      "class": "V_Flutter_Fib",
+      "total_windows": 72,
+      "unique_patients": 6,
+      "source_distribution": {
+        "CinC": 72
+      },
+      "primary_source": "CinC",
+      "primary_source_percentage": 100.0,
+      "status": "CRITICALLY CONFOUNDED (Single Source)"
+    },
+    {
+      "class": "V_Tachycardia",
+      "total_windows": 732,
+      "unique_patients": 61,
+      "source_distribution": {
+        "CinC": 732
+      },
+      "primary_source": "CinC",
+      "primary_source_percentage": 100.0,
+      "status": "CRITICALLY CONFOUNDED (Single Source)"
+    }
+  ],
+  "source_report": {
+    "BUT": {
+      "precision": 0.9974779319041615,
+      "recall": 0.9987373737373737,
+      "f1-score": 0.9981072555205047,
+      "support": 792.0
+    },
+    "CinC": {
+      "precision": 0.8083018867924529,
+      "recall": 0.5666666666666667,
+      "f1-score": 0.6662519440124417,
+      "support": 1890.0
+    },
+    "MIMIC": {
+      "precision": 0.6813572542901716,
+      "recall": 0.8735,
+      "f1-score": 0.7655565293602103,
+      "support": 2000.0
+    },
+    "accuracy": 0.770824434002563,
+    "macro avg": {
+      "precision": 0.8290456909955953,
+      "recall": 0.8129680134680135,
+      "f1-score": 0.8099719096310523,
+      "support": 4682.0
+    },
+    "weighted avg": {
+      "precision": 0.7860759497407463,
+      "recall": 0.770824434002563,
+      "f1-score": 0.7648078127458725,
+      "support": 4682.0
+    }
+  }
+}

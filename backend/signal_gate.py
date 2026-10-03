@@ -1,14 +1,21 @@
 """
-CardioTwin - 5-Part Signal Reliability Gate (Phase 1 Clinical Safety Pipeline)
+CardioTwin - Separated Signal Quality Gate & Physiological Observation Engine
 ================================================================================
-Replaces single-metric heuristic SQI with an evidence-aware 5-part physiological gate:
-  1. Sensor contact / amplitude check (flatline, finger-off, ADC saturation, clipping)
-  2. Sample-timing check (timestamp diff near 10ms, dropped sample detection)
-  3. Peak regularity check (systolic peak prominence, spacing, and RR interval coverage)
-  4. Physiological plausibility check (seated rate 40-180 BPM; outside -> VERIFY_SIGNAL, never false alarm)
-  5. Window stability check (requires >= 3 consecutive 10s windows before enabling AI screening)
+Architecture (Step 2 of CardioTwin v4 Product Pivot):
+Separates signal reliability assessment into two independent axes:
+  1. Signal Quality Gate (May block AI):
+     - Sensor contact & optical amplitude (flatline, finger liftoff)
+     - ADC clipping & saturation (transimpedance amp ceiling)
+     - Sample timing jitter & dropped hardware packets
+     - Pulse morphology (minimum 3 detectable systolic peaks)
+     -> Strictly blocks AI when hardware or optical contact fails.
+  2. Physiological Observation (NEVER blocks AI screening):
+     - Beat-to-beat pulse irregularity (RR CV > 0.35 -> IRREGULAR_PULSE_OBSERVATION)
+     - Pulse rate extremes (BPM < 40 or > 180 -> RECHECK_REQUIRED tag)
+     -> Surfaces observed physiological patterns to screening models rather
+        than discarding genuine arrhythmias (AFib, severe bradycardia) as noise!
 
-Computes the 5 authoritative metrics per 10-second window:
+Authoritative 5 metrics:
   - sample_rate_estimate = 1 / median(timestamp_difference)
   - bpm = 60 / median(valid_peak_intervals)
   - peak_coverage = valid_peak_intervals_total_time / window_duration
@@ -34,8 +41,7 @@ def bandpass_filter(signal: np.ndarray, lowcut: float = 0.5, highcut: float = 8.
 
 class SignalReliabilityGate:
     """
-    Evaluates 10-second PPG windows across 5 sequential physiological gates.
-    Tracks state across consecutive windows to enforce baseline stability.
+    Evaluates 10-second PPG telemetry windows across decoupled Signal Quality and Physiological Observation axes.
     """
 
     def __init__(
@@ -45,11 +51,11 @@ class SignalReliabilityGate:
         stability_threshold: int = 3,
         min_bpm: float = 40.0,
         max_bpm: float = 180.0,
-        adc_min_limit: float = 200.0,       # Raw MAX30102 optical baseline floor for finger contact
+        adc_min_limit: float = 200.0,       # Optical baseline floor for finger contact
         adc_max_limit: float = 260000.0,   # 18-bit ADC saturation limit
         max_clipping_ratio: float = 0.05,  # Max 5% clipped samples
-        max_rr_cv: float = 0.35,           # Max RR interval coefficient of variation for stable rhythm
-        min_peak_coverage: float = 0.65,   # Minimum 65% window coverage by valid systolic intervals
+        max_rr_cv: float = 0.35,           # Irregularity threshold
+        min_peak_coverage: float = 0.65,   # Minimum 65% window coverage
     ):
         self.target_fs = target_fs
         self.window_sec = window_sec
@@ -81,22 +87,23 @@ class SignalReliabilityGate:
     ) -> dict:
         """
         Evaluate a single window of PPG telemetry.
-        Returns a dict containing:
+        Returns:
+          - signal_quality: dict with contact_ok, timing_ok, saturation_ok, pulse_morphology_ok, screening_allowed
+          - physiological_observation: dict with pulse_rate, rate_state, rr_cv, irregularity_state, recheck_recommended
           - 5 core metrics: sample_rate_estimate, bpm, peak_coverage, rr_cv, clipping_ratio
-          - gate check pass/fail flags
-          - status: FINGER_OFF, SENSOR_SATURATED, POOR_TIMING, POOR_CONTACT, VERIFY_SIGNAL, STABILIZING, RELIABLE
-          - ai_screening_enabled: bool (True only when status is RELIABLE)
+          - status: FINGER_OFF, SENSOR_SATURATED, POOR_TIMING, POOR_CONTACT, STABILIZING, RECHECK_REQUIRED, IRREGULAR_RHYTHM, RELIABLE
+          - ai_screening_enabled: bool (True when quality is valid and stability threshold reached)
         """
         self.total_windows_evaluated += 1
         raw_arr = np.asarray(raw_samples, dtype=float)
         n_samples = len(raw_arr)
-        window_duration = n_samples / self.target_fs if n_samples > 0 else self.window_sec
+        if timestamps_ms is not None and len(timestamps_ms) == n_samples and n_samples > 1:
+            window_duration = max(0.1, (float(timestamps_ms[-1]) - float(timestamps_ms[0])) / 1000.0)
+        else:
+            window_duration = n_samples / self.target_fs if n_samples > 0 else self.window_sec
 
         # Default fallback metric values
         sample_rate_estimate = float(self.target_fs)
-        bpm = 0.0
-        peak_coverage = 0.0
-        rr_cv = 1.0
         clipping_ratio = 0.0
 
         checks = {
@@ -108,7 +115,7 @@ class SignalReliabilityGate:
         }
 
         # -------------------------------------------------------------
-        # GATE 1: SENSOR CONTACT & AMPLITUDE CHECK
+        # QUALITY GATE 1: WINDOW LENGTH / BUFFERING
         # -------------------------------------------------------------
         if n_samples < int(self.target_fs * 3):
             return self._build_result(
@@ -123,14 +130,23 @@ class SignalReliabilityGate:
                     "clipping_ratio": 0.0,
                     "sqi": 0.0,
                 },
-                is_pass=False
+                is_pass=False,
+                signal_quality={
+                    "contact_ok": False,
+                    "timing_ok": False,
+                    "saturation_ok": True,
+                    "pulse_morphology_ok": False,
+                    "screening_allowed": False
+                }
             )
 
         raw_std = float(np.std(raw_arr))
         raw_ptp = float(np.ptp(raw_arr))
         raw_median = float(np.median(raw_arr))
 
-        # Check clipping / ADC saturation FIRST
+        # -------------------------------------------------------------
+        # QUALITY GATE 2: SENSOR SATURATION / CLIPPING
+        # -------------------------------------------------------------
         clipping_count = np.sum(raw_arr >= self.adc_max_limit)
         clipping_ratio = float(clipping_count / n_samples)
         if clipping_ratio > self.max_clipping_ratio or raw_median >= self.adc_max_limit:
@@ -147,14 +163,24 @@ class SignalReliabilityGate:
                     "clipping_ratio": max(clipping_ratio, 1.0 if raw_median >= self.adc_max_limit else 0.0),
                     "sqi": 0.0,
                 },
-                is_pass=False
+                is_pass=False,
+                signal_quality={
+                    "contact_ok": True,
+                    "timing_ok": False,
+                    "saturation_ok": False,
+                    "pulse_morphology_ok": False,
+                    "screening_allowed": False
+                }
             )
 
+        # -------------------------------------------------------------
+        # QUALITY GATE 3: SENSOR LIFTOFF / FLATLINE / FINGER-OFF
+        # -------------------------------------------------------------
         if raw_std < 0.05 or raw_ptp < 1.0 or raw_median < self.adc_min_limit:
             self.consecutive_good_windows = 0
             return self._build_result(
                 status="FINGER_OFF",
-                reason="Sensor liftoff or flatline detected (amplitude below optical threshold)",
+                reason="Sensor liftoff or flatline detected (amplitude below optical contact threshold)",
                 checks=checks,
                 metrics={
                     "sample_rate_estimate": sample_rate_estimate,
@@ -164,13 +190,20 @@ class SignalReliabilityGate:
                     "clipping_ratio": clipping_ratio,
                     "sqi": 0.0,
                 },
-                is_pass=False
+                is_pass=False,
+                signal_quality={
+                    "contact_ok": False,
+                    "timing_ok": False,
+                    "saturation_ok": True,
+                    "pulse_morphology_ok": False,
+                    "screening_allowed": False
+                }
             )
 
         checks["contact_amplitude"] = True
 
         # -------------------------------------------------------------
-        # GATE 2: SAMPLE-TIMING CHECK
+        # QUALITY GATE 4: HARDWARE SAMPLE-TIMING & PACKET INTEGRITY
         # -------------------------------------------------------------
         if timestamps_ms is not None and len(timestamps_ms) == n_samples and n_samples > 1:
             ts_diffs = np.diff(np.asarray(timestamps_ms, dtype=float))
@@ -197,13 +230,20 @@ class SignalReliabilityGate:
                             "clipping_ratio": round(clipping_ratio, 3),
                             "sqi": 0.2,
                         },
-                        is_pass=False
+                        is_pass=False,
+                        signal_quality={
+                            "contact_ok": True,
+                            "timing_ok": False,
+                            "saturation_ok": True,
+                            "pulse_morphology_ok": False,
+                            "screening_allowed": False
+                        }
                     )
 
         checks["sample_timing"] = True
 
         # -------------------------------------------------------------
-        # GATE 3: PEAK REGULARITY CHECK
+        # QUALITY GATE 5: PULSE MORPHOLOGY (PEAK DETECTION)
         # -------------------------------------------------------------
         try:
             filtered = bandpass_filter(raw_arr, lowcut=0.5, highcut=8.0, fs=sample_rate_estimate, order=4)
@@ -234,143 +274,131 @@ class SignalReliabilityGate:
                     "clipping_ratio": round(clipping_ratio, 3),
                     "sqi": 0.15,
                 },
-                is_pass=False
+                is_pass=False,
+                signal_quality={
+                    "contact_ok": True,
+                    "timing_ok": True,
+                    "saturation_ok": True,
+                    "pulse_morphology_ok": False,
+                    "screening_allowed": False
+                }
             )
 
-        rr_sec = np.diff(peaks) / sample_rate_estimate
+        # =============================================================
+        # ALL HARDWARE SIGNAL QUALITY CHECKS PASSED!
+        # =============================================================
+        signal_quality = {
+            "contact_ok": True,
+            "timing_ok": True,
+            "saturation_ok": True,
+            "pulse_morphology_ok": True,
+            "screening_allowed": True
+        }
+
+        # -------------------------------------------------------------
+        # AXIS 2: PHYSIOLOGICAL OBSERVATION (DOES NOT BLOCK SCREENING)
+        # -------------------------------------------------------------
+        if timestamps_ms is not None and len(timestamps_ms) == n_samples and n_samples > 1:
+            peak_times_sec = np.asarray(timestamps_ms[peaks], dtype=float) / 1000.0
+            rr_sec = np.diff(peak_times_sec)
+        else:
+            rr_sec = np.diff(peaks) / sample_rate_estimate
         median_rr = float(np.median(rr_sec)) if len(rr_sec) > 0 else 0.0
         raw_bpm = float(60.0 / median_rr) if median_rr > 0 else 0.0
         raw_rr_cv = float(np.std(rr_sec) / (np.mean(rr_sec) + 1e-6)) if len(rr_sec) > 0 else 1.0
+        peak_coverage = float(min(1.0, np.sum(rr_sec) / window_duration))
 
         sig_kurt = float(kurtosis(norm_sig))
         peak_amps = norm_sig[peaks]
         peak_amp_cv = float(np.std(peak_amps) / (abs(np.mean(peak_amps)) + 1e-6))
         sqi = float(max(0.0, min(1.0, (abs(sig_kurt) / 6.0) * (1.0 / (peak_amp_cv + 0.5)))))
 
-        # -------------------------------------------------------------
-        # GATE 4: PHYSIOLOGICAL PLAUSIBILITY CHECK
-        # -------------------------------------------------------------
-        # For a normal seated demo, accept pulse rate only between 40-180 BPM.
-        # Outside that range, mark the reading as VERIFY_SIGNAL, never an arrhythmia!
-        if raw_bpm < self.min_bpm or raw_bpm > self.max_bpm:
-            self.consecutive_good_windows = 0
-            coverage_val = float(min(1.0, np.sum(rr_sec) / window_duration))
-            return self._build_result(
-                status="VERIFY_SIGNAL",
-                reason=f"Pulse rate ({raw_bpm:.1f} BPM) outside plausible resting range [{self.min_bpm:.0f}, {self.max_bpm:.0f}]. Verify probe position.",
-                checks=checks,
-                metrics={
-                    "sample_rate_estimate": round(sample_rate_estimate, 1),
-                    "bpm": round(raw_bpm, 1),
-                    "peak_coverage": round(coverage_val, 3),
-                    "rr_cv": round(raw_rr_cv, 3),
-                    "clipping_ratio": round(clipping_ratio, 3),
-                    "sqi": round(sqi, 3),
-                },
-                is_pass=False
-            )
-
-        checks["physiological_plausibility"] = True
-
-        # Check peak coverage and regularity for resting range
-        min_rr_sec = 60.0 / self.max_bpm
-        max_rr_sec = 60.0 / self.min_bpm
-        valid_mask = (rr_sec >= min_rr_sec * 0.85) & (rr_sec <= max_rr_sec * 1.15)
-        valid_rr = rr_sec[valid_mask]
-
-        if len(valid_rr) >= 2:
-            bpm = float(60.0 / np.median(valid_rr))
-            valid_duration = float(np.sum(valid_rr))
-            peak_coverage = float(min(1.0, valid_duration / window_duration))
-            rr_cv = float(np.std(valid_rr) / (np.mean(valid_rr) + 1e-6))
+        # Rate state classification
+        if raw_bpm < self.min_bpm:
+            rate_state = "EXTREME_LOW"
+            recheck_rate = True
+        elif raw_bpm < 50.0:
+            rate_state = "LOW"
+            recheck_rate = False
+        elif raw_bpm <= 100.0:
+            rate_state = "TYPICAL"
+            recheck_rate = False
+        elif raw_bpm <= 120.0:
+            rate_state = "ELEVATED"
+            recheck_rate = False
+        elif raw_bpm <= self.max_bpm:
+            rate_state = "SUSTAINED_ELEVATED"
+            recheck_rate = False
         else:
-            bpm = raw_bpm
-            peak_coverage = 0.0
-            rr_cv = raw_rr_cv
+            rate_state = "EXTREME_HIGH"
+            recheck_rate = True
 
-        if peak_coverage < self.min_peak_coverage or rr_cv > self.max_rr_cv:
-            self.consecutive_good_windows = 0
-            reason_msg = (
-                f"Low pulse regularity (Coverage: {peak_coverage*100:.1f}% < {self.min_peak_coverage*100:.0f}%, "
-                f"RR CV: {rr_cv:.2f} > {self.max_rr_cv:.2f})"
-            )
-            return self._build_result(
-                status="POOR_REGULARITY",
-                reason=reason_msg,
-                checks=checks,
-                metrics={
-                    "sample_rate_estimate": round(sample_rate_estimate, 1),
-                    "bpm": round(bpm, 1),
-                    "peak_coverage": round(peak_coverage, 3),
-                    "rr_cv": round(rr_cv, 3),
-                    "clipping_ratio": round(clipping_ratio, 3),
-                    "sqi": round(sqi, 3),
-                },
-                is_pass=False
-            )
+        # Irregularity state: High RR CV (e.g. AFib) is an observation, NOT blocked noise!
+        is_irregular = (raw_rr_cv > self.max_rr_cv)
+        irregularity_state = "IRREGULAR_PULSE_OBSERVATION" if is_irregular else "REGULAR_PULSE"
+        recheck_recommended = bool(recheck_rate or is_irregular)
 
-        checks["peak_regularity"] = True
+        physiological_observation = {
+            "pulse_rate": round(raw_bpm, 1),
+            "rate_state": rate_state,
+            "rr_cv": round(raw_rr_cv, 3),
+            "irregularity_state": irregularity_state,
+            "recheck_recommended": recheck_recommended
+        }
 
-        # -------------------------------------------------------------
-        # GATE 4: PHYSIOLOGICAL PLAUSIBILITY CHECK
-        # -------------------------------------------------------------
-        if bpm < self.min_bpm or bpm > self.max_bpm:
-            self.consecutive_good_windows = 0
-            return self._build_result(
-                status="VERIFY_SIGNAL",
-                reason=f"Pulse rate ({bpm:.1f} BPM) outside plausible resting range [40, 180]. Verify probe position.",
-                checks=checks,
-                metrics={
-                    "sample_rate_estimate": round(sample_rate_estimate, 1),
-                    "bpm": round(bpm, 1),
-                    "peak_coverage": round(peak_coverage, 3),
-                    "rr_cv": round(rr_cv, 3),
-                    "clipping_ratio": round(clipping_ratio, 3),
-                    "sqi": round(sqi, 3),
-                },
-                is_pass=False
-            )
+        # Checks dict reflect physiological status
+        checks["peak_regularity"] = not is_irregular
+        checks["physiological_plausibility"] = not recheck_rate
 
-        checks["physiological_plausibility"] = True
+        metrics = {
+            "sample_rate_estimate": round(sample_rate_estimate, 1),
+            "bpm": round(raw_bpm, 1),
+            "peak_coverage": round(peak_coverage, 3),
+            "rr_cv": round(raw_rr_cv, 3),
+            "clipping_ratio": round(clipping_ratio, 3),
+            "sqi": round(sqi, 3),
+        }
 
         # -------------------------------------------------------------
-        # GATE 5: WINDOW STABILITY CHECK
+        # WINDOW STABILITY ACCUMULATION (ON QUALITY-VALID WINDOWS)
         # -------------------------------------------------------------
         self.consecutive_good_windows += 1
 
         if self.consecutive_good_windows < self.stability_threshold:
             checks["window_stability"] = False
             return self._build_result(
-                status=f"STABILIZING",
+                status="STABILIZING",
                 reason=f"Acquiring stable baseline (Window {self.consecutive_good_windows}/{self.stability_threshold})",
                 checks=checks,
-                metrics={
-                    "sample_rate_estimate": round(sample_rate_estimate, 1),
-                    "bpm": round(bpm, 1),
-                    "peak_coverage": round(peak_coverage, 3),
-                    "rr_cv": round(rr_cv, 3),
-                    "clipping_ratio": round(clipping_ratio, 3),
-                    "sqi": round(sqi, 3),
-                },
+                metrics=metrics,
                 is_pass=False,
-                consecutive=self.consecutive_good_windows
+                consecutive=self.consecutive_good_windows,
+                signal_quality=signal_quality,
+                physiological_observation=physiological_observation
             )
 
         checks["window_stability"] = True
+
+        # Determine finalized status for quality-approved window
+        if recheck_rate:
+            status = "RECHECK_REQUIRED"
+            reason = f"Pulse rate ({raw_bpm:.1f} BPM) outside resting range [{self.min_bpm:.0f}, {self.max_bpm:.0f}]. Screening active with recheck tag."
+        elif is_irregular:
+            status = "IRREGULAR_RHYTHM"
+            reason = f"Irregular beat-to-beat pulse interval observed (RR CV: {raw_rr_cv:.2f} > {self.max_rr_cv:.2f}). Optical screening active."
+        else:
+            status = "RELIABLE"
+            reason = f"Signal validated across {self.consecutive_good_windows} consecutive windows"
+
         return self._build_result(
-            status="RELIABLE",
-            reason=f"Signal validated across {self.consecutive_good_windows} consecutive windows",
+            status=status,
+            reason=reason,
             checks=checks,
-            metrics={
-                "sample_rate_estimate": round(sample_rate_estimate, 1),
-                "bpm": round(bpm, 1),
-                "peak_coverage": round(peak_coverage, 3),
-                "rr_cv": round(rr_cv, 3),
-                "clipping_ratio": round(clipping_ratio, 3),
-                "sqi": round(sqi, 3),
-            },
+            metrics=metrics,
             is_pass=True,
-            consecutive=self.consecutive_good_windows
+            consecutive=self.consecutive_good_windows,
+            signal_quality=signal_quality,
+            physiological_observation=physiological_observation
         )
 
     def _build_result(
@@ -380,16 +408,36 @@ class SignalReliabilityGate:
         checks: dict,
         metrics: dict,
         is_pass: bool,
-        consecutive: int = None
+        consecutive: int = None,
+        signal_quality: dict = None,
+        physiological_observation: dict = None
     ) -> dict:
         consec = consecutive if consecutive is not None else self.consecutive_good_windows
+        sq = signal_quality if signal_quality is not None else {
+            "contact_ok": checks.get("contact_amplitude", False),
+            "timing_ok": checks.get("sample_timing", False),
+            "saturation_ok": not (status == "SENSOR_SATURATED"),
+            "pulse_morphology_ok": not (status in ("POOR_CONTACT", "FINGER_OFF", "BUFFERING")),
+            "screening_allowed": is_pass or (status in ("STABILIZING", "RECHECK_REQUIRED", "IRREGULAR_RHYTHM", "RELIABLE"))
+        }
+        po = physiological_observation if physiological_observation is not None else {
+            "pulse_rate": float(metrics.get("bpm", 0.0)),
+            "rate_state": "UNVERIFIED" if not is_pass else "TYPICAL",
+            "rr_cv": float(metrics.get("rr_cv", 1.0)),
+            "irregularity_state": "UNVERIFIED" if not is_pass else "REGULAR_PULSE",
+            "recheck_recommended": False
+        }
+        
         result = {
             "status": status,
             "reason": reason,
-            "passed": is_pass or (status in ("RELIABLE", "STABILIZING")),
+            "passed": is_pass or (status in ("RELIABLE", "STABILIZING", "RECHECK_REQUIRED", "IRREGULAR_RHYTHM")),
             "ai_screening_enabled": is_pass and (consec >= self.stability_threshold),
+            "screening_allowed": sq["screening_allowed"],
             "consecutive_good_windows": consec,
             "stability_threshold": self.stability_threshold,
+            "signal_quality": sq,
+            "physiological_observation": po,
             "checks": checks,
             "metrics": metrics,
         }

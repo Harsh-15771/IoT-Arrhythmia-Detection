@@ -82,7 +82,7 @@ def run_hardware_audit():
     print("  CardioTwin — Hardware Recording & SQI Audit Suite")
     print("=" * 65)
 
-    csv_files = sorted(glob.glob(os.path.join(RECORDINGS_DIR, "*.csv")))
+    csv_files = sorted(glob.glob(os.path.join(RECORDINGS_DIR, "**", "*.csv"), recursive=True))
     print(f"Found {len(csv_files)} recorded sessions in '{RECORDINGS_DIR}'.\n")
 
     audit_records = []

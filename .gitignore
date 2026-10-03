@@ -61,14 +61,17 @@ metadata.csv
 !data/dataset_manifest.json
 !data/**/.gitkeep
 
-# Temporary analysis, scratch & internal helper documents
+# Temporary analysis, scratch & cache
 scratch/
 .tempmediaStorage/
 .system_generated/
-PLAN.md
-DONE.md
-*.plan.md
-*.done.md
+*.tmp
+*.bak
+*~
+
+# Runtime Patient Baselines (Persist directory structure via .gitkeep)
+backend/baselines/*.json
+!backend/baselines/.gitkeep
 
 # Frontend builds & dependencies
 **/node_modules/

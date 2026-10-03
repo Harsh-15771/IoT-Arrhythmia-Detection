@@ -150,7 +150,7 @@ def main():
         analyze_session_csv(args.file, verbose=True)
     else:
         rec_dir = os.path.join(ROOT_DIR, args.dir)
-        csv_files = sorted(glob.glob(os.path.join(rec_dir, "*.csv")))
+        csv_files = sorted(glob.glob(os.path.join(rec_dir, "**", "*.csv"), recursive=True))
         print(f"\n[INFO] Found {len(csv_files)} recording files in '{rec_dir}'. Running quality audit on sessions with >= 500 samples...")
         
         passed_sessions = 0

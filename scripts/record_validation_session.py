@@ -163,7 +163,7 @@ def evaluate_acceptance(session_type, ref_bpm, gate_report, duration_sec):
 
     elif session_type == "motion":
         # Acceptance: Motion-corrupted windows successfully gated
-        motion_gated = sum(1 for w in windows if w.get("status") in ("POOR_REGULARITY", "POOR_CONTACT", "VERIFY_SIGNAL"))
+        motion_gated = sum(1 for w in windows if w.get("status") in ("POOR_REGULARITY", "POOR_CONTACT", "VERIFY_SIGNAL", "POOR_TIMING", "SENSOR_SATURATED") or not w.get("passed", False))
         pass_motion = motion_gated >= 1
         criteria.append({
             "name": "Motion Artifact Gating",
@@ -187,7 +187,7 @@ def main():
     parser.add_argument("--duration", "-d", type=float, default=None,
                         help="Session recording duration in seconds (default: 60s for stable/motion, 30s for liftoff)")
     parser.add_argument("--api-url", default="http://127.0.0.1:5000", help="CardioTwin backend REST API base URL")
-    parser.add_argument("--out-dir", default=os.path.join(ROOT_DIR, "recordings", "validation"),
+    parser.add_argument("--out-dir", default=os.path.join(ROOT_DIR, "recordings", "new_session"),
                         help="Output directory for validated session CSVs and reports")
     parser.add_argument("--test-stream", action="store_true",
                         help="Run in synthetic simulation mode without physical ESP32 connected")
@@ -197,12 +197,15 @@ def main():
     if args.duration is None:
         args.duration = 60.0 if args.type in ("stable", "motion") else 30.0
 
-    os.makedirs(args.out_dir, exist_ok=True)
+    rec_dir = os.path.join(args.out_dir, "recordings") if not os.path.basename(args.out_dir) in ("recordings", "validation") else args.out_dir
+    val_dir = os.path.join(args.out_dir, "validation") if not os.path.basename(args.out_dir) in ("recordings", "validation") else args.out_dir
+    os.makedirs(rec_dir, exist_ok=True)
+    os.makedirs(val_dir, exist_ok=True)
     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
     session_id = f"session_{args.participant}_{args.type}_{timestamp_str}"
     csv_filename = f"{session_id}.csv"
-    csv_path = os.path.join(args.out_dir, csv_filename)
-    json_path = os.path.join(args.out_dir, f"{session_id}.json")
+    csv_path = os.path.join(rec_dir, csv_filename)
+    json_path = os.path.join(val_dir, f"{session_id}.json")
 
     print("\n" + "=" * 80)
     print("  CARDIO-TWIN HARDWARE ACCEPTANCE PROTOCOL RECORDER")
@@ -297,11 +300,32 @@ def main():
         try:
             stop_res = requests.post(f"{args.api_url}/stop", timeout=3.0).json()
             requests.post(f"{args.api_url}/command", json={"run": False}, timeout=3.0)
-            recorded_file = stop_res.get("file")
-            if recorded_file and os.path.exists(recorded_file):
+            saved_to = stop_res.get("saved_to")
+            recorded_file = stop_res.get("file") or (os.path.basename(saved_to) if saved_to else None)
+            found_path = None
+            if saved_to and os.path.exists(saved_to):
+                found_path = saved_to
+            elif recorded_file:
+                candidates = [
+                    recorded_file,
+                    os.path.join(rec_dir, recorded_file),
+                    os.path.join(args.out_dir, recorded_file),
+                    os.path.join(ROOT_DIR, "recordings", "new_session", "recordings", recorded_file),
+                    os.path.join(ROOT_DIR, "recordings", "new_session", recorded_file),
+                    os.path.join(ROOT_DIR, "recordings", recorded_file)
+                ]
+                for cand in candidates:
+                    if os.path.exists(cand):
+                        found_path = cand
+                        break
+
+            if found_path:
                 import shutil
-                shutil.copyfile(recorded_file, csv_path)
+                if os.path.abspath(found_path) != os.path.abspath(csv_path):
+                    shutil.copyfile(found_path, csv_path)
                 print(f"[OK] Saved hardware telemetry CSV: {csv_path}")
+            else:
+                print(f"[WARN] Could not locate recorded file: {recorded_file}")
         except Exception as e:
             print(f"[WARN] Failed to gracefully stop remote recording: {e}")
 
@@ -326,19 +350,33 @@ def main():
     raw_sig = df[val_col].dropna().values.astype(float)
     timestamps = df[ts_col].values if ts_col is not None else None
 
-    gate = SignalReliabilityGate(target_fs=100.0, window_sec=10.0, stability_threshold=3)
+    gate = SignalReliabilityGate(
+        target_fs=100.0,
+        window_sec=10.0,
+        stability_threshold=3,
+        adc_min_limit=20000.0 if not args.test_stream else 200.0
+    )
     n_samples = len(raw_sig)
-    actual_dur = n_samples / 100.0
+    if timestamps is not None and len(timestamps) > 1:
+        actual_dur = max(0.1, (float(timestamps[-1]) - float(timestamps[0])) / 1000.0)
+    else:
+        actual_dur = n_samples / 100.0
     w_size = 1000
-    n_windows = max(1, n_samples // w_size)
+    window_slices = []
+    for i in range(n_samples // w_size):
+        window_slices.append((i * w_size, (i + 1) * w_size))
+    if n_samples >= w_size and (n_samples % w_size) >= 200:
+        tail_start = n_samples - w_size
+        tail_slice = (tail_start, n_samples)
+        if tail_slice not in window_slices:
+            window_slices.append(tail_slice)
 
+    n_windows = len(window_slices)
     report_windows = []
     print(f"\n{'WIN':>3} | {'STATUS':<18} | {'SR (Hz)':>7} | {'BPM':>5} | {'COV':>6} | {'RR CV':>6} | {'CLIP':>5} | {'AI SCREEN'}")
     print("-" * 80)
 
-    for i in range(n_windows):
-        start_idx = i * w_size
-        end_idx = min(n_samples, start_idx + w_size)
+    for idx, (start_idx, end_idx) in enumerate(window_slices):
         sig_w = raw_sig[start_idx:end_idx]
         ts_w = timestamps[start_idx:end_idx] if timestamps is not None else None
 
@@ -347,7 +385,7 @@ def main():
         report_windows.append(res)
         ai_str = "ENABLED [OK]" if res["ai_screening_enabled"] else "BLOCKED [X]"
         print(
-            f"{i+1:3d} | {res['status']:<18} | {m['sample_rate_estimate']:7.1f} | {m['bpm']:5.1f} | "
+            f"{idx+1:3d} | {res['status']:<18} | {m['sample_rate_estimate']:7.1f} | {m['bpm']:5.1f} | "
             f"{m['peak_coverage']*100:5.1f}% | {m['rr_cv']:6.3f} | {m['clipping_ratio']*100:4.1f}% | {ai_str}"
         )
 
@@ -369,19 +407,28 @@ def main():
     print(f"  FINAL SESSION VERDICT: {overall_badge}")
     print("=" * 80)
 
+    clean_criteria = []
+    for c in criteria_results:
+        clean_criteria.append({
+            "name": str(c["name"]),
+            "requirement": str(c["requirement"]),
+            "measured": str(c["measured"]),
+            "passed": bool(c["passed"])
+        })
+
     # Save complete JSON metadata report
     meta_report = {
         "session_id": session_id,
         "participant": args.participant,
         "condition": args.type,
         "ref_bpm": args.ref_bpm,
-        "median_bpm": median_bpm,
-        "bpm_mae": bpm_mae,
-        "duration_sec": round(actual_dur, 2),
-        "total_samples": n_samples,
-        "total_windows": n_windows,
-        "passed_acceptance": passed_all,
-        "criteria": criteria_results,
+        "median_bpm": round(float(median_bpm), 1) if median_bpm else None,
+        "bpm_mae": round(float(bpm_mae), 1) if bpm_mae is not None else None,
+        "duration_sec": round(float(actual_dur), 2),
+        "total_samples": int(n_samples),
+        "total_windows": int(n_windows),
+        "passed_acceptance": bool(passed_all),
+        "criteria": clean_criteria,
         "timestamp": timestamp_str
     }
     with open(json_path, "w") as f:
