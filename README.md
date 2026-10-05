@@ -32,12 +32,14 @@ CardioTwin Sentinel is a **personalized hypertension and cardiometabolic-risk di
 ## 📑 Core Documentation Index
 
 - 📄 **[docs/EXECUTIVE_SUMMARY.md](docs/EXECUTIVE_SUMMARY.md)** — 1-Page Hackathon Pitch & Value Proposition for Judges
+- 📚 **[docs/RESEARCH_EVIDENCE_MAPPING.md](docs/RESEARCH_EVIDENCE_MAPPING.md)** — 15 Peer-Reviewed Papers Mapped Directly to Code Implementation
 - 📋 **[docs/MODEL_CARD.md](docs/MODEL_CARD.md)** — Patient-Isolated Multi-Modal Benchmark, Architectures & Source Bias
 - 🔬 **[docs/SHAP_EXPLAINABILITY_REPORT.md](docs/SHAP_EXPLAINABILITY_REPORT.md)** — SHAP TreeExplainer Attributions for 27 Biomarkers
 - 🕵️ **[docs/SOURCE_CONFOUNDING_AUDIT.md](docs/SOURCE_CONFOUNDING_AUDIT.md)** — Cross-Dataset Provenance & Class Concentration Audit
 - 🇮🇳 **[docs/SOUTH_ASIAN_RISK_CALIBRATION.md](docs/SOUTH_ASIAN_RISK_CALIBRATION.md)** — $1.45\times$ Framingham Multiplier Clinical Justification
 - 💰 **[docs/HARDWARE_BOM_COST_ANALYSIS.md](docs/HARDWARE_BOM_COST_ANALYSIS.md)** — Bill of Materials (~₹1,165 / $14) vs Clinical Alternatives
 - 🏥 **[docs/ABDM_FHIR_INTEGRATION.md](docs/ABDM_FHIR_INTEGRATION.md)** — Ayushman Bharat Digital Mission & HL7 FHIR R4 Specification
+- 🔒 **[docs/PRIVACY_FEDERATED_ARCHITECTURE.md](docs/PRIVACY_FEDERATED_ARCHITECTURE.md)** — Privacy-Preserving Edge & Federated Learning Architecture
 - 📊 **[docs/DATA_CARD.md](docs/DATA_CARD.md)** — Dataset Provenance (2,271 patients) & PhysioNet DUA Compliance
 - 🏗️ **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — End-to-End Multimodal System Architecture
 
