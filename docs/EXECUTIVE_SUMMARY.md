@@ -65,8 +65,9 @@ Cardiovascular disease is the leading cause of mortality in India (28% of all de
 
 | Milestone / Subsystem | Benchmark Metric | Standard Achieved | Verification Evidence |
 |:---|:---|:---:|:---|
-| **Deep Learning Waveform Champion** | Macro-F1 (8 Classes) | **51.41%** (Acc: 74.05%) | 5-Fold Patient-Isolated Stratified GroupKFold |
-| **Classical Super Ensemble (XGB+RF+ET)**| Macro-F1 (27 Features) | **48.00%** (Acc: 65.98%) | 10-Model Algorithm Tournament (`model/`) |
+| **Honest Nested Dual-Modality Fusion** | Macro-F1 (Outer Folds) | **53.92%** (Acc: 59.21%) | Nested 5-Fold StratifiedGroupKFold (`model/dual_modality_benchmark_v2.json`) |
+| **Deep Learning Waveform Champion** | Macro-F1 (8 Classes) | **51.81%** (Acc: 56.37%) | Inception-1D OOF (`model/cnn_metadata-1.json`) |
+| **Classical Super Ensemble (XGB+RF+ET)**| Macro-F1 (27 Features) | **48.00%** (Acc: 58.32%) | 10-Model Algorithm Tournament (`model/`) |
 | **Cohort Diversity** | Unique ICU/Ambulatory Patients| **2,271 Patients** | MIMIC-III, CinC 2015, BUT PPG v2.0, BIDMC |
 | **Automated Testing Suite** | Unit & Target Validation Tests | **49 / 49 PASSING** | `tests/test_cardiotwin.py` + `tests/test_instability_target_validation.py` |
 | **Hardware Optical Sampling** | Sampling Rate & Jitter | **100.0 Hz ($\pm 0.4$ ms)** | FreeRTOS Core 1 Hardware ISR Timer |

@@ -52,16 +52,37 @@ A pervasive failure in commercial and hackathon health ML is random window-level
 ### 5-Fold Stratified Grouped-CV Benchmark (2,271 Patients)
 | Rank | Architecture | Input Representation | Macro-F1 (8 Classes) | Accuracy | Model Parameters | Status |
 |:---:|:---|:---|:---:|:---:|:---:|:---|
-| **1** | **Inception-1D CNN** | Raw 100 Hz Waveform (1000 samples) | **51.41%** | **74.05%** | 393,224 | **DEEP LEARNING CHAMPION** |
+| **1** | **Inception-1D CNN** | Raw 100 Hz Waveform (1000 samples) | **51.81%** | **56.37%** | 393,224 | **DEEP LEARNING CHAMPION** |
 | 2 | **ResNet-1D** | Raw 100 Hz Waveform (1000 samples) | 50.81% | 56.22% | 181,448 | Strong Runner-Up |
 | 3 | **Standard 1D-CNN** | Raw 100 Hz Waveform (1000 samples) | 48.72% | 54.13% | 172,104 | Baseline CNN |
-| **4** | **Super Ensemble (XGB+RF+ET)** | 27 Engineered Biomarkers | **48.00%** | **65.98%** | Tabular Bundle | **CLASSICAL CHAMPION** |
+| **4** | **Super Ensemble (XGB+RF+ET)** | 27 Engineered Biomarkers | **48.00%** | **58.32%** | Tabular Bundle | **CLASSICAL CHAMPION** |
 | 5 | **Extra Trees** | 27 Engineered Biomarkers | 47.32% | 56.87% | Tree Ensemble | Fast Sub-Sampling |
 | 6 | **Random Forest** | 27 Engineered Biomarkers | 47.13% | 56.14% | Tree Ensemble | Outlier Resilient |
 | 7 | **XGBoost (Standalone)** | 27 Engineered Biomarkers | 46.71% | 56.97% | Boosted Trees | Gradient Boosting Baseline |
 | 8 | **HistGradientBoosting** | 27 Engineered Biomarkers | 46.68% | 55.65% | Tree Ensemble | Histogram Binned |
 | 9 | **CRNN-BiLSTM** | Raw 100 Hz Waveform (1000 samples) | 45.04% | 51.40% | 224,968 | Recurrent Hybrid |
 | 10 | **MLP Neural Net** | 27 Engineered Biomarkers | 44.36% | 57.08% | 65,480 | Dense Feedforward |
+
+---
+
+### Canonical Leak-Free Dual-Modality Fusion (Nested 5-Fold Grouped-CV)
+Evaluated strictly blending held-out Out-Of-Fold (OOF) predictions with inner-fold weight selection (zero snooping):
+
+| System Configuration | Input Modality | Macro-F1 (8 Classes) | Balanced Accuracy | Accuracy | 95% CI |
+|:---|:---|:---:|:---:|:---:|:---:|
+| **Standalone Classical Super Ensemble** | 27 Biomarkers | 48.00% | 50.21% | 58.32% | $\pm 4.8\%$ |
+| **Standalone Inception-1D CNN** | Raw 100 Hz Waveforms | 51.81% | 56.72% | 56.37% | $\pm 5.1\%$ |
+| **🏆 Honest Nested Dual-Modality Fusion** | **Waveforms + Biomarkers ($0.38\text{ Classical} + 0.62\text{ DL}$)** | **53.92%** | **57.46%** | **59.21%** | **$54.09\% \pm 5.45\%$** |
+
+#### Per-Class Performance Breakdown (Dual Fusion on 4,683 Windows):
+- **Normal Sinus Rhythm:** **79.46% F1** (Precision: 96.0%, Recall: 68.0%)
+- **Bradycardia:** **67.82% F1** (Precision: 64.9%, Recall: 71.0%)
+- **Tachycardia:** **65.41% F1** (Precision: 62.4%, Recall: 69.0%)
+- **Atrial Fibrillation (AFib):** **53.91% F1** (Precision: 46.7%, Recall: 63.8%)
+- **Asystole:** **48.37% F1** (Precision: 39.7%, Recall: 61.8%)
+- **Ventricular Flutter/Fib:** **48.15% F1** (Precision: 43.4%, Recall: 54.2%)
+- **Cardiac Paced:** **35.32% F1** (Precision: 28.1%, Recall: 47.5%)
+- **Ventricular Tachycardia (VT):** **32.86% F1** (Precision: 52.0%, Recall: 25.0%)
 
 ---
 

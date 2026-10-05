@@ -723,8 +723,8 @@ def receive_sensor_data():
                 "history_summary": ["Verification"]
             }
         else:
-            # Clean window -> Execute Dual-Modality Prediction (30% Classical + 70% Inception-1D)
-            dual_res = dual_predictor.predict_window(sig_window, feats=feats, w_classical=0.30, w_dl=0.70)
+            # Clean window -> Execute Dual-Modality Prediction (38% Classical + 62% Inception-1D)
+            dual_res = dual_predictor.predict_window(sig_window, feats=feats, w_classical=0.38, w_dl=0.62)
             raw_pred_label = dual_res["predicted_label"]
             probs = dual_res["probabilities"]
             dual_meta = {

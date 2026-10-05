@@ -3,7 +3,7 @@
 [![Python 3.10 / 3.11](https://img.shields.io/badge/Python-3.10%20%7C%203.11-blue.svg)](https://www.python.org/)
 [![React 19](https://img.shields.io/badge/Frontend-React%2019%20%7C%20Vite-61dafb.svg)](https://react.dev/)
 [![FreeRTOS Dual-Core](https://img.shields.io/badge/Firmware-ESP32%20FreeRTOS%20Dual--Core-red.svg)](hardware/esp32_ppg_sender/esp32_ppg_sender.ino)
-[![ML Benchmark](https://img.shields.io/badge/Deep%20Learning%20Champion-51.41%25%20Macro--F1%20(Patient--Isolated)-success.svg)](docs/MODEL_CARD.md)
+[![ML Benchmark](https://img.shields.io/badge/Dual--Modality%20Fusion-53.92%25%20Macro--F1%20(Nested%20Group--CV)-success.svg)](docs/MODEL_CARD.md)
 [![Clinical Engine](https://img.shields.io/badge/Clinical%20Model-Framingham%20Cox%20(1.45x%20South%20Asian%20Recalibrated)-orange.svg)](docs/SOUTH_ASIAN_RISK_CALIBRATION.md)
 [![Tests Passing](https://img.shields.io/badge/Tests-49%20Passing%20(100%25)-brightgreen.svg)](tests/)
 [![Status](https://img.shields.io/badge/Status-Submission--Ready%20(Digital%20Twin%20Challenge%202026)-purple.svg)](docs/EXECUTIVE_SUMMARY.md)
@@ -25,7 +25,7 @@ CardioTwin Sentinel is a **personalized hypertension and cardiometabolic-risk di
 | **An 8-class autonomous diagnostic machine** | Single-channel optical PPG cannot replace 12-lead diagnostic ECG for electrophysiology |
 | **A consumer pulse-oximeter** | Single-channel IR sensor; no red LED $\rightarrow$ SpO₂ is declared unavailable rather than fabricated |
 | **A dashboard of detached numbers** | Every metric is anchored directly to your personal calibrated resting baseline |
-| **A "99% accurate" black-box model** | We report honest, leak-free, patient-isolated cross-validation numbers ($51.41\%$ Inception-1D Macro-F1) |
+| **A "99% accurate" black-box model** | We report honest, leak-free, patient-isolated cross-validation numbers ($53.92\%$ Nested Dual Fusion, $51.81\%$ Inception-1D Macro-F1) |
 
 ---
 
@@ -64,9 +64,9 @@ CardioTwin Sentinel is a **personalized hypertension and cardiometabolic-risk di
 
 ### 4. Patient-Isolated Machine Learning Benchmark (10-Model Tournament)
 - Evaluated on **2,271 unique patients across 4,683 windows** from MIMIC-III, PhysioNet CinC 2015, BUT PPG v2.0, and BIDMC.
-- **Strict 5-Fold Stratified Grouped Cross-Validation on Patient IDs:** Zero patient overlap between train and test folds.
-- **Deep Learning Champion:** Inception-1D CNN with multi-scale convolutions achieves **51.41% Macro-F1** (74.05% Accuracy).
-- **Classical Super Ensemble:** XGBoost + Random Forest + ExtraTrees on 27 biomarkers achieves **48.00% Macro-F1** (65.98% Accuracy).
+- **Deep Learning Champion:** Inception-1D CNN with multi-scale convolutions achieves **51.81% Macro-F1** (56.37% Accuracy).
+- **Classical Super Ensemble:** XGBoost + Random Forest + ExtraTrees on 27 biomarkers achieves **48.00% Macro-F1** (58.32% Accuracy).
+- **Honest Nested Dual-Modality Fusion:** Blending classical statistical priors (38%) with deep optical representations (62%) achieves **53.92% Macro-F1** (59.21% Accuracy, 95% CI: $54.09\% \pm 5.45\%$).
 - **Source Confounding Transparency:** We openly disclose that 100% of VT and Asystole instances in the training corpus originate from CinC 2015 ICU alarms, preventing overconfident claims.
 
 ### 5. Explainable AI & Evidence Ledger

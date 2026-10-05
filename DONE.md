@@ -412,7 +412,32 @@
   - Verified clean production build with Vite (`npm run build`: built in 752ms).
 
 - **Automated Test Suite Status**:
-  - **All 37/37 automated tests passing** (100% success rate in 1.28s) across all clinical, hardware, gate, personal baseline, and API contracts.
+  - **All 49/49 automated tests passing** (100% success rate in 1.72s) across all clinical, hardware, gate, personal baseline, physiological condition target validation, and API contracts.
+
+### Deep Learning Tournament Integration & Honest Leak-Free Dual-Modality Benchmark
+- **Colab Deep Learning Artifacts Verified & Integrated**:
+  - Uploaded artifact `model/cnn_metadata-1.json` verified and promoted:
+    - **Inception-1D DL Champion**: **51.81% Macro-F1** (56.37% Accuracy, 57.43% Weighted-F1) across 2,271 patients and 4,683 windows (5-Fold StratifiedGroupKFold on Patient IDs).
+    - Top tournament rank against ResNet-1D (49.44%), Standard 1D-CNN (49.16%), and CRNN-BiLSTM (45.04%).
+  - Uploaded model weights `model/ppg_1d_cnn (1).pt` (1.61 MB) promoted to active production weights `model/ppg_1d_cnn.pt`.
+  - Uploaded confusion matrix `model/confusion_matrix_cnn (1).png` promoted to `model/confusion_matrix_cnn.png`.
+  - Uploaded out-of-fold predictions `model/oof_predictions_cnn.npz` integrated.
+
+- **Canonical Leak-Free Nested Dual-Modality Benchmark**:
+  - Ran `scripts/evaluate_dual_pipeline_v2.py` blending classical 27-biomarker Super Ensemble OOF predictions with deep learning Inception-1D OOF predictions.
+  - Employed nested 5-fold cross-validation with inner-fold grid search to select fusion weights without data snooping.
+  - Produced `model/dual_modality_benchmark_v2.json`:
+    - Standalone Classical Super Ensemble (OOF): **48.00% Macro-F1** (58.32% Accuracy)
+    - Standalone Inception-1D CNN (OOF): **51.81% Macro-F1** (56.37% Accuracy)
+    - **Honest Nested Dual-Modality Fusion (OOF): 53.92% Macro-F1** (59.21% Accuracy, 57.46% Balanced Accuracy, 95% CI: $54.09\% \pm 5.45\%$)
+    - Optimal weights: **0.38 Classical + 0.62 DL**.
+    - Per-class boosts: AFib F1: **53.91%** (Recall: 63.75%), Normal F1: **79.33%** (Precision: 95.73%), Bradycardia F1: **67.82%**, Tachycardia F1: **65.29%**.
+
+- **Production Dual Engine & API Integration**:
+  - [`backend/dual_engine.py`](file:///c:/Users/harsh/Desktop/Harsh%20Folder/Machine%20Learning/IoT%20Project/backend/dual_engine.py): Updated default fusion weights to `w_classical=0.38, w_dl=0.62`.
+  - [`backend/api_server.py`](file:///c:/Users/harsh/Desktop/Harsh%20Folder/Machine%20Learning/IoT%20Project/backend/api_server.py): Updated live inference endpoint to pass `w_classical=0.38, w_dl=0.62`.
+  - [`docs/MODEL_CARD.md`](file:///c:/Users/harsh/Desktop/Harsh%20Folder/Machine%20Learning/IoT%20Project/docs/MODEL_CARD.md), [`README.md`](file:///c:/Users/harsh/Desktop/Harsh%20Folder/Machine%20Learning/IoT%20Project/README.md), and [`docs/EXECUTIVE_SUMMARY.md`](file:///c:/Users/harsh/Desktop/Harsh%20Folder/Machine%20Learning/IoT%20Project/docs/EXECUTIVE_SUMMARY.md) updated with canonical benchmark tables.
+
 
 
 

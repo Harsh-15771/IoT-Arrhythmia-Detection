@@ -1,9 +1,9 @@
 """
 CardioTwin - Dual-Modality Inference Engine (Phase 2)
 Integrates:
-  1. Modality A: Classical Super Ensemble (XGBoost + Random Forest + Extra Trees on 27 Biomarkers - 47.39% Grouped-CV Macro-F1)
-  2. Modality B: Deep Learning Inception-1D (Multi-Scale Convolutions on 100 Hz Raw Waveforms - 51.41% Grouped-CV Macro-F1)
-  3. Weighted Fusion: Investigational screening fusion architecture (pending re-evaluation with strict CNN OOF predictions)
+  1. Modality A: Classical Super Ensemble (XGBoost + Random Forest + Extra Trees on 27 Biomarkers - 48.00% Grouped-CV Macro-F1)
+  2. Modality B: Deep Learning Inception-1D (Multi-Scale Convolutions on 100 Hz Raw Waveforms - 51.81% Grouped-CV Macro-F1)
+  3. Honest Nested Dual-Modality Fusion (0.38 Classical + 0.62 DL - 53.92% Grouped-CV Macro-F1, 59.21% Accuracy)
 """
 
 import os
@@ -161,8 +161,8 @@ class DualModalityPredictor:
         self,
         sig_window: np.ndarray,
         feats: Optional[Dict[str, Any]] = None,
-        w_classical: float = 0.30,
-        w_dl: float = 0.70
+        w_classical: float = 0.38,
+        w_dl: float = 0.62
     ) -> Dict[str, Any]:
         """
         Run Dual-Modality Inference on a single 10-second PPG window.

@@ -1,0 +1,101 @@
+{
+  "version": "4.0.0-leak-free-v2",
+  "evaluated_at": "2026-10-05 12:11:03",
+  "total_windows": 4683,
+  "total_patients": 2271,
+  "validation_scheme": "Nested 5-Fold StratifiedGroupKFold on Patient IDs (Zero Leakage)",
+  "standalone_benchmarks": {
+    "classical_super_ensemble": {
+      "macro_f1": 0.48000592296175904,
+      "accuracy": 0.5831731795857357
+    },
+    "inception_1d_cnn": {
+      "macro_f1": 0.5181353826951258,
+      "accuracy": 0.5637411915438821
+    }
+  },
+  "nested_dual_fusion": {
+    "macro_f1": 0.53922157386241,
+    "accuracy": 0.5921417894512065,
+    "balanced_accuracy": 0.5745715744201092,
+    "weighted_f1": 0.597008999110262,
+    "outer_fold_macro_f1s": [
+      0.628974415437955,
+      0.556829733157334,
+      0.5419643234042553,
+      0.5425329028946759,
+      0.4343949403126116
+    ],
+    "confidence_interval_95": 0.054540117054709236,
+    "selected_weights_classical": [
+      0.4,
+      0.4,
+      0.4,
+      0.4,
+      0.3
+    ]
+  },
+  "per_class_report": {
+    "AFib": {
+      "precision": 0.46703296703296704,
+      "recall": 0.6375,
+      "f1-score": 0.5391120507399577,
+      "support": 400.0
+    },
+    "Asystole": {
+      "precision": 0.39747634069400634,
+      "recall": 0.6176470588235294,
+      "f1-score": 0.4836852207293666,
+      "support": 204.0
+    },
+    "Bradycardia": {
+      "precision": 0.6493506493506493,
+      "recall": 0.7097791798107256,
+      "f1-score": 0.6782215523737755,
+      "support": 634.0
+    },
+    "Cardiac_Paced": {
+      "precision": 0.28106508875739644,
+      "recall": 0.475,
+      "f1-score": 0.35315985130111527,
+      "support": 400.0
+    },
+    "Normal": {
+      "precision": 0.957345971563981,
+      "recall": 0.6772841575859179,
+      "f1-score": 0.7933235149729995,
+      "support": 1193.0
+    },
+    "Tachycardia": {
+      "precision": 0.618073316283035,
+      "recall": 0.691793893129771,
+      "f1-score": 0.6528590724898694,
+      "support": 1048.0
+    },
+    "V_Flutter_Fib": {
+      "precision": 0.42857142857142855,
+      "recall": 0.5416666666666666,
+      "f1-score": 0.4785276073619632,
+      "support": 72.0
+    },
+    "V_Tachycardia": {
+      "precision": 0.5247813411078717,
+      "recall": 0.2459016393442623,
+      "f1-score": 0.33488372093023255,
+      "support": 732.0
+    },
+    "accuracy": 0.5921417894512065,
+    "macro avg": {
+      "precision": 0.540462137920167,
+      "recall": 0.5745715744201092,
+      "f1-score": 0.53922157386241,
+      "support": 4683.0
+    },
+    "weighted avg": {
+      "precision": 0.6399454135371747,
+      "recall": 0.5921417894512065,
+      "f1-score": 0.597008999110262,
+      "support": 4683.0
+    }
+  }
+}
