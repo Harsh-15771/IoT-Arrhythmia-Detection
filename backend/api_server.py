@@ -138,7 +138,12 @@ state = {
     "last_sequence": None,
     "sequence_gaps": 0,
     "last_device_id": None,
-    "last_sample_interval_us": 10000
+    "last_device_boot_id": None,
+    "last_sample_interval_us": 10000,
+    "dropped_buffers_total": 0,
+    "measured_sample_rate": 100.0,
+    "timing_jitter_ms": 0.0,
+    "duplicate_chunks_rejected": 0
 }
 state_lock = threading.Lock()
 
@@ -332,17 +337,29 @@ def select_patient():
 def get_twin_status():
     with twin_lock:
         status = active_twin.get_status()
-    status["has_calibrated_baseline"] = live_baseline_manager.baseline is not None
-    status["personal_baseline"] = live_baseline_manager.baseline
-    status["is_calibrating"] = live_baseline_manager.is_calibrating
-    if live_baseline_manager.is_calibrating:
-        elapsed = time.time() - live_baseline_manager.calibration_start_time
-        status["calibration_status"] = {
-            "is_calibrating": True,
-            "elapsed_sec": round(elapsed, 1),
-            "target_duration_sec": live_baseline_manager.target_calibration_duration_sec,
-            "stabilization_duration_sec": live_baseline_manager.stabilization_duration_sec,
-            "windows_collected": len(live_baseline_manager.calibration_windows)
+    with state_lock:
+        status["has_calibrated_baseline"] = live_baseline_manager.baseline is not None
+        status["personal_baseline"] = live_baseline_manager.baseline
+        status["is_calibrating"] = live_baseline_manager.is_calibrating
+        if live_baseline_manager.is_calibrating:
+            elapsed = time.time() - live_baseline_manager.calibration_start_time
+            status["calibration_status"] = {
+                "is_calibrating": True,
+                "elapsed_sec": round(elapsed, 1),
+                "target_duration_sec": live_baseline_manager.target_calibration_duration_sec,
+                "stabilization_duration_sec": live_baseline_manager.stabilization_duration_sec,
+                "windows_collected": len(live_baseline_manager.calibration_windows),
+                "windows_required": 6
+            }
+        status["hardware_telemetry"] = {
+            "device_id": state.get("last_device_id"),
+            "device_boot_id": state.get("last_device_boot_id"),
+            "measured_sample_rate": state.get("measured_sample_rate", 100.0),
+            "timing_jitter_ms": state.get("timing_jitter_ms", 0.0),
+            "sequence_gaps": state.get("sequence_gaps", 0),
+            "dropped_buffers": state.get("dropped_buffers_total", 0),
+            "duplicate_chunks_rejected": state.get("duplicate_chunks_rejected", 0),
+            "last_sequence": state.get("last_sequence")
         }
     return jsonify(status)
 
@@ -404,6 +421,57 @@ def reset_signal_gate():
         state["timestamp_buffer"].clear()
         state["last_gate_result"] = None
     return jsonify({"success": True, "message": "Signal Reliability Gate reset to baseline."})
+
+# 4d. Hardware Telemetry & FreeRTOS Timing Integrity Endpoint
+@app.route("/telemetry/integrity", methods=["GET"])
+def get_telemetry_integrity():
+    with state_lock:
+        return jsonify({
+            "device_id": state.get("last_device_id"),
+            "device_boot_id": state.get("last_device_boot_id"),
+            "measured_sample_rate": state.get("measured_sample_rate", 100.0),
+            "timing_jitter_ms": state.get("timing_jitter_ms", 0.0),
+            "sequence_gaps": state.get("sequence_gaps", 0),
+            "dropped_buffers": state.get("dropped_buffers_total", 0),
+            "duplicate_chunks_rejected": state.get("duplicate_chunks_rejected", 0),
+            "last_sequence": state.get("last_sequence")
+        })
+
+# 4e. Explainability & Research Transparency Endpoints (Phase 1)
+@app.route("/transparency/evidence_ledger", methods=["GET"])
+def get_evidence_ledger():
+    return jsonify({
+        "status": "VALIDATED",
+        "system": "CardioTwin Sentinel Cardiovascular Digital Twin",
+        "evidence_ledger": {
+            "sensor_type": "Reflective Photoplethysmography (MAX30102 Infrared 880nm @ 100 Hz)",
+            "spo2_available": False,
+            "spo2_reason": "Single-channel infrared optical sensor; clinical SpO2 requires red + IR ratiometric measurement and calibrated lookup table",
+            "ecg_equivalence": "NOT EQUIVALENT (Optical volume pulse wave cannot assess QRS complexes, ST segment depression, or axis deviation)",
+            "personal_baseline_calibration": "2-minute empirical calibration required; population default baselines strictly forbidden",
+            "training_cohort": "PhysioNet CinC 2015 & MIMIC-III ICU monitoring cohorts (2,271 unique patients, 4,683 windows)",
+            "source_bias_alert": "100% of Ventricular Tachycardia, Asystole, and Ventricular Flutter/Fib in training data originate from CinC 2015",
+            "regulatory_status": "Investigational research decision-support prototype — not cleared by US FDA or India CDSCO for primary clinical diagnosis"
+        }
+    })
+
+@app.route("/transparency/source_confounding", methods=["GET"])
+def get_source_confounding_matrix():
+    conf_path = os.path.join(ROOT_DIR, "docs", "source_confounding_audit.json")
+    if os.path.exists(conf_path):
+        with open(conf_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return jsonify(data)
+    return jsonify({"error": "Source confounding audit not yet generated"}), 404
+
+@app.route("/explainability/shap", methods=["GET"])
+def get_shap_explainability():
+    shap_path = os.path.join(ROOT_DIR, "docs", "shap_feature_importance.json")
+    if os.path.exists(shap_path):
+        with open(shap_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return jsonify(data)
+    return jsonify({"error": "SHAP feature importance report not yet generated"}), 404
 
 # 5. Scenario Injector for Demonstrations (Explicitly Provenanced as Simulation)
 @app.route("/twin/scenario", methods=["POST"])
@@ -489,22 +557,22 @@ def trigger_scenario():
             }
         },
         "motion_artifact": {
-            "bpm": 142, "rmssd": 88.0, "sdnn": 92.0, "spo2": 93, "signal_quality": 0.28,
-            "arrhythmia_predicted": "Verification: POOR_REGULARITY",
-            "arrhythmia_probabilities": {"POOR_REGULARITY": 1.0},
+            "bpm": None, "rmssd": None, "sdnn": None, "spo2": 93, "signal_quality": 0.28,
+            "arrhythmia_predicted": "Verification: OPTICAL_MOTION_ARTIFACT",
+            "arrhythmia_probabilities": {"OPTICAL_MOTION_ARTIFACT": 1.0},
             "data_source": "SIMULATION",
             "signal_gate": {
-                "status": "POOR_REGULARITY",
-                "reason": "Low pulse regularity (Coverage: 48.0% < 65%, RR CV: 0.44 > 0.35)",
+                "status": "OPTICAL_MOTION_ARTIFACT",
+                "reason": "Optical motion artifact detected: baseline wandering and peak clipping exceed tolerances",
                 "ai_screening_enabled": False,
                 "consecutive_good_windows": 0,
                 "stability_threshold": 3,
                 "sample_rate_estimate": 100.0,
-                "bpm": 142.0,
-                "peak_coverage": 0.48,
-                "rr_cv": 0.44,
-                "clipping_ratio": 0.02,
-                "checks": {"contact_amplitude": True, "sample_timing": True, "peak_regularity": False, "physiological_plausibility": True, "window_stability": False}
+                "bpm": None,
+                "peak_coverage": 0.45,
+                "rr_cv": 0.40,
+                "clipping_ratio": 0.08,
+                "checks": {"contact_amplitude": True, "sample_timing": True, "peak_morphology": False, "optical_stability": False, "window_stability": False}
             }
         },
         "sensor_liftoff": {
@@ -554,6 +622,9 @@ def receive_sensor_data():
     raw_spo2 = raw_json.get("spo2", None)
     seq = raw_json.get("sequence", None)
     device_id = raw_json.get("device_id", None)
+    boot_id = raw_json.get("device_boot_id", None)
+    dropped_buffers = raw_json.get("dropped_buffers", 0)
+    timing_deltas_us = raw_json.get("timing_deltas_us", [])
     first_sample_ms = raw_json.get("first_sample_ms", None)
     sample_interval_us = raw_json.get("sample_interval_us", None)
 
@@ -567,17 +638,43 @@ def receive_sensor_data():
     dt_ms = (sample_interval_us / 1000.0) if sample_interval_us else (1000.0 / TARGET_FS)
 
     with state_lock:
-        if device_id:
-            state["last_device_id"] = device_id
-        if sample_interval_us:
-            state["last_sample_interval_us"] = sample_interval_us
-        
-        # Track sequence continuity
-        if seq is not None:
-            if state["last_sequence"] is not None and seq > (state["last_sequence"] + 1):
+        # 1. Device reboot detection
+        if boot_id is not None:
+            if state["last_device_boot_id"] is not None and boot_id != state["last_device_boot_id"]:
+                print(f"[WARN] Hardware reboot detected! Previous: {state['last_device_boot_id']} -> Current: {boot_id}")
+                state["last_sequence"] = None
+                state["status_msg"] = f"Device restarted ({boot_id})"
+            state["last_device_boot_id"] = boot_id
+
+        # 2. Duplicate / out-of-order sequence rejection
+        if seq is not None and state["last_sequence"] is not None:
+            if seq <= state["last_sequence"]:
+                state["duplicate_chunks_rejected"] += 1
+                return jsonify({
+                    "status": "REJECTED_DUPLICATE_OR_OUT_OF_ORDER",
+                    "sequence": seq,
+                    "last_accepted_sequence": state["last_sequence"]
+                }), 200
+
+            if seq > (state["last_sequence"] + 1):
                 gap = seq - (state["last_sequence"] + 1)
                 state["sequence_gaps"] += gap
+
+        if seq is not None:
             state["last_sequence"] = seq
+
+        if device_id:
+            state["last_device_id"] = device_id
+        if dropped_buffers:
+            state["dropped_buffers_total"] = dropped_buffers
+
+        # 3. Calculate measured sample rate and jitter from microsecond deltas
+        if timing_deltas_us and len(timing_deltas_us) >= 5:
+            deltas_arr = np.array(timing_deltas_us, dtype=float)
+            mean_delta_us = float(np.mean(deltas_arr))
+            std_delta_us = float(np.std(deltas_arr))
+            state["measured_sample_rate"] = round(1e6 / max(100.0, mean_delta_us), 1)
+            state["timing_jitter_ms"] = round(std_delta_us / 1000.0, 2)
 
         for i, val in enumerate(ppg_chunk):
             if first_sample_ms is not None:

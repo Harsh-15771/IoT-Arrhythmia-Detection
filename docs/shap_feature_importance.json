@@ -1,0 +1,1008 @@
+{
+  "status": "VALIDATED_SHAP_EXPLANATIONS",
+  "model": "Classical Super Ensemble (XGBoost component)",
+  "num_features": 27,
+  "num_samples_evaluated": 400,
+  "classes": [
+    "AFib",
+    "Asystole",
+    "Bradycardia",
+    "Cardiac_Paced",
+    "Normal",
+    "Tachycardia",
+    "V_Flutter_Fib",
+    "V_Tachycardia"
+  ],
+  "overall_importance": [
+    {
+      "feature": "sig_skew",
+      "mean_abs_shap": 0.48948
+    },
+    {
+      "feature": "peak_amp_mean",
+      "mean_abs_shap": 0.42715
+    },
+    {
+      "feature": "rr_mean",
+      "mean_abs_shap": 0.36462
+    },
+    {
+      "feature": "bpm",
+      "mean_abs_shap": 0.35244
+    },
+    {
+      "feature": "pnn50",
+      "mean_abs_shap": 0.22009
+    },
+    {
+      "feature": "rr_min",
+      "mean_abs_shap": 0.19678
+    },
+    {
+      "feature": "pnn20",
+      "mean_abs_shap": 0.18609
+    },
+    {
+      "feature": "rr_max",
+      "mean_abs_shap": 0.18248
+    },
+    {
+      "feature": "rr_skew",
+      "mean_abs_shap": 0.17976
+    },
+    {
+      "feature": "rmssd",
+      "mean_abs_shap": 0.17659
+    },
+    {
+      "feature": "sig_kurt",
+      "mean_abs_shap": 0.16593
+    },
+    {
+      "feature": "peak_amp_std",
+      "mean_abs_shap": 0.16065
+    },
+    {
+      "feature": "rr_kurt",
+      "mean_abs_shap": 0.14028
+    },
+    {
+      "feature": "sqi",
+      "mean_abs_shap": 0.13829
+    },
+    {
+      "feature": "peak_amp_cv",
+      "mean_abs_shap": 0.13182
+    },
+    {
+      "feature": "rr_cv",
+      "mean_abs_shap": 0.12925
+    },
+    {
+      "feature": "rr_std",
+      "mean_abs_shap": 0.11896
+    },
+    {
+      "feature": "sig_std",
+      "mean_abs_shap": 0.09186
+    },
+    {
+      "feature": "rr_range",
+      "mean_abs_shap": 0.08467
+    },
+    {
+      "feature": "sig_mean",
+      "mean_abs_shap": 0.07817
+    },
+    {
+      "feature": "pulse_width_mean",
+      "mean_abs_shap": 0.06513
+    },
+    {
+      "feature": "sdnn",
+      "mean_abs_shap": 0.01591
+    },
+    {
+      "feature": "sig_energy",
+      "mean_abs_shap": 0.01076
+    },
+    {
+      "feature": "pulse_width_std",
+      "mean_abs_shap": 0.00612
+    },
+    {
+      "feature": "lf_hf_ratio",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "lf_power",
+      "mean_abs_shap": 0.0
+    },
+    {
+      "feature": "hf_power",
+      "mean_abs_shap": 0.0
+    }
+  ],
+  "per_class_importance": {
+    "AFib": [
+      {
+        "feature": "sig_skew",
+        "mean_abs_shap": 0.57199
+      },
+      {
+        "feature": "peak_amp_mean",
+        "mean_abs_shap": 0.49216
+      },
+      {
+        "feature": "pnn20",
+        "mean_abs_shap": 0.33769
+      },
+      {
+        "feature": "pnn50",
+        "mean_abs_shap": 0.31549
+      },
+      {
+        "feature": "rmssd",
+        "mean_abs_shap": 0.30918
+      },
+      {
+        "feature": "peak_amp_cv",
+        "mean_abs_shap": 0.27734
+      },
+      {
+        "feature": "rr_skew",
+        "mean_abs_shap": 0.24214
+      },
+      {
+        "feature": "rr_cv",
+        "mean_abs_shap": 0.22241
+      },
+      {
+        "feature": "peak_amp_std",
+        "mean_abs_shap": 0.2156
+      },
+      {
+        "feature": "rr_min",
+        "mean_abs_shap": 0.21114
+      },
+      {
+        "feature": "sig_kurt",
+        "mean_abs_shap": 0.16162
+      },
+      {
+        "feature": "rr_kurt",
+        "mean_abs_shap": 0.15858
+      },
+      {
+        "feature": "bpm",
+        "mean_abs_shap": 0.13004
+      },
+      {
+        "feature": "sqi",
+        "mean_abs_shap": 0.11535
+      },
+      {
+        "feature": "rr_mean",
+        "mean_abs_shap": 0.11302
+      },
+      {
+        "feature": "sig_std",
+        "mean_abs_shap": 0.08406
+      },
+      {
+        "feature": "rr_range",
+        "mean_abs_shap": 0.07621
+      },
+      {
+        "feature": "rr_std",
+        "mean_abs_shap": 0.07356
+      },
+      {
+        "feature": "rr_max",
+        "mean_abs_shap": 0.06842
+      },
+      {
+        "feature": "sig_mean",
+        "mean_abs_shap": 0.0545
+      },
+      {
+        "feature": "pulse_width_mean",
+        "mean_abs_shap": 0.02285
+      },
+      {
+        "feature": "sig_energy",
+        "mean_abs_shap": 0.01669
+      },
+      {
+        "feature": "sdnn",
+        "mean_abs_shap": 0.00993
+      },
+      {
+        "feature": "pulse_width_std",
+        "mean_abs_shap": 0.00921
+      },
+      {
+        "feature": "lf_hf_ratio",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "lf_power",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "hf_power",
+        "mean_abs_shap": 0.0
+      }
+    ],
+    "Asystole": [
+      {
+        "feature": "peak_amp_mean",
+        "mean_abs_shap": 0.80879
+      },
+      {
+        "feature": "sig_skew",
+        "mean_abs_shap": 0.60264
+      },
+      {
+        "feature": "bpm",
+        "mean_abs_shap": 0.46286
+      },
+      {
+        "feature": "peak_amp_std",
+        "mean_abs_shap": 0.3822
+      },
+      {
+        "feature": "sig_kurt",
+        "mean_abs_shap": 0.28362
+      },
+      {
+        "feature": "rr_kurt",
+        "mean_abs_shap": 0.24039
+      },
+      {
+        "feature": "rr_mean",
+        "mean_abs_shap": 0.23627
+      },
+      {
+        "feature": "rr_min",
+        "mean_abs_shap": 0.23123
+      },
+      {
+        "feature": "rr_max",
+        "mean_abs_shap": 0.1812
+      },
+      {
+        "feature": "peak_amp_cv",
+        "mean_abs_shap": 0.17608
+      },
+      {
+        "feature": "pnn20",
+        "mean_abs_shap": 0.16076
+      },
+      {
+        "feature": "rr_skew",
+        "mean_abs_shap": 0.1574
+      },
+      {
+        "feature": "sig_std",
+        "mean_abs_shap": 0.14746
+      },
+      {
+        "feature": "sqi",
+        "mean_abs_shap": 0.14435
+      },
+      {
+        "feature": "pnn50",
+        "mean_abs_shap": 0.12948
+      },
+      {
+        "feature": "rmssd",
+        "mean_abs_shap": 0.1108
+      },
+      {
+        "feature": "rr_std",
+        "mean_abs_shap": 0.0832
+      },
+      {
+        "feature": "rr_cv",
+        "mean_abs_shap": 0.07679
+      },
+      {
+        "feature": "sig_mean",
+        "mean_abs_shap": 0.07567
+      },
+      {
+        "feature": "rr_range",
+        "mean_abs_shap": 0.0412
+      },
+      {
+        "feature": "pulse_width_mean",
+        "mean_abs_shap": 0.02871
+      },
+      {
+        "feature": "sig_energy",
+        "mean_abs_shap": 0.01851
+      },
+      {
+        "feature": "sdnn",
+        "mean_abs_shap": 0.01063
+      },
+      {
+        "feature": "pulse_width_std",
+        "mean_abs_shap": 0.00831
+      },
+      {
+        "feature": "lf_hf_ratio",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "lf_power",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "hf_power",
+        "mean_abs_shap": 0.0
+      }
+    ],
+    "Bradycardia": [
+      {
+        "feature": "rr_mean",
+        "mean_abs_shap": 0.82285
+      },
+      {
+        "feature": "bpm",
+        "mean_abs_shap": 0.41107
+      },
+      {
+        "feature": "pnn50",
+        "mean_abs_shap": 0.19322
+      },
+      {
+        "feature": "rr_min",
+        "mean_abs_shap": 0.18927
+      },
+      {
+        "feature": "sig_skew",
+        "mean_abs_shap": 0.18349
+      },
+      {
+        "feature": "peak_amp_mean",
+        "mean_abs_shap": 0.15435
+      },
+      {
+        "feature": "sqi",
+        "mean_abs_shap": 0.15173
+      },
+      {
+        "feature": "rr_kurt",
+        "mean_abs_shap": 0.14611
+      },
+      {
+        "feature": "pulse_width_mean",
+        "mean_abs_shap": 0.14407
+      },
+      {
+        "feature": "peak_amp_std",
+        "mean_abs_shap": 0.1302
+      },
+      {
+        "feature": "rr_cv",
+        "mean_abs_shap": 0.13005
+      },
+      {
+        "feature": "rr_skew",
+        "mean_abs_shap": 0.12232
+      },
+      {
+        "feature": "rr_std",
+        "mean_abs_shap": 0.10973
+      },
+      {
+        "feature": "sig_kurt",
+        "mean_abs_shap": 0.10742
+      },
+      {
+        "feature": "rr_max",
+        "mean_abs_shap": 0.10578
+      },
+      {
+        "feature": "peak_amp_cv",
+        "mean_abs_shap": 0.07904
+      },
+      {
+        "feature": "pnn20",
+        "mean_abs_shap": 0.0736
+      },
+      {
+        "feature": "sig_std",
+        "mean_abs_shap": 0.05534
+      },
+      {
+        "feature": "rmssd",
+        "mean_abs_shap": 0.05337
+      },
+      {
+        "feature": "rr_range",
+        "mean_abs_shap": 0.02886
+      },
+      {
+        "feature": "sig_mean",
+        "mean_abs_shap": 0.02743
+      },
+      {
+        "feature": "sdnn",
+        "mean_abs_shap": 0.01544
+      },
+      {
+        "feature": "sig_energy",
+        "mean_abs_shap": 0.00896
+      },
+      {
+        "feature": "pulse_width_std",
+        "mean_abs_shap": 0.00238
+      },
+      {
+        "feature": "lf_power",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "lf_hf_ratio",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "hf_power",
+        "mean_abs_shap": 0.0
+      }
+    ],
+    "Cardiac_Paced": [
+      {
+        "feature": "sig_skew",
+        "mean_abs_shap": 0.47448
+      },
+      {
+        "feature": "peak_amp_mean",
+        "mean_abs_shap": 0.41371
+      },
+      {
+        "feature": "rr_max",
+        "mean_abs_shap": 0.28037
+      },
+      {
+        "feature": "pnn50",
+        "mean_abs_shap": 0.24216
+      },
+      {
+        "feature": "rr_cv",
+        "mean_abs_shap": 0.22338
+      },
+      {
+        "feature": "rr_mean",
+        "mean_abs_shap": 0.21552
+      },
+      {
+        "feature": "rmssd",
+        "mean_abs_shap": 0.19428
+      },
+      {
+        "feature": "rr_std",
+        "mean_abs_shap": 0.19024
+      },
+      {
+        "feature": "rr_range",
+        "mean_abs_shap": 0.18512
+      },
+      {
+        "feature": "bpm",
+        "mean_abs_shap": 0.17221
+      },
+      {
+        "feature": "rr_skew",
+        "mean_abs_shap": 0.17066
+      },
+      {
+        "feature": "peak_amp_cv",
+        "mean_abs_shap": 0.13979
+      },
+      {
+        "feature": "sig_kurt",
+        "mean_abs_shap": 0.12798
+      },
+      {
+        "feature": "peak_amp_std",
+        "mean_abs_shap": 0.12249
+      },
+      {
+        "feature": "rr_kurt",
+        "mean_abs_shap": 0.11602
+      },
+      {
+        "feature": "rr_min",
+        "mean_abs_shap": 0.10918
+      },
+      {
+        "feature": "sqi",
+        "mean_abs_shap": 0.08922
+      },
+      {
+        "feature": "sig_std",
+        "mean_abs_shap": 0.07425
+      },
+      {
+        "feature": "pnn20",
+        "mean_abs_shap": 0.06377
+      },
+      {
+        "feature": "pulse_width_mean",
+        "mean_abs_shap": 0.0389
+      },
+      {
+        "feature": "sdnn",
+        "mean_abs_shap": 0.03358
+      },
+      {
+        "feature": "sig_mean",
+        "mean_abs_shap": 0.02799
+      },
+      {
+        "feature": "sig_energy",
+        "mean_abs_shap": 0.00949
+      },
+      {
+        "feature": "pulse_width_std",
+        "mean_abs_shap": 0.00587
+      },
+      {
+        "feature": "lf_hf_ratio",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "lf_power",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "hf_power",
+        "mean_abs_shap": 0.0
+      }
+    ],
+    "Normal": [
+      {
+        "feature": "bpm",
+        "mean_abs_shap": 0.70647
+      },
+      {
+        "feature": "sig_skew",
+        "mean_abs_shap": 0.49036
+      },
+      {
+        "feature": "pnn50",
+        "mean_abs_shap": 0.3367
+      },
+      {
+        "feature": "rr_mean",
+        "mean_abs_shap": 0.31401
+      },
+      {
+        "feature": "rr_max",
+        "mean_abs_shap": 0.26132
+      },
+      {
+        "feature": "pnn20",
+        "mean_abs_shap": 0.18569
+      },
+      {
+        "feature": "sig_kurt",
+        "mean_abs_shap": 0.16685
+      },
+      {
+        "feature": "rr_skew",
+        "mean_abs_shap": 0.16077
+      },
+      {
+        "feature": "rmssd",
+        "mean_abs_shap": 0.13977
+      },
+      {
+        "feature": "rr_std",
+        "mean_abs_shap": 0.13253
+      },
+      {
+        "feature": "rr_range",
+        "mean_abs_shap": 0.1295
+      },
+      {
+        "feature": "peak_amp_cv",
+        "mean_abs_shap": 0.11611
+      },
+      {
+        "feature": "sqi",
+        "mean_abs_shap": 0.10753
+      },
+      {
+        "feature": "rr_min",
+        "mean_abs_shap": 0.10093
+      },
+      {
+        "feature": "rr_kurt",
+        "mean_abs_shap": 0.10045
+      },
+      {
+        "feature": "peak_amp_mean",
+        "mean_abs_shap": 0.10013
+      },
+      {
+        "feature": "rr_cv",
+        "mean_abs_shap": 0.09612
+      },
+      {
+        "feature": "peak_amp_std",
+        "mean_abs_shap": 0.08413
+      },
+      {
+        "feature": "pulse_width_mean",
+        "mean_abs_shap": 0.05055
+      },
+      {
+        "feature": "sig_mean",
+        "mean_abs_shap": 0.03239
+      },
+      {
+        "feature": "sig_std",
+        "mean_abs_shap": 0.02715
+      },
+      {
+        "feature": "sdnn",
+        "mean_abs_shap": 0.02225
+      },
+      {
+        "feature": "pulse_width_std",
+        "mean_abs_shap": 0.00494
+      },
+      {
+        "feature": "sig_energy",
+        "mean_abs_shap": 0.00488
+      },
+      {
+        "feature": "lf_hf_ratio",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "lf_power",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "hf_power",
+        "mean_abs_shap": 0.0
+      }
+    ],
+    "Tachycardia": [
+      {
+        "feature": "rr_mean",
+        "mean_abs_shap": 0.79179
+      },
+      {
+        "feature": "sig_skew",
+        "mean_abs_shap": 0.27927
+      },
+      {
+        "feature": "rr_min",
+        "mean_abs_shap": 0.25453
+      },
+      {
+        "feature": "bpm",
+        "mean_abs_shap": 0.18429
+      },
+      {
+        "feature": "rmssd",
+        "mean_abs_shap": 0.15843
+      },
+      {
+        "feature": "pulse_width_mean",
+        "mean_abs_shap": 0.14573
+      },
+      {
+        "feature": "rr_max",
+        "mean_abs_shap": 0.12621
+      },
+      {
+        "feature": "peak_amp_std",
+        "mean_abs_shap": 0.11955
+      },
+      {
+        "feature": "sig_kurt",
+        "mean_abs_shap": 0.11646
+      },
+      {
+        "feature": "pnn20",
+        "mean_abs_shap": 0.10028
+      },
+      {
+        "feature": "peak_amp_cv",
+        "mean_abs_shap": 0.09232
+      },
+      {
+        "feature": "rr_kurt",
+        "mean_abs_shap": 0.09108
+      },
+      {
+        "feature": "peak_amp_mean",
+        "mean_abs_shap": 0.08349
+      },
+      {
+        "feature": "rr_cv",
+        "mean_abs_shap": 0.0795
+      },
+      {
+        "feature": "sqi",
+        "mean_abs_shap": 0.07941
+      },
+      {
+        "feature": "pnn50",
+        "mean_abs_shap": 0.06713
+      },
+      {
+        "feature": "sig_std",
+        "mean_abs_shap": 0.05585
+      },
+      {
+        "feature": "rr_skew",
+        "mean_abs_shap": 0.04947
+      },
+      {
+        "feature": "rr_std",
+        "mean_abs_shap": 0.04153
+      },
+      {
+        "feature": "rr_range",
+        "mean_abs_shap": 0.04085
+      },
+      {
+        "feature": "sig_mean",
+        "mean_abs_shap": 0.03867
+      },
+      {
+        "feature": "sdnn",
+        "mean_abs_shap": 0.00988
+      },
+      {
+        "feature": "sig_energy",
+        "mean_abs_shap": 0.00973
+      },
+      {
+        "feature": "pulse_width_std",
+        "mean_abs_shap": 0.00704
+      },
+      {
+        "feature": "lf_hf_ratio",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "lf_power",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "hf_power",
+        "mean_abs_shap": 0.0
+      }
+    ],
+    "V_Flutter_Fib": [
+      {
+        "feature": "peak_amp_mean",
+        "mean_abs_shap": 1.23138
+      },
+      {
+        "feature": "sig_skew",
+        "mean_abs_shap": 0.9311
+      },
+      {
+        "feature": "rr_skew",
+        "mean_abs_shap": 0.44297
+      },
+      {
+        "feature": "bpm",
+        "mean_abs_shap": 0.43412
+      },
+      {
+        "feature": "pnn20",
+        "mean_abs_shap": 0.41806
+      },
+      {
+        "feature": "rmssd",
+        "mean_abs_shap": 0.37713
+      },
+      {
+        "feature": "pnn50",
+        "mean_abs_shap": 0.37439
+      },
+      {
+        "feature": "sig_mean",
+        "mean_abs_shap": 0.3246
+      },
+      {
+        "feature": "rr_std",
+        "mean_abs_shap": 0.26109
+      },
+      {
+        "feature": "sig_std",
+        "mean_abs_shap": 0.25125
+      },
+      {
+        "feature": "sig_kurt",
+        "mean_abs_shap": 0.24236
+      },
+      {
+        "feature": "rr_max",
+        "mean_abs_shap": 0.23275
+      },
+      {
+        "feature": "rr_min",
+        "mean_abs_shap": 0.21996
+      },
+      {
+        "feature": "sqi",
+        "mean_abs_shap": 0.19492
+      },
+      {
+        "feature": "rr_kurt",
+        "mean_abs_shap": 0.16701
+      },
+      {
+        "feature": "peak_amp_std",
+        "mean_abs_shap": 0.13207
+      },
+      {
+        "feature": "rr_cv",
+        "mean_abs_shap": 0.1288
+      },
+      {
+        "feature": "rr_mean",
+        "mean_abs_shap": 0.10593
+      },
+      {
+        "feature": "peak_amp_cv",
+        "mean_abs_shap": 0.10132
+      },
+      {
+        "feature": "rr_range",
+        "mean_abs_shap": 0.04945
+      },
+      {
+        "feature": "pulse_width_mean",
+        "mean_abs_shap": 0.03369
+      },
+      {
+        "feature": "sig_energy",
+        "mean_abs_shap": 0.01228
+      },
+      {
+        "feature": "sdnn",
+        "mean_abs_shap": 0.01146
+      },
+      {
+        "feature": "lf_hf_ratio",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "pulse_width_std",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "lf_power",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "hf_power",
+        "mean_abs_shap": 0.0
+      }
+    ],
+    "V_Tachycardia": [
+      {
+        "feature": "sig_skew",
+        "mean_abs_shap": 0.38248
+      },
+      {
+        "feature": "bpm",
+        "mean_abs_shap": 0.31847
+      },
+      {
+        "feature": "rr_mean",
+        "mean_abs_shap": 0.3176
+      },
+      {
+        "feature": "rr_min",
+        "mean_abs_shap": 0.25798
+      },
+      {
+        "feature": "sqi",
+        "mean_abs_shap": 0.2238
+      },
+      {
+        "feature": "rr_max",
+        "mean_abs_shap": 0.20382
+      },
+      {
+        "feature": "pnn20",
+        "mean_abs_shap": 0.14888
+      },
+      {
+        "feature": "peak_amp_mean",
+        "mean_abs_shap": 0.1332
+      },
+      {
+        "feature": "rr_range",
+        "mean_abs_shap": 0.12615
+      },
+      {
+        "feature": "sig_kurt",
+        "mean_abs_shap": 0.12112
+      },
+      {
+        "feature": "rr_kurt",
+        "mean_abs_shap": 0.10257
+      },
+      {
+        "feature": "pnn50",
+        "mean_abs_shap": 0.10218
+      },
+      {
+        "feature": "peak_amp_std",
+        "mean_abs_shap": 0.09893
+      },
+      {
+        "feature": "rr_skew",
+        "mean_abs_shap": 0.09233
+      },
+      {
+        "feature": "rr_cv",
+        "mean_abs_shap": 0.07695
+      },
+      {
+        "feature": "peak_amp_cv",
+        "mean_abs_shap": 0.07251
+      },
+      {
+        "feature": "rmssd",
+        "mean_abs_shap": 0.06979
+      },
+      {
+        "feature": "rr_std",
+        "mean_abs_shap": 0.05979
+      },
+      {
+        "feature": "pulse_width_mean",
+        "mean_abs_shap": 0.05658
+      },
+      {
+        "feature": "sig_mean",
+        "mean_abs_shap": 0.0441
+      },
+      {
+        "feature": "sig_std",
+        "mean_abs_shap": 0.03953
+      },
+      {
+        "feature": "sdnn",
+        "mean_abs_shap": 0.01412
+      },
+      {
+        "feature": "pulse_width_std",
+        "mean_abs_shap": 0.01122
+      },
+      {
+        "feature": "sig_energy",
+        "mean_abs_shap": 0.00551
+      },
+      {
+        "feature": "lf_power",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "lf_hf_ratio",
+        "mean_abs_shap": 0.0
+      },
+      {
+        "feature": "hf_power",
+        "mean_abs_shap": 0.0
+      }
+    ]
+  }
+}

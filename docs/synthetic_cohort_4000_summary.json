@@ -1,0 +1,29 @@
+{
+  "total_cohort_size": 4000,
+  "demographics": {
+    "males": 2014,
+    "male_pct": 50.3,
+    "females": 1986,
+    "female_pct": 49.6,
+    "mean_age": 49.0,
+    "age_range": [
+      30,
+      75
+    ]
+  },
+  "cardiometabolic_prevalence": {
+    "hypertension_cases": 2559,
+    "hypertension_pct": 64.0,
+    "type2_diabetes_cases": 909,
+    "type2_diabetes_pct": 22.7,
+    "tobacco_smoker_cases": 742,
+    "tobacco_smoker_pct": 18.6
+  },
+  "recalibrated_framingham_risk_distribution": {
+    "High": 1377,
+    "Moderate": 1192,
+    "Low": 1431
+  },
+  "south_asian_factor_applied": 1.45,
+  "geographic_coverage": "24 Indian urban metropolitan centers, tier-2 cities, and rural district blocks"
+}

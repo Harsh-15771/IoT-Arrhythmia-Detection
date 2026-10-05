@@ -316,6 +316,23 @@ class CardioTwin:
         else:
             status_label = "Physiologically Stable"
 
+        # Compute dynamic cardiovascular biological age (Phase 6.1)
+        cv_age_eval = None
+        try:
+            try:
+                from framingham_risk import compute_cardiovascular_age
+            except ImportError:
+                from backend.framingham_risk import compute_cardiovascular_age
+            vasc_age = self.patient.get("cardiovascular_risk", {}).get("vascular_age", self.patient.get("age", 50))
+            cv_age_eval = compute_cardiovascular_age(
+                chronological_age=self.patient.get("age", 50),
+                vascular_age=vasc_age,
+                resting_bpm=self.current_vitals.get("bpm"),
+                rmssd=self.current_vitals.get("rmssd")
+            )
+        except Exception:
+            cv_age_eval = None
+
         return {
             "patient_id": self.patient_id,
             "patient_name": self.name,
@@ -325,6 +342,7 @@ class CardioTwin:
             "current_dynamic_risk": self.current_dynamic_risk, # Backwards-compatible alias
             "base_clinical_risk": self.base_risk_score,
             "baseline_10yr_cvd_risk_pct": self.base_risk_score,
+            "cardiovascular_age": cv_age_eval,
             "current_vitals": self.current_vitals,
             "patient_ehr": self.patient,
             "risk_history": self.risk_history[-30:],

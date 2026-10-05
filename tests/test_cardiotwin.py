@@ -557,6 +557,7 @@ class TestPersonalBaselineEngine(unittest.TestCase):
         self.assertEqual(res["status"], "CALIBRATION_COMPLETE")
         b = res["baseline"]
         self.assertEqual(b["patient_id"], self.patient_id)
+        self.assertEqual(b["windows_accepted"], 6)
         self.assertAlmostEqual(b["median_bpm"], 70.5, delta=1.5)
         self.assertTrue(os.path.exists(self.test_json))
 
@@ -565,10 +566,122 @@ class TestPersonalBaselineEngine(unittest.TestCase):
         reloaded = PersonalBaselineManager(self.patient_id)
         self.assertIsNotNone(reloaded.baseline)
         self.assertEqual(reloaded.baseline["median_bpm"], b["median_bpm"])
+        self.assertEqual(reloaded.baseline["device_id"], "cardiotwin-esp32-01")
+
+    def test_no_score_before_calibration(self):
+        """Rule 1: Never calculate a numerical instability score before empirical calibration."""
+        self.manager.baseline = None
+        res = self.manager.compute_instability(
+            current_bpm=72.0, current_rmssd=35.0, current_rr_cv=0.08, is_quality_reliable=True
+        )
+        self.assertIsNone(res["instability_score"])
+        self.assertEqual(res["status_label"], "Personal baseline required")
+        self.assertIn("BASELINE_NOT_CALIBRATED", res["departure_flags"])
+        self.assertFalse(res["calibrated"])
+
+    def test_failed_calibration_after_too_few_quality_windows(self):
+        """Rule 1 & 4: Require at least 6 reliable post-settling windows, not merely 3."""
+        self.manager.start_calibration()
+        # Feed only 3 quality windows (< 6)
+        for bpm in [70.0, 71.0, 69.0]:
+            self.manager.calibration_windows.append({
+                "bpm": bpm, "rmssd": 38.0, "rr_cv": 0.08, "sqi": 0.95, "timestamp": time.time()
+            })
+        res = self.manager.finalize_calibration()
+        self.assertEqual(res["status"], "CALIBRATION_FAILED")
+        self.assertIn("Insufficient quality windows", res["reason"])
+        self.assertEqual(res["windows_accepted"], 3)
+        self.assertEqual(res["windows_required"], 6)
+
+    def test_score_after_valid_calibration(self):
+        """Test score calculation after successful 6-window calibration."""
+        self.manager.start_calibration()
+        for bpm in [68.0, 70.0, 71.0, 69.0, 70.0, 72.0]:
+            self.manager.calibration_windows.append({
+                "bpm": bpm, "rmssd": 42.0, "rr_cv": 0.07, "sqi": 0.95, "timestamp": time.time()
+            })
+        calib_res = self.manager.finalize_calibration()
+        self.assertEqual(calib_res["status"], "CALIBRATION_COMPLETE")
+
+        # Now compute instability on resting pulse
+        eval_res = self.manager.compute_instability(
+            current_bpm=70.0, current_rmssd=41.0, current_rr_cv=0.07, is_quality_reliable=True
+        )
+        self.assertIsNotNone(eval_res["instability_score"])
+        self.assertLessEqual(eval_res["instability_score"], 20.0)
+        self.assertEqual(eval_res["status_label"], "Stable")
+        self.assertTrue(eval_res["calibrated"])
+
+    def test_expired_baseline_rejected(self):
+        """Rule 4: Invalidate or request recalibration when baseline is older than 30 days."""
+        now_ts = time.time()
+        self.manager.baseline = {
+            "patient_id": self.patient_id,
+            "device_id": "cardiotwin-esp32-01",
+            "firmware_version": "4.1.0",
+            "sensor_settings": {"led_current_ma": 6.0, "sample_rate_hz": 100},
+            "calibrated_at_ts": now_ts - (35 * 86400),
+            "expires_at_ts": now_ts - (5 * 86400),  # expired 5 days ago
+            "windows_accepted": 6,
+            "median_bpm": 70.0,
+            "mad_bpm": 3.0,
+            "median_rmssd": 40.0,
+            "mad_rmssd": 5.0,
+            "median_rr_cv": 0.08,
+            "mad_rr_cv": 0.02
+        }
+        res = self.manager.compute_instability(
+            current_bpm=70.0, current_rmssd=40.0, current_rr_cv=0.08, is_quality_reliable=True
+        )
+        self.assertIsNone(res["instability_score"])
+        self.assertEqual(res["status_label"], "Personal baseline required")
+        self.assertIn("BASELINE_EXPIRED", res["departure_flags"])
+
+    def test_device_and_configuration_mismatch(self):
+        """Rule 4: Invalidate when device ID or sensor configuration changes."""
+        now_ts = time.time()
+        self.manager.baseline = {
+            "patient_id": self.patient_id,
+            "device_id": "cardiotwin-esp32-01",
+            "firmware_version": "4.1.0",
+            "sensor_settings": {"led_current_ma": 6.0, "sample_rate_hz": 100},
+            "calibrated_at_ts": now_ts,
+            "expires_at_ts": now_ts + (30 * 86400),
+            "windows_accepted": 6,
+            "median_bpm": 70.0,
+            "mad_bpm": 3.0,
+            "median_rmssd": 40.0,
+            "mad_rmssd": 5.0,
+            "median_rr_cv": 0.08,
+            "mad_rr_cv": 0.02
+        }
+
+        # 1. Device mismatch
+        res_dev = self.manager.compute_instability(
+            current_bpm=70.0, current_rmssd=40.0, current_rr_cv=0.08, is_quality_reliable=True,
+            current_device_id="cardiotwin-esp32-99"
+        )
+        self.assertIsNone(res_dev["instability_score"])
+        self.assertIn("DEVICE_MISMATCH", res_dev["departure_flags"])
+
+        # 2. Config mismatch (e.g. LED current changed)
+        res_cfg = self.manager.compute_instability(
+            current_bpm=70.0, current_rmssd=40.0, current_rr_cv=0.08, is_quality_reliable=True,
+            current_settings={"led_current_ma": 14.0, "sample_rate_hz": 100}
+        )
+        self.assertIsNone(res_cfg["instability_score"])
+        self.assertIn("CONFIG_MISMATCH", res_cfg["departure_flags"])
 
     def test_instability_resting_vs_departure(self):
-        # Establish known baseline
+        now_ts = time.time()
         self.manager.baseline = {
+            "patient_id": self.patient_id,
+            "device_id": "cardiotwin-esp32-01",
+            "firmware_version": "4.1.0",
+            "sensor_settings": {"led_current_ma": 6.0, "sample_rate_hz": 100},
+            "calibrated_at_ts": now_ts,
+            "expires_at_ts": now_ts + (30 * 86400),
+            "windows_accepted": 6,
             "median_bpm": 70.0,
             "mad_bpm": 3.0,
             "median_rmssd": 40.0,
@@ -583,7 +696,6 @@ class TestPersonalBaselineEngine(unittest.TestCase):
         self.assertEqual(res_stable["status_label"], "Stable")
 
         # 2. 30%+ increase (105 BPM) -> sustained departure (instability 40–70)
-        # Feed 3 consecutive high windows to trigger sustained memory
         self.manager.compute_instability(current_bpm=105.0, current_rmssd=20.0, current_rr_cv=0.15, is_quality_reliable=True)
         self.manager.compute_instability(current_bpm=106.0, current_rmssd=18.0, current_rr_cv=0.16, is_quality_reliable=True)
         res_dep = self.manager.compute_instability(current_bpm=104.0, current_rmssd=19.0, current_rr_cv=0.15, is_quality_reliable=True)
@@ -605,4 +717,5 @@ class TestPersonalBaselineEngine(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
 

@@ -163,11 +163,11 @@ def evaluate_acceptance(session_type, ref_bpm, gate_report, duration_sec):
 
     elif session_type == "motion":
         # Acceptance: Motion-corrupted windows successfully gated
-        motion_gated = sum(1 for w in windows if w.get("status") in ("POOR_REGULARITY", "POOR_CONTACT", "VERIFY_SIGNAL", "POOR_TIMING", "SENSOR_SATURATED") or not w.get("passed", False))
+        motion_gated = sum(1 for w in windows if w.get("status") in ("OPTICAL_MOTION_ARTIFACT", "POOR_CONTACT", "VERIFY_SIGNAL", "POOR_TIMING", "SENSOR_SATURATED") or not w.get("passed", False))
         pass_motion = motion_gated >= 1
         criteria.append({
             "name": "Motion Artifact Gating",
-            "requirement": "Motion-corrupted segments flagged as POOR_REGULARITY / VERIFY_SIGNAL",
+            "requirement": "Motion-corrupted segments flagged as OPTICAL_MOTION_ARTIFACT / VERIFY_SIGNAL",
             "measured": f"{motion_gated} motion windows successfully gated",
             "passed": pass_motion
         })

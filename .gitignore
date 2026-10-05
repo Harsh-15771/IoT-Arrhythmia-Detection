@@ -46,6 +46,7 @@ recordings/
 data/raw/
 data/raw/**
 data/processed/*.npz
+data/processed/*.json
 data/legacy/
 data/legacy/**
 PPG_Dataset.csv

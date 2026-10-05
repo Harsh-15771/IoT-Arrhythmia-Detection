@@ -143,6 +143,20 @@ class DualModalityPredictor:
         except Exception as e:
             print(f"[WARN] DualEngine: Could not load Inception-1D model: {e}")
 
+        # 3. Load SHAP Feature Attribution Knowledge
+        self.shap_metadata = None
+        try:
+            shap_path = os.path.join(model_dir, "shap_feature_importance.json")
+            if not os.path.exists(shap_path):
+                shap_path = os.path.join(os.path.dirname(model_dir), "docs", "shap_feature_importance.json")
+            if os.path.exists(shap_path):
+                import json
+                with open(shap_path, "r", encoding="utf-8") as f:
+                    self.shap_metadata = json.load(f)
+                print("[INFO] DualEngine: Loaded SHAP explainability knowledge base")
+        except Exception as e:
+            print(f"[WARN] DualEngine: Could not load SHAP metadata: {e}")
+
     def predict_window(
         self,
         sig_window: np.ndarray,
@@ -220,6 +234,37 @@ class DualModalityPredictor:
         pred_label = self.classes[pred_idx]
         confidence = float(fused[pred_idx])
 
+        # Feature Attribution & Explainability (Phase 1.1)
+        explainability = {
+            "method": "SHAP (TreeExplainer on Classical XGBoost Component)",
+            "top_drivers": [],
+            "summary": f"Optical pattern '{pred_label}' identified with {confidence*100:.1f}% confidence."
+        }
+        if self.shap_metadata and "per_class_importance" in self.shap_metadata:
+            class_ranking = self.shap_metadata["per_class_importance"].get(pred_label, [])
+            top_3 = class_ranking[:4]
+            drivers = []
+            for item in top_3:
+                feat_name = item["feature"]
+                val = feats.get(feat_name) if feats else None
+                drivers.append({
+                    "feature": feat_name,
+                    "value": round(float(val), 3) if val is not None else None,
+                    "mean_abs_shap": item["mean_abs_shap"]
+                })
+            explainability["top_drivers"] = drivers
+
+        # Evidence Ledger / Honest Limitations Disclosure (Phase 1.2)
+        evidence_ledger = {
+            "sensor_modality": "Single-channel reflective photoplethysmography (MAX30102 IR 880nm)",
+            "spo2_available": False,
+            "spo2_channel_status": "UNAVAILABLE (Single IR channel cannot compute clinical ratiometric SpO2)",
+            "ecg_equivalence": "NOT EQUIVALENT (Optical pulse waves reflect microvascular blood volume changes, not myocardial electrical vectors)",
+            "training_cohort": "MIMIC-III & PhysioNet CinC 2015 ICU cohorts (2,271 patients)",
+            "source_confounding_warning": "High alert: Ventricular arrhythmias (VT/V_Flutter_Fib) derive exclusively from CinC 2015 ICU alarm records",
+            "regulatory_status": "Investigational research prototype — not approved by FDA or CDSCO for clinical diagnosis"
+        }
+
         return {
             "predicted_label": pred_label,
             "research_waveform_pattern": pred_label,
@@ -229,5 +274,7 @@ class DualModalityPredictor:
             "classical_probabilities": {c: round(float(probs_c[i]), 4) for i, c in enumerate(self.classes)} if probs_c is not None else None,
             "dl_probabilities": {c: round(float(probs_dl[i]), 4) for i, c in enumerate(self.classes)} if probs_dl is not None else None,
             "pipeline_mode": mode,
-            "fusion_weights": {"classical": w_classical, "dl": w_dl}
+            "fusion_weights": {"classical": w_classical, "dl": w_dl},
+            "explainability": explainability,
+            "evidence_ledger": evidence_ledger
         }

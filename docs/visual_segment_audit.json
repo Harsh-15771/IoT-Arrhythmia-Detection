@@ -1,0 +1,74 @@
+{
+  "AFib": {
+    "total_windows_in_dataset": 400,
+    "sampled_windows": 25,
+    "mean_peaks_per_window": 14.0,
+    "implied_mean_bpm": 84.0,
+    "mean_snr_db": 39.39,
+    "clipping_incidence_pct": 0.0,
+    "morphology_assessment": "Plausible rapid pulsatile activity"
+  },
+  "Asystole": {
+    "total_windows_in_dataset": 204,
+    "sampled_windows": 25,
+    "mean_peaks_per_window": 10.2,
+    "implied_mean_bpm": 61.2,
+    "mean_snr_db": 29.97,
+    "clipping_incidence_pct": 8.0,
+    "morphology_assessment": "Severely attenuated or flatline microvascular waveform"
+  },
+  "Bradycardia": {
+    "total_windows_in_dataset": 634,
+    "sampled_windows": 25,
+    "mean_peaks_per_window": 9.3,
+    "implied_mean_bpm": 55.7,
+    "mean_snr_db": 41.74,
+    "clipping_incidence_pct": 0.0,
+    "morphology_assessment": "Low-frequency bradycardic pulse intervals"
+  },
+  "Cardiac_Paced": {
+    "total_windows_in_dataset": 400,
+    "sampled_windows": 25,
+    "mean_peaks_per_window": 13.2,
+    "implied_mean_bpm": 79.4,
+    "mean_snr_db": 39.36,
+    "clipping_incidence_pct": 0.0,
+    "morphology_assessment": "Complex irregular / multi-peaked morphology"
+  },
+  "Normal": {
+    "total_windows_in_dataset": 1193,
+    "sampled_windows": 25,
+    "mean_peaks_per_window": 22.0,
+    "implied_mean_bpm": 132.2,
+    "mean_snr_db": 27.11,
+    "clipping_incidence_pct": 32.0,
+    "morphology_assessment": "Regular physiological dicrotic notch morphology"
+  },
+  "Tachycardia": {
+    "total_windows_in_dataset": 1048,
+    "sampled_windows": 25,
+    "mean_peaks_per_window": 15.5,
+    "implied_mean_bpm": 92.9,
+    "mean_snr_db": 34.47,
+    "clipping_incidence_pct": 8.0,
+    "morphology_assessment": "Plausible rapid pulsatile activity"
+  },
+  "V_Flutter_Fib": {
+    "total_windows_in_dataset": 72,
+    "sampled_windows": 25,
+    "mean_peaks_per_window": 9.5,
+    "implied_mean_bpm": 56.9,
+    "mean_snr_db": 38.07,
+    "clipping_incidence_pct": 16.0,
+    "morphology_assessment": "Complex irregular / multi-peaked morphology"
+  },
+  "V_Tachycardia": {
+    "total_windows_in_dataset": 732,
+    "sampled_windows": 25,
+    "mean_peaks_per_window": 13.4,
+    "implied_mean_bpm": 80.2,
+    "mean_snr_db": 37.31,
+    "clipping_incidence_pct": 16.0,
+    "morphology_assessment": "Plausible rapid pulsatile activity"
+  }
+}

@@ -25,12 +25,38 @@ INDIAN_CITIES = [
     ("Nagpur", "Maharashtra"),
     ("Ahmedabad", "Gujarat"),
     ("Pune", "Maharashtra"),
-    ("Kochi", "Kerala")
+    ("Kochi", "Kerala"),
+    ("Lucknow", "Uttar Pradesh"),
+    ("Jaipur", "Rajasthan"),
+    ("Bhopal", "Madhya Pradesh"),
+    ("Chandigarh", "Punjab"),
+    ("Guwahati", "Assam"),
+    ("Patna", "Bihar"),
+    ("Bhubaneswar", "Odisha"),
+    ("Coimbatore", "Tamil Nadu"),
+    ("Indore", "Madhya Pradesh"),
+    ("Visakhapatnam", "Andhra Pradesh"),
+    ("Solapur (Rural District)", "Maharashtra"),
+    ("Belagavi (Rural Block)", "Karnataka"),
+    ("Varanasi (Tier-2)", "Uttar Pradesh"),
+    ("Thrissur", "Kerala")
 ]
 
-FIRST_NAMES_MALE = ["Ramesh", "Rajesh", "Amit", "Suresh", "Vikram", "Sunil", "Anil", "Manoj", "Deepak", "Sanjay", "Arjun", "Praveen", "Alok", "Devendra", "Girish"]
-FIRST_NAMES_FEMALE = ["Priya", "Sunita", "Anjali", "Meera", "Kavita", "Pooja", "Rekha", "Shalini", "Deepa", "Sneha", "Geeta", "Radha", "Nandini", "Anita", "Archana"]
-LAST_NAMES = ["Patel", "Sharma", "Verma", "Sen", "Nair", "Iyer", "Rao", "Reddy", "Gupta", "Kulkarni", "Deshmukh", "Choudhury", "Bose", "Mehta", "Singh"]
+FIRST_NAMES_MALE = [
+    "Ramesh", "Rajesh", "Amit", "Suresh", "Vikram", "Sunil", "Anil", "Manoj",
+    "Deepak", "Sanjay", "Arjun", "Praveen", "Alok", "Devendra", "Girish",
+    "Karthik", "Subhash", "Manish", "Gopal", "Harish", "Sachin", "Vijay", "Rohit"
+]
+FIRST_NAMES_FEMALE = [
+    "Priya", "Sunita", "Anjali", "Meera", "Kavita", "Pooja", "Rekha", "Shalini",
+    "Deepa", "Sneha", "Geeta", "Radha", "Nandini", "Anita", "Archana",
+    "Lakshmi", "Sarita", "Divya", "Swati", "Ritu", "Bhavna", "Kalyani", "Usha"
+]
+LAST_NAMES = [
+    "Patel", "Sharma", "Verma", "Sen", "Nair", "Iyer", "Rao", "Reddy",
+    "Gupta", "Kulkarni", "Deshmukh", "Choudhury", "Bose", "Mehta", "Singh",
+    "Banerjee", "Pillai", "Das", "Joshi", "Mishra", "Pandey", "Yadav", "Menon"
+]
 
 def generate_patient(patient_id: str, archetype: str = None) -> dict:
     if archetype == "high_risk_male":
@@ -194,15 +220,70 @@ def generate_cohort(num_patients: int = 100, output_file: str = "synthetic_patie
         patients.append(generate_patient(pid, arch))
 
     # Generate remaining cohort
-    for i in range(6, num_patients + 1):
-        pid = f"PAT{i:03d}"
+    for i in range(len(patients) + 1, num_patients + 1):
+        pid = f"PAT{i:04d}" if num_patients > 999 else f"PAT{i:03d}"
         patients.append(generate_patient(pid))
 
+    os.makedirs(os.path.dirname(output_file) if os.path.dirname(output_file) else ".", exist_ok=True)
     with open(output_file, "w") as f:
         json.dump(patients, f, indent=2)
 
     print(f"Generated {len(patients)} synthetic Indian patient EHR records saved to '{output_file}'.")
     return patients
 
+
+def generate_cohort_summary(patients: list, summary_file: str = "docs/synthetic_cohort_summary.json"):
+    total = len(patients)
+    males = sum(1 for p in patients if p["gender"] == "male")
+    females = total - males
+    ages = [p["age"] for p in patients]
+    risks = [p.get("cardiovascular_risk", {}).get("risk_category", "Unknown") for p in patients]
+    diabetes_count = sum(1 for p in patients if any("Diabetes" in c for c in p.get("clinical_history", {}).get("conditions", [])))
+    smokers = sum(1 for p in patients if p.get("lifestyle", {}).get("smoker", False))
+    hypertensive = sum(1 for p in patients if any("Hypertension" in c for c in p.get("clinical_history", {}).get("conditions", [])))
+
+    risk_dist = {}
+    for r in risks:
+        risk_dist[r] = risk_dist.get(r, 0) + 1
+
+    summary = {
+        "total_cohort_size": total,
+        "demographics": {
+            "males": males,
+            "male_pct": round((males / total) * 100, 1),
+            "females": females,
+            "female_pct": round((females / total) * 100, 1),
+            "mean_age": round(float(sum(ages) / total), 1),
+            "age_range": [min(ages), max(ages)]
+        },
+        "cardiometabolic_prevalence": {
+            "hypertension_cases": hypertensive,
+            "hypertension_pct": round((hypertensive / total) * 100, 1),
+            "type2_diabetes_cases": diabetes_count,
+            "type2_diabetes_pct": round((diabetes_count / total) * 100, 1),
+            "tobacco_smoker_cases": smokers,
+            "tobacco_smoker_pct": round((smokers / total) * 100, 1)
+        },
+        "recalibrated_framingham_risk_distribution": risk_dist,
+        "south_asian_factor_applied": 1.45,
+        "geographic_coverage": "24 Indian urban metropolitan centers, tier-2 cities, and rural district blocks"
+    }
+
+    os.makedirs(os.path.dirname(summary_file) if os.path.dirname(summary_file) else ".", exist_ok=True)
+    with open(summary_file, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+
+    print(f"Saved cohort demographic summary ({total} patients) to '{summary_file}'.")
+    return summary
+
+
 if __name__ == "__main__":
-    generate_cohort(100)
+    # 1. Maintain standard 100-patient cohort for default API contract
+    patients_100 = generate_cohort(100, "backend/synthetic_patients.json")
+    # Also save at root if needed
+    generate_cohort(100, "synthetic_patients.json")
+
+    # 2. Generate scaled 4,000-patient epidemiological cohort (Phase 5.3)
+    patients_4000 = generate_cohort(4000, "data/processed/synthetic_patients_4000.json")
+    generate_cohort_summary(patients_4000, "docs/synthetic_cohort_4000_summary.json")
+

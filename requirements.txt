@@ -18,6 +18,8 @@ scipy>=1.13.0
 # Machine Learning & Signal Processing
 scikit-learn>=1.4.0
 xgboost>=2.0.0
+torch>=2.0.0
+shap>=0.45.0
 joblib>=1.3.0
 wfdb>=4.1.0
 
