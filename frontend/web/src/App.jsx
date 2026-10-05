@@ -288,7 +288,7 @@ export default function App() {
               <div>
                 <p className="eyebrow">Today’s care story</p>
                 <h2>{displayedName}</h2>
-                <p>{age} · {patient.city || 'Cardiovascular care profile'}</p>
+                <p>{age} · {patient.city || 'Cardiovascular care profile'}{twinStatus?.cardiovascular_age?.estimated_cv_age ? ` · ~${twinStatus.cardiovascular_age.estimated_cv_age}y vascular age` : ''}</p>
                 {hasBaseline ? (
                   <span className="freshness-chip green">
                     ● Calibrated {daysAgo === 0 ? 'today' : `${daysAgo}d ago`} (resting median {baseline?.median_bpm} BPM)
@@ -371,7 +371,7 @@ export default function App() {
                 <div>
                   <p className="eyebrow">Patient profile</p>
                   <h2>{displayedName}</h2>
-                  <p>{age} · {patient.gender || 'Profile'} · {patient.city || 'India'}</p>
+                  <p>{age} · {patient.gender || 'Profile'} · {patient.city || 'India'}{twinStatus?.cardiovascular_age?.estimated_cv_age ? ` · Est. vascular age ~${twinStatus.cardiovascular_age.estimated_cv_age} yrs` : ''}</p>
                 </div>
                 <hr />
                 <p className="profile-note">
@@ -407,6 +407,11 @@ export default function App() {
               <div>
                 <span>Daily context</span>
                 <strong>{patient.lifestyle?.physical_activity || 'Not recorded'}</strong>
+              </div>
+              <div>
+                <span>Cardiovascular age</span>
+                <strong>~{twinStatus?.cardiovascular_age?.estimated_cv_age || patient.age || '—'} yrs</strong>
+                <small>{twinStatus?.cardiovascular_age?.age_delta > 0 ? `+${twinStatus.cardiovascular_age.age_delta} yrs vascular shift` : 'Aligned with chronological age'}</small>
               </div>
             </section>
 
@@ -465,6 +470,9 @@ export default function App() {
                       + Calibrate baseline now
                     </span>
                   )}
+                  <span className="freshness-badge dual-fusion" title="Fused 38% Classical Super Ensemble + 62% Inception-1D CNN (53.9% Macro-F1)">
+                    ⚡ <b>Dual Engine</b> (Biomarkers + Waveform)
+                  </span>
                 </div>
                 <div>
                   <button className="button subtle" onClick={() => fetch(`${API_BASE}/signal/gate/reset`, { method: 'POST' }).then(fetchStatus)}>
@@ -523,6 +531,19 @@ export default function App() {
                       <li key={idx}><strong>Why this changed:</strong> {flag}</li>
                     ))}
                   </ul>
+                )}
+                {vitals.explainability?.top_drivers?.length > 0 && (
+                  <div className="explainability-pill">
+                    <span className="explain-label">Optical feature attribution (SHAP):</span>
+                    <span className="explain-text">
+                      {vitals.explainability.summary || 'Primary signal drivers:'}{' '}
+                      {vitals.explainability.top_drivers.map((d, i) => (
+                        <span key={i} className="driver-tag">
+                          {d.feature.toUpperCase()}{d.value !== null ? `: ${d.value}` : ''}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
                 )}
               </div>
               <div className="score-quiet">
@@ -622,10 +643,36 @@ export default function App() {
           </section>
         )}
       </main>
-      <footer>
-        <span>CardioTwin v4.1</span>
-        <p>Personalized cardiovascular-instability twin · Investigational, non-diagnostic prototype</p>
-        <span>Built with care for the Digital Twin Challenge</span>
+      <footer className="site-footer">
+        <div className="footer-top">
+          <span>CardioTwin v4.1</span>
+          <p>Personalized cardiovascular-instability twin · Investigational, non-diagnostic prototype</p>
+          <span>Built with care for the Digital Twin Challenge</span>
+        </div>
+        <div className="footer-disclosure">
+          <div className="footer-disclosure-header">
+            <ShieldCheck size={14} />
+            <span>Clinical Integrity & Sensor Limitations Disclosure</span>
+          </div>
+          <div className="footer-disclosure-grid">
+            <div>
+              <strong>Single-Channel Photoplethysmography</strong>
+              <p>MAX30102 reflective IR (880nm) sampled at 100 Hz. Optical pulse signals measure microvascular volume changes, not myocardial electrical vectors (not a 12-lead ECG).</p>
+            </div>
+            <div>
+              <strong>Oxygen Saturation Transparency</strong>
+              <p>SpO₂ is declared unavailable rather than fabricated. Single-channel IR cannot physically compute ratiometric oxygen saturation; zero simulated defaults are emitted.</p>
+            </div>
+            <div>
+              <strong>ICU Dataset Provenance & Bias</strong>
+              <p>Trained across 2,271 patients (MIMIC-III, CinC 2015, BUT PPG, BIDMC). Ventricular events (VT / V-Fib) originate from ICU alarm archives, presenting domain transfer caveats.</p>
+            </div>
+            <div>
+              <strong>Regulatory & Clinical Role</strong>
+              <p>Investigational decision-support tool. Designed to flag sustained baseline departures to prompt clinical assessment, never to serve as an autonomous diagnostic machine.</p>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );

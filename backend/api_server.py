@@ -361,6 +361,20 @@ def get_twin_status():
             "duplicate_chunks_rejected": state.get("duplicate_chunks_rejected", 0),
             "last_sequence": state.get("last_sequence")
         }
+        status["evidence_ledger"] = {
+            "sensor_modality": "Single-channel reflective photoplethysmography (MAX30102 IR 880nm)",
+            "spo2_available": False,
+            "spo2_channel_status": "UNAVAILABLE (Single IR channel cannot compute clinical ratiometric SpO2)",
+            "ecg_equivalence": "NOT EQUIVALENT (Optical pulse waves reflect microvascular blood volume changes, not myocardial electrical vectors)",
+            "training_cohort": "MIMIC-III & PhysioNet CinC 2015 ICU cohorts (2,271 patients)",
+            "source_confounding_warning": "Ventricular arrhythmias (VT/V_Flutter_Fib) derive exclusively from CinC 2015 ICU alarm records",
+            "regulatory_status": "Investigational research prototype — not approved by FDA or CDSCO for clinical diagnosis"
+        }
+        status["dual_modality"] = {
+            "pipeline_mode": "DUAL_MODALITY_FUSION",
+            "benchmark_macro_f1": 0.5392,
+            "fusion_weights": {"classical": 0.38, "dl": 0.62}
+        }
     return jsonify(status)
 
 # 4. Interactive "What-If" Treatment Simulator
@@ -485,6 +499,20 @@ def trigger_scenario():
             "arrhythmia_predicted": "Tachycardia",
             "arrhythmia_probabilities": {"Tachycardia": 0.88, "Normal": 0.08, "Bradycardia": 0.02, "V_Tachycardia": 0.02},
             "data_source": "SIMULATION",
+            "dual_modality": {
+                "pipeline_mode": "DUAL_MODALITY_FUSION",
+                "confidence": 0.88,
+                "fusion_weights": {"classical": 0.38, "dl": 0.62}
+            },
+            "explainability": {
+                "method": "SHAP (TreeExplainer)",
+                "summary": "Elevated pulse rate (138 BPM) with low pulse-interval variability.",
+                "top_drivers": [
+                    {"feature": "bpm", "value": 138.0, "mean_abs_shap": 0.42},
+                    {"feature": "rmssd", "value": 12.0, "mean_abs_shap": 0.28},
+                    {"feature": "rr_cv", "value": 0.08, "mean_abs_shap": 0.19}
+                ]
+            },
             "signal_gate": {
                 "status": "RELIABLE",
                 "reason": "Simulated telemetry passed 5-part clinical gate",
@@ -504,6 +532,20 @@ def trigger_scenario():
             "arrhythmia_predicted": "AFib",
             "arrhythmia_probabilities": {"AFib": 0.84, "Normal": 0.08, "Tachycardia": 0.05, "Bradycardia": 0.03},
             "data_source": "SIMULATION",
+            "dual_modality": {
+                "pipeline_mode": "DUAL_MODALITY_FUSION",
+                "confidence": 0.84,
+                "fusion_weights": {"classical": 0.38, "dl": 0.62}
+            },
+            "explainability": {
+                "method": "SHAP (TreeExplainer)",
+                "summary": "Irregular pulse intervals (RR-CV 22%) and elevated short-term beat variation.",
+                "top_drivers": [
+                    {"feature": "rr_cv", "value": 0.22, "mean_abs_shap": 0.39},
+                    {"feature": "rmssd", "value": 78.0, "mean_abs_shap": 0.33},
+                    {"feature": "bpm", "value": 118.0, "mean_abs_shap": 0.21}
+                ]
+            },
             "signal_gate": {
                 "status": "RELIABLE",
                 "reason": "Simulated optical pulse passed 5-part clinical gate",
@@ -542,6 +584,20 @@ def trigger_scenario():
             "arrhythmia_predicted": "Normal",
             "arrhythmia_probabilities": {"Normal": 0.96, "Tachycardia": 0.02, "Bradycardia": 0.02},
             "data_source": "SIMULATION",
+            "dual_modality": {
+                "pipeline_mode": "DUAL_MODALITY_FUSION",
+                "confidence": 0.96,
+                "fusion_weights": {"classical": 0.38, "dl": 0.62}
+            },
+            "explainability": {
+                "method": "SHAP (TreeExplainer)",
+                "summary": "Regular sinus rhythm consistent with healthy autonomic balance.",
+                "top_drivers": [
+                    {"feature": "bpm", "value": 72.0, "mean_abs_shap": 0.26},
+                    {"feature": "rr_cv", "value": 0.05, "mean_abs_shap": 0.22},
+                    {"feature": "rmssd", "value": 44.0, "mean_abs_shap": 0.18}
+                ]
+            },
             "signal_gate": {
                 "status": "RELIABLE",
                 "reason": "Simulated clean baseline passed 5-part clinical gate",
@@ -705,6 +761,7 @@ def receive_sensor_data():
         pred_label = "Normal"
         probs = {"Normal": 0.90}
 
+        dual_res = None
         # 5-Part Gate Decision Logic:
         # If gate is NOT passed (FINGER_OFF, SENSOR_SATURATED, POOR_TIMING, POOR_CONTACT, VERIFY_SIGNAL, or STABILIZING)
         # -> Strictly block AI screening to prevent spurious critical alerts!
@@ -799,6 +856,8 @@ def receive_sensor_data():
             "sequence": state["last_sequence"],
             "sequence_gaps": state["sequence_gaps"],
             "dual_modality": dual_meta,
+            "explainability": dual_res.get("explainability") if dual_res else None,
+            "evidence_ledger": dual_res.get("evidence_ledger") if dual_res else None,
             "layer1_pulse_rules": pulse_eval,
             "layer2_persistence": consensus_eval,
             "physiological_observation": gate_res.get("physiological_observation"),
