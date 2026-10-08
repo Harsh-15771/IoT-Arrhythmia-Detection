@@ -59,6 +59,8 @@
 
 ## 👥 Team Details
 
+**Team Name:** Root Access (Solo)
+
 | Role | Name | Institution |
 |:---|:---|:---|
 | **Lead Developer & ML Engineer** | Harsh Mishra | Visvesvaraya National Institute of Technology, Nagpur |
