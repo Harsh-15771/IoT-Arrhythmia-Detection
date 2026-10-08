@@ -43,9 +43,7 @@
 - [Screenshots](#-screenshots)
 - [Technical Highlights](#-technical-highlights--core-innovations)
 - [AI/ML Model Details](#-aiml-model--framework-details)
-- [Verified Performance Matrix](#-verified-performance-matrix)
 - [Technology Stack](#-technology-stack)
-- [Engineering Decisions](#-engineering-decisions)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Running Tests](#-running-the-test-suite)
@@ -279,64 +277,7 @@ Nested 5-Fold StratifiedGroupKFold (Patient-Isolated, Zero Leakage)
 - **What-If Simulation:** SBP reduction, statin therapy, smoking cessation, diabetes management
 - **Biological Vascular Age** estimation based on cardiovascular risk factor profile
 
----
-
-## 📊 Verified Performance Matrix
-
-### Standalone Model Benchmarks (5-Fold Stratified Grouped CV)
-
-| Model | Macro-F1 (8 Classes) | Accuracy | Evaluation Protocol |
-|:---|:---:|:---:|:---|
-| Random Guess Baseline | 12.50% | 12.50% | — |
-| Classical Super Ensemble (XGB+RF+ET) | **48.00%** | 58.32% | 5-Fold StratifiedGroupKFold (Patient-Isolated) |
-| Inception-1D CNN (Champion) | **51.81%** | 56.37% | 5-Fold StratifiedGroupKFold (Patient-Isolated) |
-
-### Nested Dual-Modality Fusion (Canonical Benchmark)
-
-| Metric | Value |
-|:---|:---:|
-| **Macro-F1** | **53.92%** |
-| **Accuracy** | 59.21% |
-| **Balanced Accuracy** | 57.46% |
-| **Weighted F1** | 59.70% |
-| **95% Confidence Interval** | $54.09\% \pm 5.45\%$ |
-| **Optimal Fusion Weights** | 38% Classical + 62% Deep Learning |
-| **Validation Scheme** | Nested 5-Fold StratifiedGroupKFold (Zero Patient Leakage) |
-| **Total Patients** | 2,271 |
-| **Total Windows** | 4,683 |
-
-### Deep Learning Architecture Tournament
-
-| Rank | Architecture | Macro-F1 | Accuracy | Training Time |
-|:---:|:---|:---:|:---:|:---:|
-| 🥇 | **Inception-1D** | 51.81% | 56.37% | 105s |
-| 🥈 | ResNet-1D | 49.44% | 54.96% | 77s |
-| 🥉 | Standard 1D-CNN | 49.16% | 54.30% | 60s |
-| 4 | CRNN-BiLSTM | 45.04% | 51.46% | 40s |
-
-### Per-Class Performance (Dual Fusion)
-
-| Rhythm Class | Precision | Recall | F1-Score | Support |
-|:---|:---:|:---:|:---:|:---:|
-| AFib | 46.70% | 63.75% | 53.91% | 400 |
-| Asystole | 39.75% | 61.76% | 48.37% | 204 |
-| Bradycardia | 64.94% | 70.98% | 67.82% | 634 |
-| Cardiac Paced | 28.11% | 47.50% | 35.32% | 400 |
-| Normal | 95.73% | 67.73% | 79.33% | 1,193 |
-| Tachycardia | 61.81% | 69.18% | 65.29% | 1,048 |
-| V Flutter/Fib | 42.86% | 54.17% | 47.85% | 72 |
-| V Tachycardia | 52.48% | 24.59% | 33.49% | 732 |
-
-> **Honest Disclosure:** These are leak-free, patient-isolated cross-validation numbers — not inflated train-set metrics. We report what the model actually achieves on unseen patients.
-
-### Operational Safety Metrics
-
-| Metric | Result |
-|:---|:---:|
-| **Finger-Off Detection** | 100% (Gated by Signal Reliability Gate) |
-| **Motion False Alarms** | 0 false persistent alarms (Multi-window consensus) |
-| **BPM MAE (Resting)** | ≤ 2.0 BPM |
-| **Automated Tests** | 49/49 Passing (100%) |
+> 📊 **Verified Performance Benchmarks:** CardioTwin strictly reports leak-free, patient-isolated cross-validation metrics (Nested Dual Fusion: **53.92% Macro-F1**, Inception-1D Champion: **51.81% Macro-F1**, Classical Super Ensemble: **48.00% Macro-F1** across 2,271 patients). For complete 5-fold cross-validation tables, per-class sensitivity/specificity, deep learning tournament results, and operational safety audits, see [`docs/PERFORMANCE_MATRIX.md`](docs/PERFORMANCE_MATRIX.md) and [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md).
 
 ---
 
@@ -371,52 +312,7 @@ Nested 5-Fold StratifiedGroupKFold (Patient-Isolated, Zero Leakage)
 
 ---
 
-## 🧠 Engineering Decisions
-
-### Why Dual-Modality Fusion Over a Single Model?
-
-**Decision:** Blend classical biomarker ensemble (27 features) with deep 1D CNN waveform analysis.
-
-**Rationale:**
-- **Complementary strengths.** Classical features capture inter-beat timing statistics (RMSSD, pNN50, RR-CV) that summarize cardiac physiology. The CNN captures raw morphological waveform patterns the hand-crafted features miss.
-- **Measurable improvement.** Fusion achieves 53.92% Macro-F1 vs. 51.81% (CNN alone) and 48.00% (classical alone) — a statistically meaningful gain verified across 5 nested outer folds.
-- **Honest weight selection.** Fusion weights are discovered per outer fold via inner-fold grid search. No single fixed weight is cherry-picked.
-
-### Why Inception-1D Over Transformers or LSTMs?
-
-**Decision:** Inception-1D multi-scale convolutional architecture.
-
-**Rationale:**
-- **Multi-scale temporal patterns.** Cardiac rhythms manifest at different time scales (individual beats vs. multi-beat patterns). Inception modules capture both simultaneously through parallel convolution branches with different kernel sizes.
-- **Won the tournament.** Beat ResNet-1D, Standard 1D-CNN, and CRNN-BiLSTM on the same data with identical evaluation protocol. The selection is empirical, not assumed.
-- **Lightweight.** 393K parameters (1.61 MB) — deployable on edge devices without GPU.
-
-### Why Personal Baseline Instead of Population Norms?
-
-**Decision:** Every instability score is anchored to the patient's own empirical 2-minute resting calibration.
-
-**Rationale:**
-- **72 BPM is not universal.** A marathon runner's resting HR is 48 BPM; an elderly diabetic patient may rest at 88 BPM. Population-default thresholds generate false alarms for both.
-- **PPG ≠ ECG.** Pulse Rate Variability (PRV) from optical PPG agrees best with HRV at seated rest. The calibration protocol is designed around this physiological constraint.
-- **Refusal to guess.** If calibration hasn't been performed, the system returns `null` — never a fabricated baseline.
-
-### Why Median + MAD Instead of Mean + Standard Deviation?
-
-**Decision:** Robust non-parametric statistics for baseline and departure detection.
-
-**Rationale:**
-- **Outlier resistance.** A single motion artifact spike that produces a 300 BPM reading would shift the mean significantly. The median is unaffected.
-- **MAD scales correctly.** For normal distributions, $\text{MAD} \times 1.4826 \approx \sigma$, but MAD remains valid even when the distribution is skewed (common in physiological data).
-- **Clinically appropriate.** A "sustained departure" should reflect persistent physiological change, not a single noisy window.
-
-### Why Framingham + 1.45× South Asian Recalibration?
-
-**Decision:** Framingham Cox proportional hazards with a $1.45\times$ ethnic recalibration multiplier.
-
-**Rationale:**
-- **Most validated risk model.** Framingham remains the most extensively validated cardiovascular risk prediction framework globally, with 50+ years of prospective cohort data.
-- **Known underestimation.** The original Framingham cohort was predominantly White Americans. South Asians have demonstrably higher cardiovascular risk at the same risk factor levels — documented across INTERHEART, UK Biobank, and QRISK3 studies.
-- **1.45× is conservative.** ESC/EAS guidelines recommend ethnic multipliers between 1.3–1.5 for South Asian populations. We use 1.45× and cite the source openly.
+> 🧠 **Engineering Decisions & Tradeoffs:** For detailed rationale on why dual-modality fusion outperforms single models, why Inception-1D won over LSTMs/Transformers, personal baseline calibration vs. population thresholds, MAD non-parametric statistics, and South Asian Framingham recalibration, see [`docs/ENGINEERING_DECISIONS.md`](docs/ENGINEERING_DECISIONS.md).
 
 ---
 
@@ -628,9 +524,11 @@ python scripts/evaluate_dual_pipeline_v2.py
 | Document | Description |
 |:---|:---|
 | [`docs/EXECUTIVE_SUMMARY.md`](docs/EXECUTIVE_SUMMARY.md) | 1-page hackathon pitch & value proposition for judges |
-| [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md) | Patient-isolated multi-modal benchmark, architectures & source bias |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | End-to-end multimodal system architecture & data flow |
+| [`docs/ENGINEERING_DECISIONS.md`](docs/ENGINEERING_DECISIONS.md) | Architectural choices, non-parametric statistics & clinical tradeoffs |
+| [`docs/PERFORMANCE_MATRIX.md`](docs/PERFORMANCE_MATRIX.md) | 5-Fold patient-isolated CV benchmarks, tournament & safety audits |
+| [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md) | Model card: Inception-1D CNN + Classical Super Ensemble specifications |
 | [`docs/DATA_CARD.md`](docs/DATA_CARD.md) | Dataset provenance (2,271 patients) & PhysioNet DUA compliance |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | End-to-end multimodal system architecture |
 | [`docs/RESEARCH_EVIDENCE_MAPPING.md`](docs/RESEARCH_EVIDENCE_MAPPING.md) | 15 peer-reviewed papers mapped directly to code implementation |
 | [`docs/SHAP_EXPLAINABILITY_REPORT.md`](docs/SHAP_EXPLAINABILITY_REPORT.md) | SHAP TreeExplainer attributions for 27 biomarkers |
 | [`docs/SOURCE_CONFOUNDING_AUDIT.md`](docs/SOURCE_CONFOUNDING_AUDIT.md) | Cross-dataset provenance & class concentration audit |

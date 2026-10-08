@@ -3,7 +3,7 @@
 **Model Card Version:** 4.1.0-sentinel  
 **Date:** October 2026  
 **Format:** Mitchell et al. (FAT* 2019) / Google Responsible AI Model Card Standard  
-**Authors:** Harshvardhan & CardioTwin Sentinel Engineering Team  
+**Authors:** Harsh Mishra & CardioTwin Sentinel Engineering Team  
 **Evaluation Standard:** Patient-Isolated Stratified GroupKFold (Zero Data Leakage)  
 
 ---
