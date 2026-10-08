@@ -69,6 +69,10 @@ scratch/
 *.tmp
 *.bak
 *~
+PLAN.md
+DONE.md
+PLAN*.md
+DONE*.md
 
 # Runtime Patient Baselines (Persist directory structure via .gitkeep)
 backend/baselines/*.json
