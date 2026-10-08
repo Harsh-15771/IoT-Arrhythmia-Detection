@@ -169,31 +169,31 @@ CardioTwin Sentinel addresses **personalized cardiovascular screening and cardio
 
 <table width="100%">
   <tr>
-    <th width="50%">Home — Patient Profile & Biological Vascular Age</th>
-    <th width="50%">Live Check — Real-Time Waveform & SHAP Attribution</th>
+    <th width="50%">Home — Patient Profile & Normal Baseline</th>
+    <th width="50%">Live Check — Real-Time Waveform & Telemetry Integrity</th>
   </tr>
   <tr>
     <td align="center">
-      <code>📷 Screenshot placeholder — ./screenshots/01_home.png</code>
-      <br><i>(Patient overview with instability score, biological vascular age, and dual-engine indicator)</i>
+      <img src="./screenshots/01_home.png" alt="CardioTwin Home Screen" width="100%" />
+      <br><i>Patient overview with quiet baseline reference, clinical context, and dual-engine status</i>
     </td>
     <td align="center">
-      <code>📷 Screenshot placeholder — ./screenshots/02_live_check.png</code>
-      <br><i>(Live PPG waveform with SHAP feature attribution pills and baseline departure context)</i>
+      <img src="./screenshots/02_live_check.png" alt="Live Check Waveform" width="100%" />
+      <br><i>Real-time optical PPG waveform (100 Hz, ±0.8ms jitter), signal gate validation, and baseline comparison</i>
     </td>
   </tr>
   <tr>
     <th width="50%">What-If Treatment Simulator</th>
-    <th width="50%">Digital Twin Profile & Evidence Ledger</th>
+    <th width="50%">Digital Twin Profile & Long-Term Context</th>
   </tr>
   <tr>
     <td align="center">
-      <code>📷 Screenshot placeholder — ./screenshots/03_whatif.png</code>
-      <br><i>(Framingham Cox simulator showing 10-year CVD risk reduction from SBP control and statin therapy)</i>
+      <img src="./screenshots/03_whatif.png" alt="What-If Treatment Simulator" width="100%" />
+      <br><i>Educational Framingham Cox simulator demonstrating projected 10-year CVD risk reduction from therapies</i>
     </td>
     <td align="center">
-      <code>📷 Screenshot placeholder — ./screenshots/04_twin_profile.png</code>
-      <br><i>(Digital twin with personal baseline stats, evidence ledger, and clinical disclosure)</i>
+      <img src="./screenshots/04_twin_profile.png" alt="Digital Twin Profile" width="100%" />
+      <br><i>Digital twin health story with Framingham perspective, biological vascular age, and longitudinal context</i>
     </td>
   </tr>
 </table>

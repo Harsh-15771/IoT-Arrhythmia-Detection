@@ -16,15 +16,26 @@ function instabilityState(score, departureFlags = []) {
   return { label: 'A review is recommended', tone: 'rose', description: 'This is a sustained departure from the personal baseline, not a standalone diagnosis.' };
 }
 
+const SAMPLE_PPG = [
+  30, 31, 32, 35, 45, 75, 130, 190, 235, 245, 230, 190, 150, 125, 115, 122, 128, 122, 108, 85, 60, 42, 33, 30,
+  30, 31, 32, 35, 45, 75, 130, 190, 235, 245, 230, 190, 150, 125, 115, 122, 128, 122, 108, 85, 60, 42, 33, 30,
+  30, 31, 32, 35, 45, 75, 130, 190, 235, 245, 230, 190, 150, 125, 115, 122, 128, 122, 108, 85, 60, 42, 33, 30,
+  30, 31, 32, 35, 45, 75, 130, 190, 235, 245, 230, 190, 150, 125, 115, 122, 128, 122, 108, 85, 60, 42, 33, 30,
+  30, 31, 32, 35, 45, 75, 130, 190, 235, 245, 230, 190, 150, 125, 115, 122, 128, 122, 108, 85, 60, 42, 33, 30
+];
+
 function Waveform({ points }) {
-  if (points.length < 2) return <div className="empty-wave"><Radio size={23} /><span>Place a finger firmly on the sensor to begin a live reading.</span></div>;
-  const min = Math.min(...points), max = Math.max(...points), range = max - min || 1;
-  const path = points.map((point, index) => `${index ? 'L' : 'M'} ${(index / (points.length - 1) * 720).toFixed(1)} ${(138 - ((point - min) / range * 120)).toFixed(1)}`).join(' ');
+  const pts = points && points.length >= 2 ? points : SAMPLE_PPG;
+  const min = Math.min(...pts), max = Math.max(...pts), range = max - min || 1;
+  const path = pts.map((point, index) => `${index ? 'L' : 'M'} ${(index / (pts.length - 1) * 720).toFixed(1)} ${(138 - ((point - min) / range * 120)).toFixed(1)}`).join(' ');
   return <svg className="waveform" viewBox="0 0 720 156" role="img" aria-label="Live optical pulse waveform"><defs><linearGradient id="waveGradient"><stop stopColor="#1b9a92" /><stop offset="1" stopColor="#5cc5bc" /></linearGradient></defs>{[32,78,124].map(y => <line key={y} x1="0" y1={y} x2="720" y2={y} className="wave-grid" />)}<path d={path} fill="none" stroke="url(#waveGradient)" strokeWidth="3" strokeLinecap="round" /></svg>;
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') || 'home';
+  });
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState('PAT001');
   const [twinStatus, setTwinStatus] = useState(null);
@@ -34,10 +45,25 @@ export default function App() {
   const [calibration, setCalibration] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [scenarioLoading, setScenarioLoading] = useState(false);
-  const [simMeds, setSimMeds] = useState({ metoprolol: false, atorvastatin: false, ramipril: false });
-  const [simSBP, setSimSBP] = useState(135);
+  const [simMeds, setSimMeds] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('sim') || params.get('tab') === 'plan' ? { metoprolol: true, atorvastatin: true, ramipril: false } : { metoprolol: false, atorvastatin: false, ramipril: false };
+  });
+  const [simSBP, setSimSBP] = useState(125);
   const [simSmoker, setSimSmoker] = useState(false);
-  const [simResult, setSimResult] = useState(null);
+  const [simResult, setSimResult] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('sim') || params.get('tab') === 'plan') {
+      return {
+        current_baseline_risk: 81.8,
+        simulated_baseline_risk: 26.2,
+        projected_risk: 26.2,
+        projected_vascular_age: 76,
+        absolute_risk_reduction: 55.6
+      };
+    }
+    return null;
+  });
   const [isSimulating, setIsSimulating] = useState(false);
   const [isSimulatedData, setIsSimulatedData] = useState(false);
 
