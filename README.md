@@ -114,8 +114,8 @@ CardioTwin Sentinel addresses **personalized cardiovascular screening and cardio
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                          STREAM 1: PATIENT EHR                              │
-│  Demographics, Vitals, Lipid Panel, HbA1c, Smoking, South Asian Multiplier   │
-│  Framingham 10-Year Cardiovascular Event Risk (Cox Proportional Hazards)   │
+│  Demographics, Vitals, Lipid Panel, HbA1c, Smoking, South Asian Multiplier  │
+│  Framingham 10-Year Cardiovascular Event Risk (Cox Proportional Hazards)    │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
                                        ▼
