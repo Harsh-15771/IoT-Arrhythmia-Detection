@@ -388,19 +388,11 @@ IoT-Arrhythmia-Detection/
 │   ├── test_cardiotwin.py                  # Core: clinical engine, signal gate, baseline, API (41 tests)
 │   └── test_instability_target_validation.py  # Physiological target validation (8 tests)
 │
-├── docs/                                    # Technical Documentation (11 Documents)
-│   ├── EXECUTIVE_SUMMARY.md                # 1-page hackathon pitch & value proposition
-│   ├── MODEL_CARD.md                       # ML benchmark, architectures & source bias disclosure
-│   ├── DATA_CARD.md                        # Dataset provenance (2,271 patients) & PhysioNet DUA
-│   ├── ARCHITECTURE.md                     # End-to-end multimodal system architecture
-│   ├── RESEARCH_EVIDENCE_MAPPING.md        # 15 peer-reviewed papers mapped to code
-│   ├── SHAP_EXPLAINABILITY_REPORT.md       # SHAP TreeExplainer attributions for 27 biomarkers
-│   ├── SOURCE_CONFOUNDING_AUDIT.md         # Cross-dataset provenance & class concentration audit
-│   ├── SOUTH_ASIAN_RISK_CALIBRATION.md     # 1.45× Framingham multiplier clinical justification
-│   ├── HARDWARE_BOM_COST_ANALYSIS.md       # Bill of Materials (~₹1,165) vs clinical alternatives
-│   ├── ABDM_FHIR_INTEGRATION.md            # Ayushman Bharat & HL7 FHIR R4 specification
-│   ├── PRIVACY_FEDERATED_ARCHITECTURE.md   # Privacy-preserving edge & federated learning
-│   └── VISUAL_SEGMENT_AUDIT.md             # Visual PPG waveform morphology verification
+├── docs/                                    # Technical Documentation (4 Authoritative Documents)
+│   ├── EXECUTIVE_SUMMARY.md                # 1-page executive pitch, architecture highlights & scorecard
+│   ├── ARCHITECTURE.md                     # End-to-end system design, engineering rationale, BOM & ABDM FHIR
+│   ├── MODEL_CARD.md                       # AI model benchmarks, 2,271-patient cohort, SHAP XAI & audits
+│   └── CLINICAL_EVALUATION.md              # Clinical evidence, 15-paper literature mapping & South Asian risk
 │
 ├── requirements.txt                         # Python dependencies (pinned)
 ├── .env.example                             # Environment variable template
@@ -521,21 +513,12 @@ python scripts/evaluate_dual_pipeline_v2.py
 
 ## 📑 Documentation Index
 
-| Document | Description |
+| Document | Focus & Coverage |
 |:---|:---|
-| [`docs/EXECUTIVE_SUMMARY.md`](docs/EXECUTIVE_SUMMARY.md) | 1-page hackathon pitch & value proposition for judges |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | End-to-end multimodal system architecture & data flow |
-| [`docs/ENGINEERING_DECISIONS.md`](docs/ENGINEERING_DECISIONS.md) | Architectural choices, non-parametric statistics & clinical tradeoffs |
-| [`docs/PERFORMANCE_MATRIX.md`](docs/PERFORMANCE_MATRIX.md) | 5-Fold patient-isolated CV benchmarks, tournament & safety audits |
-| [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md) | Model card: Inception-1D CNN + Classical Super Ensemble specifications |
-| [`docs/DATA_CARD.md`](docs/DATA_CARD.md) | Dataset provenance (2,271 patients) & PhysioNet DUA compliance |
-| [`docs/RESEARCH_EVIDENCE_MAPPING.md`](docs/RESEARCH_EVIDENCE_MAPPING.md) | 15 peer-reviewed papers mapped directly to code implementation |
-| [`docs/SHAP_EXPLAINABILITY_REPORT.md`](docs/SHAP_EXPLAINABILITY_REPORT.md) | SHAP TreeExplainer attributions for 27 biomarkers |
-| [`docs/SOURCE_CONFOUNDING_AUDIT.md`](docs/SOURCE_CONFOUNDING_AUDIT.md) | Cross-dataset provenance & class concentration audit |
-| [`docs/SOUTH_ASIAN_RISK_CALIBRATION.md`](docs/SOUTH_ASIAN_RISK_CALIBRATION.md) | $1.45\times$ Framingham multiplier clinical justification |
-| [`docs/HARDWARE_BOM_COST_ANALYSIS.md`](docs/HARDWARE_BOM_COST_ANALYSIS.md) | Bill of Materials (~₹1,165 / $14) vs clinical alternatives |
-| [`docs/ABDM_FHIR_INTEGRATION.md`](docs/ABDM_FHIR_INTEGRATION.md) | Ayushman Bharat Digital Mission & HL7 FHIR R4 specification |
-| [`docs/PRIVACY_FEDERATED_ARCHITECTURE.md`](docs/PRIVACY_FEDERATED_ARCHITECTURE.md) | Privacy-preserving edge & federated learning architecture |
+| [`docs/EXECUTIVE_SUMMARY.md`](docs/EXECUTIVE_SUMMARY.md) | **1-Page Executive Pitch & Scorecard:** Value proposition, 6 wow factors, and benchmark summary. |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | **End-to-End System Technical Reference:** Dual clinical streams, engineering decisions, ESP32 BOM (₹1,165), edge privacy (DPDP 2023), and ABDM / HL7 FHIR R4 integration. |
+| [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md) | **Unified AI Model & Data Card:** 2,271-patient cohort provenance, leak-free 5-fold CV benchmarks (53.92% Macro-F1), DL tournament, SHAP explainability, and source confounding audits. |
+| [`docs/CLINICAL_EVALUATION.md`](docs/CLINICAL_EVALUATION.md) | **Clinical Rigor & Evidence:** $1.45\times$ South Asian Framingham recalibration, interactive "What-If" treatment simulator, and 15 peer-reviewed papers mapped to code. |
 
 ---
 

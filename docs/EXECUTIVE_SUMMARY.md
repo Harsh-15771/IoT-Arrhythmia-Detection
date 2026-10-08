@@ -2,7 +2,8 @@
 
 **Project Title:** CardioTwin Sentinel: A Personalized Cardiovascular & Cardiometabolic Digital Twin  
 **Target:** Digital Twin Challenge 2026 (Happiest Health)  
-**Lead Developer:** Harshvardhan  
+**Lead Developer:** Harsh Mishra (Team: Root Access)  
+**Institution:** Visvesvaraya National Institute of Technology (VNIT), Nagpur  
 **Repository:** [Harsh-15771/IoT-Arrhythmia-Detection](https://github.com/Harsh-15771/IoT-Arrhythmia-Detection)  
 
 ---
@@ -72,8 +73,8 @@ Cardiovascular disease is the leading cause of mortality in India (28% of all de
 | **Automated Testing Suite** | Unit & Target Validation Tests | **49 / 49 PASSING** | `tests/test_cardiotwin.py` + `tests/test_instability_target_validation.py` |
 | **Hardware Optical Sampling** | Sampling Rate & Jitter | **100.0 Hz ($\pm 0.4$ ms)** | FreeRTOS Core 1 Hardware ISR Timer |
 | **Signal Quality Yield** | Post-Settling Usable Windows | **$\ge 92.4\%$** | Decoupled 5-Part Signal Reliability Gate |
-| **Estimated Hardware BOM** | Total Unit Cost | **₹1,165 (~$14)** | Bulk sourcing analysis (`docs/HARDWARE_BOM_COST_ANALYSIS.md`) |
-| **Interoperability** | Standards Alignment | **HL7 FHIR R4 / ABDM** | Export specification (`docs/ABDM_FHIR_INTEGRATION.md`) |
+| **Estimated Hardware BOM** | Total Unit Cost | **₹1,165 (~$14)** | Sourcing analysis ([`docs/ARCHITECTURE.md`](ARCHITECTURE.md)) |
+| **Interoperability** | Standards Alignment | **HL7 FHIR R4 / ABDM** | Export specification ([`docs/ARCHITECTURE.md`](ARCHITECTURE.md)) |
 
 ---
 
@@ -104,8 +105,8 @@ Cardiovascular disease is the leading cause of mortality in India (28% of all de
 
 ## 👥 Project Team & Submission Details
 
-- **Author / Developer:** Harshvardhan
-- **Academic Context:** Machine Learning & Internet-of-Things (IoT) Research
+- **Author / Developer:** Harsh Mishra (Team: Root Access)
+- **Institution:** Visvesvaraya National Institute of Technology (VNIT), Nagpur
 - **Competition:** Digital Twin Challenge 2026 (Organized by Happiest Health)
 - **Codebase License:** MIT License with Open Science Research Disclaimer
 
