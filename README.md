@@ -532,8 +532,6 @@ python scripts/evaluate_dual_pipeline_v2.py
 | **Project Presentation** | PDF / PPT | `📎 Placeholder — upload to ./docs/CardioTwin_Presentation.pdf` |
 | **Demo Video** | YouTube (Unlisted) | `📎 Placeholder — paste YouTube link after upload` |
 
-> All files and links will be publicly accessible without additional permissions once uploaded.
-
 ---
 
 ## 🔮 Future Scope
