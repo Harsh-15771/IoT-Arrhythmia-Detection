@@ -17,13 +17,13 @@ CardioTwin Sentinel is an evidence-aware cardiovascular digital twin that fuses 
                       +--------------------+---------------------+
                                            |
                                            v
-+------------------------+      +--------------------+      +-------------------------+
-| STREAM 2: IoT SENSORS  | ---> |   MULTIMODAL FUSION| ---> |  INTERACTIVE CLINICIAN  |
-| ESP32 + MAX30102 PPG   |      |  DIGITAL TWIN CORE |      |        DASHBOARD        |
-| 100 Hz Optical Pulse   |      | Layer 1: Base CVD  |      | Dynamic Trajectory      |
++------------------------+      +---------------------+      +-------------------------+
+| STREAM 2: IoT SENSORS  | ---> |   MULTIMODAL FUSION | ---> |  INTERACTIVE CLINICIAN  |
+| ESP32 + MAX30102 PPG   |      |  DIGITAL TWIN CORE  |      |        DASHBOARD        |
+| 100 Hz Optical Pulse   |      | Layer 1: Base CVD   |      | Dynamic Trajectory      |
 | SQI Artifact Rejection | ---> | Layer 2: Instability| ---> | What-If Simulator       |
-| 27 Biomarkers + XGBoost|      | Layer 3: EMA State |      | Alert Auditing Panel    |
-+------------------------+      +--------------------+      +-------------------------+
+| 27 Biomarkers + XGBoost|      | Layer 3: EMA State  |      | Alert Auditing Panel    |
++------------------------+      +---------------------+      +-------------------------+
 ```
 
 ### Stream 1: Longitudinal Cardiometabolic State (Layer 1)

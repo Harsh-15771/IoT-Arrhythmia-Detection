@@ -40,11 +40,11 @@ Cardiovascular disease is the leading cause of mortality in India (28% of all de
 │                                                                             │
 │  3. CLINICAL WHAT-IF INTERVENTION SIMULATOR                                 │
 │     Bridges acute IoT telemetry with 10-year longitudinal CVD epidemiology  │
-│     Simulates SBP reductions, statin therapy, and smoking cessation        │
+│     Simulates SBP reductions, statin therapy, and smoking cessation         │
 │     Features 1.45x South Asian recalibration factor for Indian patients     │
 │                                                                             │
 │  4. GAME-THEORETIC XAI & EVIDENCE LEDGER                                    │
-│     SHAP TreeExplainer unpacks decisions across 27 physiological markers   │
+│     SHAP TreeExplainer unpacks decisions across 27 physiological markers    │
 │     Machine-readable Evidence Ledger discloses SpO2, ECG, and data limits   │
 │     Domain confounding audit reveals ICU dataset signatures                 │
 │                                                                             │
