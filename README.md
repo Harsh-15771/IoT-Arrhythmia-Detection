@@ -20,10 +20,10 @@
   <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React" />
   <img src="https://img.shields.io/badge/PyTorch-Inception_1D-EE4C2C?logo=pytorch&logoColor=white" alt="PyTorch" />
-  <img src="https://img.shields.io/badge/XGBoost-Super_Ensemble-02569B?logo=xgboost&logoColor=white" alt="XGBoost" />
-  <img src="https://img.shields.io/badge/ESP32-FreeRTOS_Dual_Core-E7352C?logo=espressif&logoColor=white" alt="ESP32" />
+  <img src="https://img.shields.io/badge/XGBoost-Super_Ensemble-02569B" alt="XGBoost" />
+  <img src="https://img.shields.io/badge/ESP32-FreeRTOS_100Hz-E7352C?logo=espressif&logoColor=white" alt="ESP32" />
   <img src="https://img.shields.io/badge/Flask-Socket.IO-000000?logo=flask&logoColor=white" alt="Flask" />
-  <img src="https://img.shields.io/badge/Tests-49%2F49_Passing-22C55E?logo=pytest&logoColor=white" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-49_Passed-22C55E?logo=pytest&logoColor=white" alt="Tests" />
   <img src="https://img.shields.io/badge/License-MIT-blue?logo=opensourceinitiative&logoColor=white" alt="MIT License" />
 </p>
 
