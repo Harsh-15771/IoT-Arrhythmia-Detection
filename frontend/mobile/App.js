@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,665 +7,1428 @@ import {
   SafeAreaView,
   StatusBar,
   Dimensions,
-  Animated,
-  Easing,
   ScrollView,
+  Platform,
 } from "react-native";
-import Svg, { Polyline, Line } from "react-native-svg";
+import Svg, {
+  Path,
+  Line,
+  Defs,
+  LinearGradient,
+  Stop,
+  Rect,
+  Circle,
+  Polyline,
+} from "react-native-svg";
 
-// ─── CONFIG ──────────────────────────────────────────────
-const SERVER_IP = "10.139.96.96"; // ← Your laptop's IPv4
+// ─── CONFIGURATION ──────────────────────────────────────────
+const SERVER_IP = "10.139.96.96";
 const SERVER_PORT = 5000;
 const BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
-const POLL_MS = 800;
-// ─────────────────────────────────────────────────────────
+const POLL_MS = 1000;
+// ─────────────────────────────────────────────────────────────
 
-// AbortSignal.timeout is not available in Expo Go's JS engine,
-// so we use a manual AbortController + setTimeout instead.
-function fetchWithTimeout(url, options = {}, timeoutMs = 4000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  return fetch(url, { ...options, signal: controller.signal }).finally(() =>
-    clearTimeout(timer),
+const { width: SW } = Dimensions.get("window");
+const GRAPH_W = SW - 48;
+const GRAPH_H = 150;
+
+// ─── CARDIOTWIN DESIGN SYSTEM PALETTE (MATCHES WEB APP) ──────
+const T = {
+  bg: "#F8F7F2",
+  card: "#FFFFFF",
+  cardBorder: "rgba(25, 59, 58, 0.09)",
+  cardBorderStrong: "rgba(25, 59, 58, 0.16)",
+  primary: "#167C76",
+  primaryHover: "#136A65",
+  teal: "#188F89",
+  tealDark: "#1B403E",
+  tealDeep: "#1D4F4C",
+  textPrimary: "#1B403E",
+  textSecondary: "#5B716E",
+  textMuted: "#889895",
+  waveStart: "#1B9A92",
+  waveEnd: "#5CC5BC",
+  greenBg: "#E4F2E9",
+  greenText: "#186A5E",
+  amberBg: "#F9EDD6",
+  amberText: "#8A5A1E",
+  roseBg: "#F8E0DC",
+  roseText: "#9B3733",
+  blueBg: "#E6F0F0",
+  blueText: "#2C5D66",
+  chipBg: "#EFF4ED",
+  chipText: "#4F716D",
+};
+
+// ─── SAMPLE REALISTIC PULSE DATA FOR OFFLINE / DEMO ─────────
+const SAMPLE_PPG = [
+  32, 33, 35, 42, 60, 95, 150, 210, 245, 250, 230, 185, 145, 125, 115, 120,
+  128, 125, 110, 85, 58, 42, 35, 32, 32, 33, 35, 42, 60, 95, 150, 210, 245,
+  250, 230, 185, 145, 125, 115, 120, 128, 125, 110, 85, 58, 42, 35, 32, 32,
+  33, 35, 42, 60, 95, 150, 210, 245, 250, 230, 185, 145, 125, 115, 120, 128,
+  125, 110, 85, 58, 42, 35, 32, 32, 33, 35, 42, 60, 95, 150, 210, 245, 250,
+  230, 185, 145, 125, 115, 120, 128, 125, 110, 85, 58, 42, 35, 32,
+];
+
+// ─── ICON COMPONENTS (PURE SVG — ZERO NATIVE DEPENDENCIES) ───
+function HeartIcon({ size = 18, color = T.primary }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12 7v4l2.5 1.5"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </Svg>
   );
 }
 
-const { width: SW } = Dimensions.get("window");
-const GRAPH_W = SW - 40;
-const GRAPH_H = 180;
+function PulseIcon({ size = 18, color = T.primary }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M3 12h4l3 8l4 -16l3 8h4"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
 
-const C = {
-  bg: "#080C14",
-  card: "#0F1724",
-  cardBorder: "#1A2540",
-  green: "#00E5A0",
-  red: "#FF4C6A",
-  yellow: "#FFD166",
-  blue: "#4CC9F0",
-  purple: "#9B72CF",
-  textPrimary: "#EDF2FF",
-  textMuted: "#5A6A8A",
-  graphLine: "#00E5A0",
-  gridLine: "#1A2540",
-};
+function UserIcon({ size = 18, color = T.primary }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" />
+      <Path
+        d="M6 20v-1a6 6 0 0 1 12 0v1"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
 
-function PPGGraph({ data, isRecording }) {
-  if (!data || data.length < 2) {
-    return (
-      <View
-        style={[
-          styles.graphBox,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
-        <Text
-          style={{ color: C.textMuted, fontFamily: "monospace", fontSize: 12 }}
-        >
-          {isRecording ? "Waiting for signal..." : "No data yet"}
-        </Text>
-      </View>
-    );
-  }
-  const display = data.slice(-80);
-  const min = Math.min(...display);
-  const max = Math.max(...display);
+function SparklesIcon({ size = 18, color = T.primary }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <Path d="M19 17l1 3l3 1l-3 1l-1 3l-1-3l-3-1l3-1l1-3z" fill={color} />
+    </Svg>
+  );
+}
+
+function ShieldCheckIcon({ size = 16, color = T.primary }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 3a12 12 0 0 0 8.5 3.5A12 12 0 0 1 12 21A12 12 0 0 1 3.5 6.5A12 12 0 0 0 12 3"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M9 12l2 2l4 -4"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+function CheckIcon({ size = 14, color = T.primary }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M5 13l4 4L19 7"
+        stroke={color}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+// ─── WAVEFORM COMPONENT (MATCHES DESKTOP GRADIENT) ───────────
+function WaveformCanvas({ points }) {
+  const pts = points && points.length >= 8 ? points : SAMPLE_PPG;
+  const min = Math.min(...pts);
+  const max = Math.max(...pts);
   const range = max - min || 1;
-  const pad = 10;
-  const W = GRAPH_W - pad * 2;
-  const H = GRAPH_H - pad * 2;
-  const points = display
+  const pad = 12;
+  const w = GRAPH_W - pad * 2;
+  const h = GRAPH_H - pad * 2;
+
+  const path = pts
     .map((v, i) => {
-      const x = pad + (i / (display.length - 1)) * W;
-      const y = pad + (1 - (v - min) / range) * H;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
+      const x = pad + (i / (pts.length - 1)) * w;
+      const y = pad + (1 - (v - min) / range) * h;
+      return `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
     })
     .join(" ");
+
   return (
-    <View style={styles.graphBox}>
+    <View style={styles.waveBox}>
       <Svg width={GRAPH_W} height={GRAPH_H}>
-        {[0.25, 0.5, 0.75].map((t, i) => (
+        <Defs>
+          <LinearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset="0%" stopColor={T.waveStart} />
+            <Stop offset="100%" stopColor={T.waveEnd} />
+          </LinearGradient>
+        </Defs>
+        {/* Subtle hospital-grade reference grid lines */}
+        {[0.25, 0.5, 0.75].map((fraction, idx) => (
           <Line
-            key={i}
+            key={idx}
             x1={pad}
-            y1={pad + t * H}
+            y1={pad + fraction * h}
             x2={GRAPH_W - pad}
-            y2={pad + t * H}
-            stroke={C.gridLine}
+            y2={pad + fraction * h}
+            stroke="rgba(24, 143, 137, 0.12)"
             strokeWidth="1"
-            strokeDasharray="3,5"
+            strokeDasharray="4 4"
           />
         ))}
-        <Polyline
-          points={points}
+        {/* Continuous organic PPG waveform */}
+        <Path
+          d={path}
           fill="none"
-          stroke={C.graphLine}
-          strokeWidth="2.5"
-          strokeLinejoin="round"
+          stroke="url(#waveGrad)"
+          strokeWidth="2.8"
           strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </Svg>
     </View>
   );
 }
 
-function StatCard({ label, value, unit, color }) {
-  return (
-    <View style={[styles.statCard, { borderColor: color + "33" }]}>
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
-      {unit ? (
-        <Text style={[styles.statUnit, { color: color + "99" }]}>{unit}</Text>
-      ) : null}
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
+// ─── MAIN COMPONENT ──────────────────────────────────────────
 export default function App() {
-  const [appState, setAppState] = useState("idle");
-  const [ppgData, setPpgData] = useState([]);
-  const [prediction, setPrediction] = useState("---");
-  const [confidence, setConfidence] = useState(0);
-  const [bpm, setBpm] = useState(0);
-  const [alertFlag, setAlertFlag] = useState(false);
-  const [sampleCount, setSampleCount] = useState(0);
-  const [statusMsg, setStatusMsg] = useState("Ready");
+  const [activeTab, setActiveTab] = useState("live"); // 'live' | 'twin' | 'plan'
   const [connected, setConnected] = useState(false);
-  const [error, setError] = useState("");
-  const [csvPath, setCsvPath] = useState("");
-  const [isFetchingResult, setIsFetchingResult] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isCalibrating, setIsCalibrating] = useState(false);
 
-  // Use a ref so the poll callback always sees latest appState
-  const appStateRef = useRef(appState);
+  // Core Clinical State (Defaults populated for instant demo/presentation mode)
+  const [patientName, setPatientName] = useState("Praveen Choudhury");
+  const [patientAge, setPatientAge] = useState(52);
+  const [patientCity, setPatientCity] = useState("Nagpur, India");
+  const [bpm, setBpm] = useState(68);
+  const [gateStatus, setGateStatus] = useState("NORMAL_SINUS");
+  const [instabilityScore, setInstabilityScore] = useState(14);
+  const [baselineBpm, setBaselineBpm] = useState(64);
+  const [hasBaseline, setHasBaseline] = useState(true);
+  const [baseRisk, setBaseRisk] = useState(26.2);
+  const [vascularAge, setVascularAge] = useState(76);
+  const [ppgPoints, setPpgPoints] = useState(SAMPLE_PPG);
+
+  // Simulation Controls State
+  const [simMeds, setSimMeds] = useState({
+    metoprolol: true,
+    atorvastatin: true,
+    ramipril: false,
+  });
+  const [simSBP, setSimSBP] = useState(130);
+  const [simSmoker, setSimSmoker] = useState(false);
+  const [simProjectedRisk, setSimProjectedRisk] = useState(26.2);
+
+  // ─── POLLING SYNC WITH FLASK BACKEND ────────────────────────
   useEffect(() => {
-    appStateRef.current = appState;
-  }, [appState]);
-
-  const alertAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (alertFlag) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(alertAnim, {
-            toValue: 1.03,
-            duration: 700,
-            easing: Easing.ease,
-            useNativeDriver: true,
-          }),
-          Animated.timing(alertAnim, {
-            toValue: 1,
-            duration: 700,
-            easing: Easing.ease,
-            useNativeDriver: true,
-          }),
-        ]),
-      ).start();
-    } else {
-      alertAnim.stopAnimation();
-      alertAnim.setValue(1);
-    }
-  }, [alertFlag]);
-
-  // ── Core result-apply function (shared by poll and manual fetch) ──
-  const applyResult = (data) => {
-    // Accept any truthy prediction string (including "Normal")
-    const pred = data.prediction ?? "";
-    if (pred && pred !== "---") {
-      setPrediction(pred);
-      setConfidence(data.confidence ?? 0);
-      setBpm(data.bpm ?? 0);
-      setAlertFlag(data.alert ?? false);
-      if (data.csv_path) setCsvPath(data.csv_path);
-      setAppState("result");
-      setError("");
-      return true;
-    }
-    return false;
-  };
-
-  // ── Poll /stream — also auto-detects when analysis is done ──
-  useEffect(() => {
-    const poll = async () => {
+    let isMounted = true;
+    const fetchStatus = async () => {
       try {
-        const res = await fetchWithTimeout(`${BASE_URL}/stream`, {}, 2000);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch(`${BASE_URL}/twin/status`, {
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) throw new Error("Server not ready");
         const data = await res.json();
-        setConnected(true);
-        setError("");
 
-        if (data.ppg && data.ppg.length > 0) setPpgData(data.ppg);
-        if (data.bpm !== undefined) setBpm(data.bpm);
-        if (data.alert !== undefined) setAlertFlag(data.alert);
-        if (data.sample_count !== undefined) setSampleCount(data.sample_count);
-        if (data.status_msg) setStatusMsg(data.status_msg);
-
-        // ── AUTO-TRANSITION: if we're analysing and server says done, fetch result ──
-        if (appStateRef.current === "analysing" && data.is_running === false) {
-          // Fetch /status to get the ML result
-          try {
-            const sRes = await fetchWithTimeout(`${BASE_URL}/status`, {}, 3000);
-            const sData = await sRes.json();
-            applyResult(sData);
-          } catch (e) {
-            // Will retry next poll cycle
-            console.warn("Auto-fetch result failed:", e.message);
+        if (isMounted) {
+          setConnected(true);
+          if (data.patient_ehr?.name) setPatientName(data.patient_ehr.name);
+          if (data.patient_ehr?.age) setPatientAge(data.patient_ehr.age);
+          if (data.patient_ehr?.city) setPatientCity(data.patient_ehr.city);
+          if (data.current_vitals?.bpm) setBpm(Math.round(data.current_vitals.bpm));
+          if (data.signal_gate?.status) setGateStatus(data.signal_gate.status);
+          if (data.personal_instability?.instability_score !== undefined) {
+            setInstabilityScore(data.personal_instability.instability_score);
+          }
+          if (data.personal_baseline?.median_bpm) {
+            setBaselineBpm(Math.round(data.personal_baseline.median_bpm));
+          }
+          if (data.has_calibrated_baseline !== undefined) {
+            setHasBaseline(data.has_calibrated_baseline);
+          }
+          if (data.base_clinical_risk !== undefined) {
+            setBaseRisk(Number(data.base_clinical_risk).toFixed(1));
+          }
+          if (data.cardiovascular_age?.estimated_cv_age) {
+            setVascularAge(data.cardiovascular_age.estimated_cv_age);
+          }
+          if (data.is_calibrating !== undefined) {
+            setIsCalibrating(data.is_calibrating);
           }
         }
       } catch (e) {
-        setConnected(false);
-        setError("Cannot reach server — check IP & WiFi");
-        console.warn("Poll error:", e.message);
+        if (isMounted) {
+          // Graceful fallback: maintain offline presentation state
+          setConnected(false);
+        }
       }
     };
-    const id = setInterval(poll, POLL_MS);
-    poll(); // immediate first call
-    return () => clearInterval(id);
+
+    fetchStatus();
+    const interval = setInterval(fetchStatus, POLL_MS);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
-  // ── Manual GET RESULT button ──
-  const fetchResult = async () => {
-    setIsFetchingResult(true);
-    setError("");
+  // ─── ACTION HANDLERS ───────────────────────────────────────
+  const toggleRecording = async () => {
+    const next = !isRecording;
+    setIsRecording(next);
     try {
-      const res = await fetchWithTimeout(`${BASE_URL}/status`, {}, 5000);
+      await fetch(`${BASE_URL}/${next ? "start" : "stop"}`, { method: "POST" });
+    } catch (e) {}
+  };
 
-      if (!res.ok) {
-        setError(`Server error: HTTP ${res.status}`);
-        return;
+  const startCalibration = async () => {
+    setIsCalibrating(true);
+    try {
+      await fetch(`${BASE_URL}/baseline/calibrate`, { method: "POST" });
+    } catch (e) {}
+  };
+
+  const runScenario = async (scenarioKey) => {
+    try {
+      await fetch(`${BASE_URL}/twin/scenario`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scenario: scenarioKey }),
+      });
+      setActiveTab("live");
+    } catch (e) {
+      // Offline fallback: demonstrate the clinical shift locally
+      if (scenarioKey === "stress_tachycardia") {
+        setBpm(112);
+        setInstabilityScore(64);
+        setGateStatus("EXTREME_RATE");
+      } else if (scenarioKey === "afib_episode") {
+        setBpm(88);
+        setInstabilityScore(78);
+        setGateStatus("IRREGULAR_PULSE");
+      } else {
+        setBpm(64);
+        setInstabilityScore(12);
+        setGateStatus("NORMAL_SINUS");
       }
-
-      const data = await res.json();
-      console.log("GET RESULT response:", JSON.stringify(data)); // debug log
-
-      const applied = applyResult(data);
-      if (!applied) {
-        // prediction is missing or "---" — tell the user
-        setStatusMsg(
-          data.status_msg
-            ? `Not ready: ${data.status_msg}`
-            : "Analysis not ready yet — try again in a moment",
-        );
-      }
-    } catch (e) {
-      console.error("fetchResult error:", e.message);
-      setError(`Fetch failed: ${e.message}`);
-    } finally {
-      setIsFetchingResult(false);
+      setActiveTab("live");
     }
   };
 
-  const handleStart = async () => {
-    setError("");
-    try {
-      const res = await fetch(`${BASE_URL}/start`, { method: "POST" });
-      const data = await res.json();
-      setAppState("recording");
-      setPpgData([]);
-      setPrediction("---");
-      setConfidence(0);
-      setBpm(0);
-      setAlertFlag(false);
-      setSampleCount(0);
-      setStatusMsg("Recording...");
-      if (data.csv) setCsvPath(data.csv);
-    } catch (e) {
-      console.error("Start error:", e.message);
-      setError(`Cannot start: ${e.message}`);
+  const calculateSimulation = () => {
+    let r = parseFloat(baseRisk) || 81.8;
+    if (simMeds.atorvastatin) r *= 0.72;
+    if (simMeds.metoprolol) r *= 0.85;
+    if (simMeds.ramipril) r *= 0.88;
+    if (simSBP < 130) r *= 0.82;
+    if (simSmoker) r *= 1.35;
+    setSimProjectedRisk(Math.min(100, Math.max(5, r)).toFixed(1));
+  };
+
+  // Instability Tone Classifier
+  const getInstabilityTone = () => {
+    if (!hasBaseline || instabilityScore === null) {
+      return {
+        label: "Awaiting Baseline",
+        desc: "2-minute quiet calibration required",
+        bg: T.blueBg,
+        text: T.blueText,
+      };
     }
-  };
-
-  const handleStop = async () => {
-    setError("");
-    try {
-      await fetch(`${BASE_URL}/stop`, { method: "POST" });
-      setAppState("analysing");
-      setStatusMsg("Analysing… tap GET RESULT when ready");
-    } catch (e) {
-      console.error("Stop error:", e.message);
-      setError(`Cannot stop: ${e.message}`);
+    if (instabilityScore <= 20) {
+      return {
+        label: "Within Usual Range",
+        desc: "Pulse dynamics match calibrated baseline",
+        bg: T.greenBg,
+        text: T.greenText,
+      };
     }
+    if (instabilityScore <= 50) {
+      return {
+        label: "Mild Baseline Shift",
+        desc: "Slight autonomic or pulse elevation noticed",
+        bg: T.amberBg,
+        text: T.amberText,
+      };
+    }
+    return {
+      label: "Sustained Departure",
+      desc: "Prompt clinical context & symptom review",
+      bg: T.roseBg,
+      text: T.roseText,
+    };
   };
 
-  const handleReset = () => {
-    setAppState("idle");
-    setPpgData([]);
-    setPrediction("---");
-    setConfidence(0);
-    setBpm(0);
-    setAlertFlag(false);
-    setSampleCount(0);
-    setStatusMsg("Ready");
-    setCsvPath("");
-    setError("");
-  };
-
-  const predColor =
-    prediction === "Normal"
-      ? C.green
-      : prediction === "---"
-        ? C.textMuted
-        : C.red;
-
-  const secs = (sampleCount / 100).toFixed(1);
+  const tone = getInstabilityTone();
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
+      <StatusBar barStyle="dark-content" backgroundColor={T.bg} />
+
+      {/* ─── APP HEADER ────────────────────────────────────── */}
+      <View style={styles.header}>
+        <View style={styles.brandRow}>
+          <View style={styles.brandMark}>
+            <HeartIcon size={17} color="#FFFFFF" />
+          </View>
+          <Text style={styles.brandTitle}>cardiotwin</Text>
+        </View>
+
+        <View style={styles.headerTools}>
+          <View
+            style={[
+              styles.statusPill,
+              { backgroundColor: connected ? T.greenBg : T.amberBg },
+            ]}
+          >
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: connected ? "#10B981" : "#F59E0B" },
+              ]}
+            />
+            <Text
+              style={[
+                styles.statusPillText,
+                { color: connected ? T.greenText : T.amberText },
+              ]}
+            >
+              {connected ? "LIVE GATEWAY" : "PRESENTATION DEMO"}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* ─── PATIENT CONTEXT CHIP ──────────────────────────── */}
+      <View style={styles.patientBanner}>
+        <View style={styles.avatarCircle}>
+          <Text style={styles.avatarText}>{patientName.slice(0, 1)}</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.patientName}>{patientName}</Text>
+          <Text style={styles.patientMeta}>
+            {patientAge}y · {patientCity} · Est. Vascular Age ~{vascularAge}y
+          </Text>
+        </View>
+        {hasBaseline ? (
+          <View style={styles.baselinePill}>
+            <Text style={styles.baselinePillText}>
+              ✓ Baseline: {baselineBpm} BPM
+            </Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.calibratePill}
+            onPress={startCalibration}
+          >
+            <Text style={styles.calibratePillText}>+ Calibrate</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* ─── MAIN CONTENT AREA ─────────────────────────────── */}
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.headerTitle}>PPG Monitor</Text>
-            <Text style={styles.headerSub}>Heart Disease Detection</Text>
-          </View>
-          <View style={{ alignItems: "center", gap: 4 }}>
+        {/* ════ TAB 1: LIVE CHECK ════ */}
+        {activeTab === "live" && (
+          <View style={styles.tabContent}>
+            {/* Waveform Card */}
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <View>
+                  <Text style={styles.eyebrow}>STREAM 2 TELEMETRY</Text>
+                  <Text style={styles.cardTitle}>Live Optical Pulse</Text>
+                </View>
+                <View style={styles.dualEngineBadge}>
+                  <Text style={styles.dualEngineText}>⚡ DUAL ENGINE</Text>
+                </View>
+              </View>
+
+              <WaveformCanvas points={ppgPoints} />
+
+              <View style={styles.vitalsRow}>
+                <View style={styles.vitalCol}>
+                  <Text style={styles.vitalLabel}>PULSE RATE</Text>
+                  <Text style={styles.vitalValue}>
+                    {bpm > 0 ? bpm : "—"}{" "}
+                    <Text style={styles.vitalUnit}>BPM</Text>
+                  </Text>
+                  <Text style={styles.vitalSub}>Optical IBI tracking</Text>
+                </View>
+
+                <View style={[styles.vitalCol, styles.vitalBorderCol]}>
+                  <Text style={styles.vitalLabel}>SIGNAL GATE</Text>
+                  <Text style={styles.vitalWord}>
+                    {gateStatus.replace(/_/g, " ").toLowerCase()}
+                  </Text>
+                  <Text style={styles.vitalSub}>5-Part Decoupled Gate</Text>
+                </View>
+
+                <View style={styles.vitalCol}>
+                  <Text style={styles.vitalLabel}>SpO₂ OXYGEN</Text>
+                  <Text style={styles.vitalWordMuted}>Not measured</Text>
+                  <Text style={styles.vitalSub}>Single IR transparency</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Personal Instability Assessment Card */}
             <View
               style={[
-                styles.dot,
-                { backgroundColor: connected ? C.green : C.red },
+                styles.instabilityCard,
+                { backgroundColor: tone.bg, borderColor: tone.text + "33" },
               ]}
-            />
-            <Text
-              style={[styles.connLabel, { color: connected ? C.green : C.red }]}
             >
-              {connected ? "LIVE" : "OFF"}
-            </Text>
-          </View>
-        </View>
+              <View style={styles.instabilityLeft}>
+                <Text style={[styles.eyebrow, { color: tone.text }]}>
+                  PERSONAL REFERENCE DEPARTURE
+                </Text>
+                <Text style={[styles.instabilityTitle, { color: tone.text }]}>
+                  {tone.label}
+                </Text>
+                <Text style={styles.instabilityDesc}>{tone.desc}</Text>
 
-        {/* Error */}
-        {!!error && (
-          <View style={styles.errorBanner}>
-            <Text style={styles.errorText}>⚠ {error}</Text>
-          </View>
-        )}
-
-        {/* Graph */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>LIVE PPG WAVEFORM</Text>
-            {appState === "recording" && (
-              <Text
-                style={[
-                  styles.badge,
-                  { backgroundColor: C.red + "22", color: C.red },
-                ]}
-              >
-                ● REC {secs}s
-              </Text>
-            )}
-          </View>
-          <PPGGraph data={ppgData} isRecording={appState === "recording"} />
-        </View>
-
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <StatCard
-            label="HEART RATE"
-            value={bpm > 0 ? Math.round(bpm) : "--"}
-            unit="bpm"
-            color={C.blue}
-          />
-          <StatCard
-            label="SAMPLES"
-            value={sampleCount > 0 ? sampleCount : "--"}
-            unit={sampleCount > 0 ? `${secs}s` : ""}
-            color={C.purple}
-          />
-          <StatCard
-            label="CONFIDENCE"
-            value={confidence > 0 ? `${(confidence * 100).toFixed(0)}%` : "--"}
-            color={C.yellow}
-          />
-        </View>
-
-        {/* Result Card */}
-        {appState === "analysing" ? (
-          <View style={[styles.resultCard, { borderColor: C.yellow + "44" }]}>
-            <Text style={styles.resultLabel}>ANALYSING</Text>
-            <Text style={[styles.resultValue, { color: C.yellow }]}>
-              Please wait...
-            </Text>
-            <Text style={styles.resultSub}>
-              Running ML model on recorded data
-            </Text>
-          </View>
-        ) : appState === "result" ? (
-          <Animated.View
-            style={[
-              styles.resultCard,
-              {
-                borderColor: predColor + "55",
-                transform: [{ scale: alertAnim }],
-              },
-            ]}
-          >
-            {alertFlag && (
-              <View style={styles.alertBadge}>
-                <Text style={styles.alertBadgeText}>⚠ ALERT</Text>
+                <View style={styles.shapPill}>
+                  <Text style={styles.shapText}>
+                    SHAP Drivers:{" "}
+                    <Text style={{ fontWeight: "700" }}>BPM (0.42)</Text> ·{" "}
+                    <Text style={{ fontWeight: "700" }}>RR_MEAN (0.28)</Text>
+                  </Text>
+                </View>
               </View>
-            )}
-            <Text style={styles.resultLabel}>DIAGNOSIS</Text>
-            <Text style={[styles.resultValue, { color: predColor }]}>
-              {prediction}
-            </Text>
-            <Text style={[styles.confidenceText, { color: predColor + "99" }]}>
-              {(confidence * 100).toFixed(1)}% confidence • BPM:{" "}
-              {Math.round(bpm)}
-            </Text>
-            <Text style={styles.resultSub}>
-              {prediction === "Normal"
-                ? "✓ No abnormalities detected in your PPG signal"
-                : `${prediction} pattern detected in your PPG signal.\nPlease consult a doctor.`}
-            </Text>
-            {!!csvPath && (
-              <Text style={styles.csvNote}>
-                💾 {csvPath.split(/[\\/]/).pop()}
+
+              <View style={styles.scoreCircle}>
+                <Text style={[styles.scoreValue, { color: tone.text }]}>
+                  {instabilityScore ?? "—"}
+                </Text>
+                <Text style={styles.scoreSub}>out of 100</Text>
+              </View>
+            </View>
+
+            {/* Quick Record Action Button */}
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                { backgroundColor: isRecording ? "#B6464B" : T.primary },
+              ]}
+              onPress={toggleRecording}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.actionButtonText}>
+                {isRecording ? "■ STOP RECORDING" : "● RECORD LIVE TELEMETRY"}
               </Text>
-            )}
-          </Animated.View>
-        ) : (
-          <View style={[styles.resultCard, { borderColor: C.cardBorder }]}>
-            <Text style={styles.resultLabel}>DIAGNOSIS</Text>
-            <Text style={[styles.resultValue, { color: C.textMuted }]}>
-              ---
-            </Text>
-            <Text style={styles.resultSub}>
-              {appState === "idle"
-                ? "Press START, place finger on sensor, then press STOP"
-                : "Recording in progress..."}
-            </Text>
+            </TouchableOpacity>
+
+            {/* Clinical Guardrail Footer */}
+            <View style={styles.disclaimerBox}>
+              <ShieldCheckIcon size={15} color={T.textSecondary} />
+              <Text style={styles.disclaimerText}>
+                Non-diagnostic decision-support. Optical pulse screening requires
+                confirmatory 12-lead ECG.
+              </Text>
+            </View>
           </View>
         )}
 
-        {/* Buttons */}
-        <View style={styles.btnArea}>
-          {appState === "idle" && (
-            <TouchableOpacity
-              style={[styles.btn, { backgroundColor: C.green }]}
-              onPress={handleStart}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.btnText}>▶ START RECORDING</Text>
-            </TouchableOpacity>
-          )}
-
-          {appState === "recording" && (
-            <TouchableOpacity
-              style={[styles.btn, { backgroundColor: C.red }]}
-              onPress={handleStop}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.btnText}>■ STOP & ANALYSE</Text>
-            </TouchableOpacity>
-          )}
-
-          {appState === "analysing" && (
-            <View style={{ gap: 10 }}>
-              <View
-                style={[
-                  styles.btn,
-                  {
-                    backgroundColor: C.yellow + "22",
-                    borderWidth: 1,
-                    borderColor: C.yellow,
-                  },
-                ]}
-              >
-                <Text style={[styles.btnText, { color: C.yellow }]}>
-                  ⏳ ANALYSING...
+        {/* ════ TAB 2: YOUR TWIN ════ */}
+        {activeTab === "twin" && (
+          <View style={styles.tabContent}>
+            {/* Longitudinal 10-Yr CVD Risk Card */}
+            <View style={styles.riskLetterCard}>
+              <Text style={styles.riskEyebrow}>STREAM 1: CARDIOMETABOLIC STATE</Text>
+              <Text style={styles.riskHuge}>{baseRisk}%</Text>
+              <Text style={styles.riskSub}>
+                Estimated 10-Year Cardiovascular Event Risk
+              </Text>
+              <Text style={styles.riskExplain}>
+                Framingham Cox proportional hazards baseline incorporating a
+                1.45× South Asian recalibration factor for Indian primary care.
+              </Text>
+              <View style={styles.riskFooterRow}>
+                <ShieldCheckIcon size={14} color="#C5DFCF" />
+                <Text style={styles.riskFooterText}>
+                  Independent of acute optical fluctuations
                 </Text>
               </View>
+            </View>
+
+            {/* Vitals Strip */}
+            <View style={styles.vitalsStrip}>
+              <View style={styles.vitalsStripItem}>
+                <Text style={styles.stripLabel}>Resting BP</Text>
+                <Text style={styles.stripVal}>145/92 mmHg</Text>
+              </View>
+              <View style={[styles.vitalsStripItem, styles.vitalBorderCol]}>
+                <Text style={styles.stripLabel}>Resting Pulse</Text>
+                <Text style={styles.stripVal}>78 BPM</Text>
+              </View>
+              <View style={styles.vitalsStripItem}>
+                <Text style={styles.stripLabel}>Daily Context</Text>
+                <Text style={styles.stripVal}>Moderate</Text>
+              </View>
+            </View>
+
+            {/* Modifiable Risk Levers */}
+            <View style={styles.card}>
+              <Text style={styles.eyebrow}>PREVENTION TRAJECTORY</Text>
+              <Text style={styles.cardTitle}>Modifiable Risk Factors</Text>
+
+              {[
+                {
+                  f: "Blood Pressure Optimization",
+                  d: "Projected -28% risk shift under SBP < 130",
+                },
+                {
+                  f: "Lipid-Lowering Statin Therapy",
+                  d: "Projected -22% risk shift with LDL-C reduction",
+                },
+                {
+                  f: "Physical Activity & Diet",
+                  d: "Improves autonomic vagal tone & RMSSD",
+                },
+              ].map((item, idx) => (
+                <View key={idx} style={styles.leverRow}>
+                  <View style={styles.checkCircle}>
+                    <CheckIcon size={12} color={T.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.leverTitle}>{item.f}</Text>
+                    <Text style={styles.leverDesc}>{item.d}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* ════ TAB 3: EXPLORE CHANGES (WHAT-IF) ════ */}
+        {activeTab === "plan" && (
+          <View style={styles.tabContent}>
+            <View style={styles.card}>
+              <Text style={styles.eyebrow}>INTERACTIVE WHAT-IF SIMULATOR</Text>
+              <Text style={styles.cardTitle}>Preventive Scenario Modeling</Text>
+              <Text style={styles.planSub}>
+                Explore the projected 5–10 year impact of pharmacological and
+                lifestyle interventions under sustained adherence.
+              </Text>
+
+              {/* Medication Chips */}
+              <Text style={styles.fieldLabel}>PHARMACOLOGICAL AGENTS</Text>
+              <View style={styles.chipsRow}>
+                {[
+                  { k: "atorvastatin", label: "Atorvastatin 20mg" },
+                  { k: "metoprolol", label: "Metoprolol 50mg" },
+                  { k: "ramipril", label: "Ramipril 5mg" },
+                ].map((item) => (
+                  <TouchableOpacity
+                    key={item.k}
+                    style={[
+                      styles.choiceChip,
+                      simMeds[item.k] && styles.choiceChipSelected,
+                    ]}
+                    onPress={() => {
+                      setSimMeds((p) => ({ ...p, [item.k]: !p[item.k] }));
+                      calculateSimulation();
+                    }}
+                  >
+                    {simMeds[item.k] && <CheckIcon size={12} color={T.primary} />}
+                    <Text
+                      style={[
+                        styles.choiceText,
+                        simMeds[item.k] && styles.choiceTextSelected,
+                      ]}
+                    >
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* BP Stepper */}
+              <Text style={styles.fieldLabel}>
+                SYSTOLIC BLOOD PRESSURE: {simSBP} mmHg
+              </Text>
+              <View style={styles.stepperRow}>
+                {[115, 125, 135, 150].map((val) => (
+                  <TouchableOpacity
+                    key={val}
+                    style={[
+                      styles.stepperBtn,
+                      simSBP === val && styles.stepperBtnActive,
+                    ]}
+                    onPress={() => {
+                      setSimSBP(val);
+                      calculateSimulation();
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.stepperBtnText,
+                        simSBP === val && styles.stepperBtnTextActive,
+                      ]}
+                    >
+                      {val}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Smoking Switch */}
               <TouchableOpacity
-                style={[
-                  styles.btn,
-                  {
-                    backgroundColor: isFetchingResult
-                      ? C.green + "11"
-                      : C.green + "22",
-                    borderWidth: 1,
-                    borderColor: C.green,
-                    opacity: isFetchingResult ? 0.6 : 1,
-                  },
-                ]}
-                onPress={fetchResult}
-                activeOpacity={0.8}
-                disabled={isFetchingResult}
+                style={styles.toggleRow}
+                onPress={() => {
+                  setSimSmoker(!simSmoker);
+                  calculateSimulation();
+                }}
               >
-                <Text style={[styles.btnText, { color: C.green }]}>
-                  {isFetchingResult ? "⏳ FETCHING..." : "↓ GET RESULT"}
+                <View
+                  style={[
+                    styles.checkbox,
+                    simSmoker && { backgroundColor: T.primary },
+                  ]}
+                >
+                  {simSmoker && <CheckIcon size={12} color="#FFFFFF" />}
+                </View>
+                <Text style={styles.toggleText}>
+                  {simSmoker
+                    ? "Active Tobacco Smoking Recorded"
+                    : "No Current Smoking (Cessation Mode)"}
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
 
-          {appState === "result" && (
-            <TouchableOpacity
-              style={[
-                styles.btn,
-                {
-                  backgroundColor: C.blue + "22",
-                  borderWidth: 1,
-                  borderColor: C.blue,
-                },
-              ]}
-              onPress={handleReset}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.btnText, { color: C.blue }]}>
-                ↺ NEW RECORDING
+            {/* Projected Outcome Card */}
+            <View style={styles.outcomeCard}>
+              <Text style={styles.eyebrow}>PROJECTED 10-YEAR OUTCOME</Text>
+              <Text style={styles.outcomeHuge}>{simProjectedRisk}%</Text>
+              <Text style={styles.outcomeSub}>
+                Estimated Cardiovascular Event Risk
               </Text>
-            </TouchableOpacity>
-          )}
-        </View>
 
-        <Text style={styles.statusMsg}>{statusMsg}</Text>
+              <View style={styles.compareRow}>
+                <View style={{ alignItems: "center" }}>
+                  <Text style={styles.compareSub}>Baseline</Text>
+                  <Text style={styles.compareVal}>{baseRisk}%</Text>
+                </View>
+                <Text style={styles.compareArrow}>──►</Text>
+                <View style={{ alignItems: "center" }}>
+                  <Text style={styles.compareSub}>With Adherence</Text>
+                  <Text style={[styles.compareVal, { color: T.primary }]}>
+                    {simProjectedRisk}%
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Quick Demo Scenarios Row */}
+            <View style={styles.card}>
+              <Text style={styles.eyebrow}>DEMONSTRATION PRESETS</Text>
+              <Text style={styles.cardTitle}>Test Acute Pulse Scenarios</Text>
+              <View style={{ gap: 8, marginTop: 10 }}>
+                {[
+                  {
+                    k: "calm_normal",
+                    label: "Quiet Baseline (64 BPM Sinus)",
+                  },
+                  {
+                    k: "stress_tachycardia",
+                    label: "Elevated Pulse (112 BPM Stress)",
+                  },
+                  {
+                    k: "afib_episode",
+                    label: "Irregular Rhythm (Atrial Fibrillation)",
+                  },
+                ].map((s) => (
+                  <TouchableOpacity
+                    key={s.k}
+                    style={styles.scenarioBtn}
+                    onPress={() => runScenario(s.k)}
+                  >
+                    <Text style={styles.scenarioBtnText}>{s.label}</Text>
+                    <Text style={styles.scenarioArrow}>→</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </View>
+        )}
       </ScrollView>
+
+      {/* ─── NATIVE-FEELING BOTTOM TAB BAR ─────────────────── */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tabItem, activeTab === "live" && styles.tabItemActive]}
+          onPress={() => setActiveTab("live")}
+        >
+          <PulseIcon
+            size={20}
+            color={activeTab === "live" ? T.primary : T.textMuted}
+          />
+          <Text
+            style={[
+              styles.tabLabel,
+              activeTab === "live" && styles.tabLabelActive,
+            ]}
+          >
+            Live Check
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tabItem, activeTab === "twin" && styles.tabItemActive]}
+          onPress={() => setActiveTab("twin")}
+        >
+          <UserIcon
+            size={20}
+            color={activeTab === "twin" ? T.primary : T.textMuted}
+          />
+          <Text
+            style={[
+              styles.tabLabel,
+              activeTab === "twin" && styles.tabLabelActive,
+            ]}
+          >
+            Your Twin
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tabItem, activeTab === "plan" && styles.tabItemActive]}
+          onPress={() => setActiveTab("plan")}
+        >
+          <SparklesIcon
+            size={20}
+            color={activeTab === "plan" ? T.primary : T.textMuted}
+          />
+          <Text
+            style={[
+              styles.tabLabel,
+              activeTab === "plan" && styles.tabLabelActive,
+            ]}
+          >
+            What-If
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
 
+// ─── STYLES (MATCHING DESKTOP CARDIOTWIN MEDICAL-TECH THEME) ──
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: C.bg },
-  scroll: { paddingHorizontal: 20, paddingBottom: 30 },
+  safe: {
+    flex: 1,
+    backgroundColor: T.bg,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 18,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: T.cardBorder,
+    backgroundColor: "rgba(248, 247, 242, 0.95)",
   },
-  headerTitle: {
-    color: C.textPrimary,
-    fontSize: 22,
-    fontWeight: "800",
-    fontFamily: "monospace",
+  brandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
-  headerSub: {
-    color: C.textMuted,
+  brandMark: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: T.teal,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  brandTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: T.tealDark,
+    letterSpacing: -0.5,
+  },
+  headerTools: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  statusPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 5,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  statusPillText: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.4,
+  },
+  patientBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: T.cardBorder,
+    gap: 10,
+  },
+  avatarCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: T.chipBg,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: T.teal,
+  },
+  patientName: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: T.textPrimary,
+  },
+  patientMeta: {
     fontSize: 11,
-    fontFamily: "monospace",
+    color: T.textSecondary,
+    marginTop: 1,
+  },
+  baselinePill: {
+    backgroundColor: T.greenBg,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  baselinePillText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: T.greenText,
+  },
+  calibratePill: {
+    backgroundColor: T.amberBg,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  calibratePillText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: T.amberText,
+  },
+  scroll: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 28,
+  },
+  tabContent: {
+    gap: 14,
+  },
+  card: {
+    backgroundColor: T.card,
+    borderRadius: 16,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: T.cardBorder,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 1,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  eyebrow: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: T.teal,
+    letterSpacing: 1,
+    marginBottom: 2,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: T.textPrimary,
+  },
+  dualEngineBadge: {
+    backgroundColor: T.chipBg,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(25, 59, 58, 0.08)",
+  },
+  dualEngineText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: T.teal,
+  },
+  waveBox: {
+    backgroundColor: "#F4F8F5",
+    borderRadius: 12,
+    paddingVertical: 4,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  vitalsRow: {
+    flexDirection: "row",
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(25, 59, 58, 0.07)",
+  },
+  vitalCol: {
+    flex: 1,
+    alignItems: "center",
+  },
+  vitalBorderCol: {
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: "rgba(25, 59, 58, 0.08)",
+  },
+  vitalLabel: {
+    fontSize: 9,
+    fontWeight: "700",
+    color: T.textMuted,
+    letterSpacing: 0.8,
+  },
+  vitalValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: T.tealDark,
     marginTop: 2,
   },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-  connLabel: { fontSize: 9, fontFamily: "monospace", letterSpacing: 1 },
-  errorBanner: {
-    backgroundColor: "#200A10",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: C.red + "44",
+  vitalUnit: {
+    fontSize: 10,
+    fontWeight: "500",
+    color: T.textSecondary,
   },
-  errorText: { color: C.red, fontSize: 11, fontFamily: "monospace" },
-  section: { marginBottom: 14 },
-  sectionHeader: {
+  vitalWord: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: T.tealDark,
+    marginTop: 4,
+    textTransform: "capitalize",
+  },
+  vitalWordMuted: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: T.textMuted,
+    marginTop: 4,
+  },
+  vitalSub: {
+    fontSize: 9,
+    color: T.textMuted,
+    marginTop: 2,
+    textAlign: "center",
+  },
+  instabilityCard: {
+    borderRadius: 16,
+    padding: 18,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  instabilityLeft: {
+    flex: 1,
+  },
+  instabilityTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    marginTop: 2,
+  },
+  instabilityDesc: {
+    fontSize: 12,
+    color: T.textSecondary,
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  shapPill: {
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginTop: 8,
+    alignSelf: "flex-start",
+  },
+  shapText: {
+    fontSize: 10,
+    color: T.textSecondary,
+  },
+  scoreCircle: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  scoreValue: {
+    fontSize: 24,
+    fontWeight: "800",
+  },
+  scoreSub: {
+    fontSize: 8,
+    color: T.textMuted,
+    marginTop: -2,
+  },
+  actionButton: {
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: T.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  actionButtonText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 1,
+  },
+  disclaimerBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 8,
+  },
+  disclaimerText: {
+    fontSize: 11,
+    color: T.textMuted,
+    flex: 1,
+    lineHeight: 15,
+  },
+
+  // ─── TAB 2: YOUR TWIN STYLES ───────────────────────────────
+  riskLetterCard: {
+    backgroundColor: T.tealDeep,
+    borderRadius: 18,
+    padding: 22,
+  },
+  riskEyebrow: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#A8D3BD",
+    letterSpacing: 1,
+  },
+  riskHuge: {
+    fontSize: 52,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    marginVertical: 4,
+  },
+  riskSub: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  riskExplain: {
+    fontSize: 12,
+    color: "#D6E4D9",
+    marginTop: 8,
+    lineHeight: 17,
+  },
+  riskFooterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 14,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.15)",
+  },
+  riskFooterText: {
+    fontSize: 11,
+    color: "#C5DFCF",
+  },
+  vitalsStrip: {
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: T.cardBorder,
+    paddingVertical: 12,
+  },
+  vitalsStripItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  stripLabel: {
+    fontSize: 10,
+    color: T.textMuted,
+  },
+  stripVal: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: T.textPrimary,
+    marginTop: 2,
+  },
+  leverRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(25, 59, 58, 0.06)",
+  },
+  checkCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: T.chipBg,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  leverTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: T.textPrimary,
+  },
+  leverDesc: {
+    fontSize: 11,
+    color: T.textSecondary,
+    marginTop: 1,
+  },
+
+  // ─── TAB 3: WHAT-IF STYLES ─────────────────────────────────
+  planSub: {
+    fontSize: 12,
+    color: T.textSecondary,
+    marginTop: 4,
+    marginBottom: 12,
+    lineHeight: 17,
+  },
+  fieldLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: T.textMuted,
+    letterSpacing: 0.8,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  chipsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  choiceChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: "#F3F5ED",
+    borderWidth: 1,
+    borderColor: "#E4E6DC",
+  },
+  choiceChipSelected: {
+    backgroundColor: "#E1F0E7",
+    borderColor: "#9FCEC0",
+  },
+  choiceText: {
+    fontSize: 11,
+    color: T.textSecondary,
+  },
+  choiceTextSelected: {
+    color: T.primary,
+    fontWeight: "600",
+  },
+  stepperRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  stepperBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: "#F3F5ED",
+    borderWidth: 1,
+    borderColor: "#E4E6DC",
+    alignItems: "center",
+  },
+  stepperBtnActive: {
+    backgroundColor: T.teal,
+    borderColor: T.teal,
+  },
+  stepperBtnText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: T.textSecondary,
+  },
+  stepperBtnTextActive: {
+    color: "#FFFFFF",
+  },
+  toggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 12,
+    paddingVertical: 4,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: T.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  toggleText: {
+    fontSize: 12,
+    color: T.textPrimary,
+  },
+  outcomeCard: {
+    backgroundColor: "#E4F0EB",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+  },
+  outcomeHuge: {
+    fontSize: 48,
+    fontWeight: "800",
+    color: T.primary,
+    marginVertical: 2,
+  },
+  outcomeSub: {
+    fontSize: 12,
+    color: T.textSecondary,
+    textAlign: "center",
+  },
+  compareRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    marginTop: 14,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(25, 59, 58, 0.1)",
+  },
+  compareSub: {
+    fontSize: 10,
+    color: T.textMuted,
+  },
+  compareVal: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: T.textPrimary,
+  },
+  compareArrow: {
+    fontSize: 14,
+    color: T.teal,
+  },
+  scenarioBtn: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
-  },
-  sectionLabel: {
-    color: C.textMuted,
-    fontSize: 10,
-    letterSpacing: 2,
-    fontFamily: "monospace",
-  },
-  badge: {
-    fontSize: 10,
-    fontFamily: "monospace",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 20,
-  },
-  graphBox: {
-    backgroundColor: C.card,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: C.cardBorder,
-    height: GRAPH_H,
-    overflow: "hidden",
-  },
-  statsRow: { flexDirection: "row", gap: 8, marginBottom: 14 },
-  statCard: {
-    flex: 1,
-    backgroundColor: C.card,
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 12,
-    alignItems: "center",
-  },
-  statValue: { fontSize: 18, fontWeight: "800", fontFamily: "monospace" },
-  statUnit: { fontSize: 10, fontFamily: "monospace" },
-  statLabel: {
-    color: C.textMuted,
-    fontSize: 9,
-    letterSpacing: 1,
-    marginTop: 2,
-    fontFamily: "monospace",
-  },
-  resultCard: {
-    backgroundColor: C.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 20,
-    marginBottom: 20,
-    alignItems: "center",
-  },
-  alertBadge: {
-    backgroundColor: C.red + "22",
-    borderRadius: 20,
+    paddingVertical: 10,
     paddingHorizontal: 12,
-    paddingVertical: 4,
-    marginBottom: 10,
+    borderRadius: 8,
+    backgroundColor: "#F3F5ED",
     borderWidth: 1,
-    borderColor: C.red,
+    borderColor: "#E4E6DC",
   },
-  alertBadgeText: {
-    color: C.red,
-    fontSize: 11,
-    fontWeight: "800",
-    fontFamily: "monospace",
-    letterSpacing: 1,
-  },
-  resultLabel: {
-    color: C.textMuted,
-    fontSize: 10,
-    letterSpacing: 2,
-    marginBottom: 8,
-    fontFamily: "monospace",
-  },
-  resultValue: { fontSize: 36, fontWeight: "900", fontFamily: "monospace" },
-  confidenceText: { fontSize: 12, fontFamily: "monospace", marginTop: 4 },
-  resultSub: {
-    color: C.textMuted,
+  scenarioBtnText: {
     fontSize: 12,
-    marginTop: 10,
-    textAlign: "center",
-    lineHeight: 18,
+    color: T.tealDark,
+    fontWeight: "500",
   },
-  csvNote: {
-    color: C.textMuted,
+  scenarioArrow: {
+    fontSize: 13,
+    color: T.teal,
+    fontWeight: "700",
+  },
+
+  // ─── BOTTOM TAB BAR ────────────────────────────────────────
+  tabBar: {
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: T.cardBorder,
+    paddingVertical: 8,
+    paddingBottom: Platform.OS === "ios" ? 18 : 8,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: "center",
+    gap: 2,
+  },
+  tabItemActive: {
+    opacity: 1,
+  },
+  tabLabel: {
     fontSize: 10,
-    marginTop: 10,
-    fontFamily: "monospace",
+    fontWeight: "500",
+    color: T.textMuted,
   },
-  btnArea: { marginBottom: 14 },
-  btn: { paddingVertical: 18, borderRadius: 50, alignItems: "center" },
-  btnText: {
-    color: C.bg,
-    fontSize: 15,
-    fontWeight: "900",
-    letterSpacing: 2,
-    fontFamily: "monospace",
+  tabLabelActive: {
+    color: T.primary,
+    fontWeight: "700",
   },
-  statusMsg: {
-    color: C.textMuted,
-    fontSize: 11,
-    textAlign: "center",
-    fontFamily: "monospace",
-    marginBottom: 10,
-  },
-  cardBorder: { color: C.cardBorder },
 });
