@@ -11,9 +11,8 @@
 
 <p align="center">
   <a href="#-demo-video"><strong>📺 Demo Video</strong></a> &nbsp;•&nbsp;
-  <a href="docs/EXECUTIVE_SUMMARY.md"><strong>📄 Executive Summary</strong></a> &nbsp;•&nbsp;
-  <a href="docs/ARCHITECTURE.md"><strong>🏗️ Architecture</strong></a> &nbsp;•&nbsp;
-  <a href="https://github.com/Harsh-15771/IoT-Arrhythmia-Detection"><strong>💻 GitHub Repo</strong></a>
+  <a href="docs/CardioTwin_Architecture_Diagram.pdf"><strong>🏗️ Architecture (PDF)</strong></a> &nbsp;•&nbsp;
+  <a href="docs/CardioTwin_Presentation.pptx"><strong>📊 Presentation (PPT)</strong></a>
 </p>
 
 <p align="center">
@@ -239,7 +238,7 @@ CardioTwin Sentinel addresses **personalized cardiovascular screening and cardio
 | **BIDMC** | Beth Israel Deaconess | — | Hospital ICU telemetry baseline | PhysioNet Open |
 | **Total** | **4 datasets** | **2,271** | **4,683 windows across 8 rhythm classes** | |
 
-> **Transparency:** 100% of VT and Asystole instances originate from CinC 2015 ICU alarm recordings. This source concentration is [openly disclosed](docs/SOURCE_CONFOUNDING_AUDIT.md), not hidden.
+> **Transparency:** 100% of VT and Asystole instances originate from CinC 2015 ICU alarm recordings. This source concentration is [openly disclosed in the Model Card](docs/MODEL_CARD.md#cross-dataset-source-confounding-audit), not hidden.
 
 ### Model Architectures
 
@@ -277,7 +276,7 @@ Nested 5-Fold StratifiedGroupKFold (Patient-Isolated, Zero Leakage)
 - **What-If Simulation:** SBP reduction, statin therapy, smoking cessation, diabetes management
 - **Biological Vascular Age** estimation based on cardiovascular risk factor profile
 
-> 📊 **Verified Performance Benchmarks:** CardioTwin strictly reports leak-free, patient-isolated cross-validation metrics (Nested Dual Fusion: **53.92% Macro-F1**, Inception-1D Champion: **51.81% Macro-F1**, Classical Super Ensemble: **48.00% Macro-F1** across 2,271 patients). For complete 5-fold cross-validation tables, per-class sensitivity/specificity, deep learning tournament results, and operational safety audits, see [`docs/PERFORMANCE_MATRIX.md`](docs/PERFORMANCE_MATRIX.md) and [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md).
+> 📊 **Verified Performance Benchmarks:** CardioTwin strictly reports leak-free, patient-isolated cross-validation metrics (Nested Dual Fusion: **53.92% Macro-F1**, Inception-1D Champion: **51.81% Macro-F1**, Classical Super Ensemble: **48.00% Macro-F1** across 2,271 patients). For complete 5-fold cross-validation tables, per-class sensitivity/specificity, deep learning tournament results, and operational safety audits, see [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md).
 
 ---
 
@@ -312,7 +311,7 @@ Nested 5-Fold StratifiedGroupKFold (Patient-Isolated, Zero Leakage)
 
 ---
 
-> 🧠 **Engineering Decisions & Tradeoffs:** For detailed rationale on why dual-modality fusion outperforms single models, why Inception-1D won over LSTMs/Transformers, personal baseline calibration vs. population thresholds, MAD non-parametric statistics, and South Asian Framingham recalibration, see [`docs/ENGINEERING_DECISIONS.md`](docs/ENGINEERING_DECISIONS.md).
+> 🧠 **Engineering Decisions & Tradeoffs:** For detailed rationale on why dual-modality fusion outperforms single models, why Inception-1D won over LSTMs/Transformers, personal baseline calibration vs. population thresholds, MAD non-parametric statistics, and South Asian Framingham recalibration, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ---
 
@@ -524,13 +523,11 @@ python scripts/evaluate_dual_pipeline_v2.py
 
 ## 📎 Presentation & Architecture Diagrams
 
-<!-- TODO: Create and upload these files, then update the links below -->
-
 | Asset | Format | Link |
-|:---|:---|:---|
-| **Architecture Diagram** | PDF / PPT | `📎 Placeholder — upload to ./docs/CardioTwin_Architecture_Diagram.pdf` |
-| **Project Presentation** | PDF / PPT | `📎 Placeholder — upload to ./docs/CardioTwin_Presentation.pdf` |
-| **Demo Video** | YouTube (Unlisted) | `📎 Placeholder — paste YouTube link after upload` |
+|:---|:---:|:---|
+| **Architecture Diagram** | PDF | [`docs/CardioTwin_Architecture_Diagram.pdf`](docs/CardioTwin_Architecture_Diagram.pdf) |
+| **Project Presentation** | PPT | [`docs/CardioTwin_Presentation.pptx`](docs/CardioTwin_Presentation.pptx) |
+| **Demo Video** | YouTube (Unlisted) | [Demo Video Section](#-demo-video) |
 
 ---
 
