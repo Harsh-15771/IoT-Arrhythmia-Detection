@@ -11,7 +11,8 @@
 
 <p align="center">
   <a href="#-demo-video"><strong>📺 Demo Video</strong></a> &nbsp;•&nbsp;
-  <a href="docs/CardioTwin_Architecture_Diagram.pdf"><strong>🏗️ Architecture (PDF)</strong></a> &nbsp;•&nbsp;
+  <a href="docs/CardioTwin_Architecture_Diagram.pdf"><strong>🏗️ Architecture Atlas (7-Page PDF)</strong></a> &nbsp;•&nbsp;
+  <a href="docs/CardioTwin_Architecture_Blueprint_2Page.pdf"><strong>📐 Blueprint (2-Page PDF)</strong></a> &nbsp;•&nbsp;
   <a href="docs/CardioTwin_Presentation.pptx"><strong>📊 Presentation (PPT)</strong></a>
 </p>
 
@@ -22,7 +23,7 @@
   <img src="https://img.shields.io/badge/XGBoost-Super_Ensemble-F7931E?logo=scikitlearn&logoColor=white" alt="XGBoost" />
   <img src="https://img.shields.io/badge/ESP32-FreeRTOS_100Hz-E7352C?logo=espressif&logoColor=white" alt="ESP32" />
   <img src="https://img.shields.io/badge/Flask-Socket.IO-000000?logo=flask&logoColor=white" alt="Flask" />
-  <img src="https://img.shields.io/badge/Tests-49_Passed-22C55E?logo=pytest&logoColor=white" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-54_Passed-22C55E?logo=pytest&logoColor=white" alt="Tests" />
   <img src="https://img.shields.io/badge/License-MIT-blue?logo=opensourceinitiative&logoColor=white" alt="MIT License" />
 </p>
 
@@ -383,8 +384,8 @@ IoT-Arrhythmia-Detection/
 │   ├── record_validation_session.py        # Live hardware validation recording
 │   └── validate_hardware_recordings.py     # Offline hardware recording verification
 │
-├── tests/                                   # Automated Test Suite (49 Tests)
-│   ├── test_cardiotwin.py                  # Core: clinical engine, signal gate, baseline, API (41 tests)
+├── tests/                                   # Automated Test Suite (54 Tests)
+│   ├── test_cardiotwin.py                  # Core: clinical engine, signal gate, baseline, API, Sentinel v4.1 (46 tests)
 │   └── test_instability_target_validation.py  # Physiological target validation (8 tests)
 │
 ├── docs/                                    # Technical Documentation (4 Authoritative Documents)
@@ -456,7 +457,7 @@ npm install
 npm run dev
 ```
 
-> Open `http://localhost:5173` to interact with the live clinical command portal.
+> Open `http://localhost:5173` to interact with the live clinical command portal. By default, active patient `PAT001` (Praveen Choudhury, 63M, Post-PCI Coronary Artery Disease, Belagavi, Karnataka) is loaded with full EHR laboratory panel, active medications, 7-day wearable trajectories, and dual-horizon treatment simulation.
 
 ### 5. (Optional) Flash ESP32 Hardware
 
@@ -483,14 +484,19 @@ test_calm_normal_scenario ... ok
 test_finger_off_scenario ... ok
 test_motion_artifact_scenario ... ok
 test_stress_tachycardia_scenario ... ok
+test_fhir_export_bundle_resource ... ok
+test_proactive_forecast_and_ehr_coupling ... ok
+test_simulate_treatment_contract_keys ... ok
+test_cardiovascular_age_alias_keys ... ok
+test_scenario_personal_instability_and_waveform ... ok
 ...
 ----------------------------------------------------------------------
-Ran 49 tests in 1.399s
+Ran 54 tests in 1.723s
 
 OK
 ```
 
-> All 49 tests pass across: clinical engine, signal gate, personal baseline, API contract, instability target validation, and physiological plausibility conditions.
+> All 54 tests pass across: clinical engine, signal gate, personal baseline, API contract, instability target validation, physiological plausibility conditions, and Sentinel v4.1 multimodal contract validations.
 
 ### Running Audit & Explainability Scripts
 
@@ -525,8 +531,10 @@ python scripts/evaluate_dual_pipeline_v2.py
 
 | Asset | Format | Link |
 |:---|:---:|:---|
-| **Architecture Diagram** | PDF | [`docs/CardioTwin_Architecture_Diagram.pdf`](docs/CardioTwin_Architecture_Diagram.pdf) |
-| **Project Presentation** | PPT | [`docs/CardioTwin_Presentation.pptx`](docs/CardioTwin_Presentation.pptx) |
+| **System Architecture Atlas (7 Pages)** | PDF | [`docs/CardioTwin_Architecture_Diagram.pdf`](docs/CardioTwin_Architecture_Diagram.pdf) |
+| **Engineering Blueprint & Math Spec (2 Pages)** | PDF | [`docs/CardioTwin_Architecture_Blueprint_2Page.pdf`](docs/CardioTwin_Architecture_Blueprint_2Page.pdf) |
+| **Executive Presentation (14 Slides, Native Charts)** | PPTX | [`docs/CardioTwin_Presentation.pptx`](docs/CardioTwin_Presentation.pptx) |
+| **Briefing Presentation (12 Slides, High-Res Images)** | PPTX | [`docs/CardioTwin_Presentation_12_Slide_Brief.pptx`](docs/CardioTwin_Presentation_12_Slide_Brief.pptx) |
 | **Demo Video** | YouTube (Unlisted) | [Demo Video Section](#-demo-video) |
 
 ---

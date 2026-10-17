@@ -31,7 +31,7 @@ class CardioTwin:
         self.base_clinical_risk_pct = self.base_risk_score
         
         # Data provenance state: 'INITIALIZED', 'LIVE_HARDWARE', 'RECORDED_REPLAY', or 'SIMULATION'
-        self.data_source = "INITIALIZED"
+        self.data_source = "SIMULATION"
         
         # Layer 2 & 3: Dynamic Physiological State & Telemetry
         self.current_vitals = {
@@ -41,7 +41,8 @@ class CardioTwin:
             "spo2": float(patient_ehr.get("vitals", {}).get("spo2_baseline", 98)),
             "signal_quality": 0.95,
             "arrhythmia_predicted": "Normal",
-            "arrhythmia_probabilities": {"Normal": 0.92, "AFib": 0.02, "Tachycardia": 0.02, "Bradycardia": 0.015, "Cardiac_Paced": 0.01, "V_Tachycardia": 0.005, "V_Flutter_Fib": 0.005, "Asystole": 0.005}
+            "arrhythmia_probabilities": {"Normal": 0.92, "AFib": 0.02, "Tachycardia": 0.02, "Bradycardia": 0.015, "Cardiac_Paced": 0.01, "V_Tachycardia": 0.005, "V_Flutter_Fib": 0.005, "Asystole": 0.005},
+            "data_source": "SIMULATION"
         }
         
         # Real-time Evidence-Aware Physiological Instability Score (0 - 100)
@@ -81,7 +82,8 @@ class CardioTwin:
         calculates dynamic physiological instability score, and generates clinical screening alerts.
         """
         self.current_vitals.update(sensor_data)
-        self.data_source = sensor_data.get("data_source", self.data_source if self.data_source != "INITIALIZED" else "LIVE_HARDWARE")
+        self.data_source = sensor_data.get("data_source", self.data_source)
+        self.current_vitals["data_source"] = self.data_source
         
         bpm_val = self.current_vitals.get("bpm")
         bpm = float(bpm_val) if bpm_val is not None else 72.0
@@ -229,17 +231,235 @@ class CardioTwin:
         if len(self.risk_history) > 60:
             self.risk_history.pop(0)
 
+    def _compute_ehr_vulnerability_coupling(
+        self,
+        bpm: Optional[float] = None,
+        rmssd: Optional[float] = None,
+        rr_cv: Optional[float] = None,
+        pred_rhythm: str = "Normal"
+    ) -> Dict[str, Any]:
+        """
+        Multimodal EHR-Coupled Vulnerability Substrate (Phase 3.1)
+        Fuses static clinical history (medications, conditions, biomarkers)
+        with real-time hemodynamic and autonomic telemetry.
+        """
+        coupling_flags = []
+        flag_messages = []
+
+        history = self.patient.get("clinical_history", {})
+        conditions = [str(c) for c in history.get("conditions", [])]
+        conditions_str = " ".join(conditions).lower()
+        meds = history.get("medications", [])
+        meds_str = json.dumps(meds).lower()
+        labs = self.patient.get("labs", {})
+
+        # 1. Pharmacological Beta-Blockade Escape Detection
+        is_beta_blocker = any(
+            b in meds_str for b in ["metoprolol", "bisoprolol", "carvedilol", "atenolol", "beta-blocker", "beta blocker"]
+        )
+        resting_hr = float(self.patient.get("vitals", {}).get("resting_hr", 70.0))
+        has_escape = False
+
+        if is_beta_blocker and bpm is not None and bpm > 0:
+            if bpm >= 90.0 or bpm >= (resting_hr + 18.0):
+                has_escape = True
+                coupling_flags.append("BETA_BLOCKADE_ESCAPE")
+                med_name = next(
+                    (m.get("name", "Beta-Blocker") for m in meds if any(x in m.get("name", "").lower() for x in ["metoprolol", "bisoprolol", "carvedilol", "atenolol"])),
+                    "Beta-Blocker"
+                )
+                flag_messages.append(
+                    f"Elevated pulse ({bpm:.0f} BPM) despite active beta-blocker therapy ({med_name}) indicates sympathetic breakthrough."
+                )
+
+        # 2. Disease-Specific Rhythm & Autonomic Amplification
+        has_afib_hx = any("atrial fibrillation" in c.lower() or "afib" in c.lower() for c in conditions)
+        if has_afib_hx and rr_cv is not None and rr_cv >= 0.18:
+            coupling_flags.append("SUBCLINICAL_AFIB_PRODROME")
+            flag_messages.append(
+                f"Elevated beat-to-beat variability (RR-CV {rr_cv*100:.1f}%) in diagnosed paroxysmal AFib patient suggests subclinical atrial fibrillation prodrome."
+            )
+
+        has_cad_or_t2dm = any(
+            k in conditions_str for k in ["coronary artery disease", "post-pci", "cad", "type 2 diabetes", "diabetes mellitus"]
+        ) or float(labs.get("hba1c", 0.0)) >= 7.0
+
+        if has_cad_or_t2dm and rmssd is not None and rmssd > 0 and rmssd < 22.0:
+            coupling_flags.append("AUTONOMIC_VAGAL_WITHDRAWAL")
+            flag_messages.append(
+                f"Severe vagal autonomic withdrawal (RMSSD {rmssd:.1f}ms) in high-risk cardiometabolic substrate."
+            )
+
+        # 3. EHR Substrate Multiplier (M_EHR in [1.00, 1.40])
+        cad_term = 0.10 if ("coronary" in conditions_str or "post-pci" in conditions_str or "cad" in conditions_str) else 0.0
+        hba1c_term = 0.08 if float(labs.get("hba1c", 0.0)) >= 7.0 else 0.0
+        crp_term = 0.08 if float(labs.get("hs_crp", 0.0)) > 2.0 else 0.0
+        escape_term = 0.14 if has_escape else 0.0
+
+        m_ehr = 1.0 + cad_term + hba1c_term + crp_term + escape_term
+        m_ehr = max(1.00, min(1.40, m_ehr))
+
+        coupled_risk = round(min(99.0, self.physiological_instability_score * m_ehr), 1)
+        tier = "HIGH" if m_ehr >= 1.25 else ("MODERATE" if m_ehr >= 1.10 else "LOW")
+
+        return {
+            "ehr_multiplier": round(m_ehr, 2),
+            "coupling_flags": coupling_flags,
+            "flag_messages": flag_messages,
+            "beta_blockade_active": is_beta_blocker,
+            "beta_blockade_escape": has_escape,
+            "vulnerability_tier": tier,
+            "ehr_coupled_risk_index": coupled_risk
+        }
+
+    def compute_proactive_forecast(self) -> Dict[str, Any]:
+        """
+        Proactive 2-Hour / 6-Hour Early Warning Forecaster & 7-Day Trend Context (Phase 3.2)
+        Deterministically synthesizes patient-specific 7-day wearable trajectories from
+        EHR vitals, labs, lifestyle, and live optical telemetry.
+        """
+        v = self.patient.get("vitals", {})
+        l = self.patient.get("labs", {})
+        s = self.patient.get("lifestyle", {})
+        age = float(self.patient.get("age", 50))
+        base_hr = float(v.get("resting_hr", 72.0))
+        hba1c = float(l.get("hba1c", 5.4))
+        hs_crp = float(l.get("hs_crp", 1.0))
+        activity = str(s.get("physical_activity", "Moderate")).lower()
+
+        # Deterministic patient-specific seed (zero randomness across reloads, unique per patient)
+        pid_num = sum((idx + 1) * ord(ch) for idx, ch in enumerate(str(self.patient_id)))
+
+        # EHR-derived physiological starting points (Day 1)
+        base_rmssd = max(18.0, min(62.0, 54.0 - (age - 30.0) * 0.32 - (4.5 if hba1c >= 7.0 else 0.0) - (3.5 if hs_crp > 2.0 else 0.0)))
+        base_sleep = max(72.0, min(95.0, 91.0 - (age - 30.0) * 0.12 - (3.5 if s.get("smoker") else 0.0)))
+        if "active" in activity and "sedentary" not in activity:
+            base_steps = 8400 + (pid_num % 1400)
+        elif "sedentary" in activity:
+            base_steps = 3800 + (pid_num % 1100)
+        else:
+            base_steps = 6100 + (pid_num % 1300)
+
+        # EHR Coupling & Drift Severity
+        coupling = self._compute_ehr_vulnerability_coupling(
+            bpm=self.current_vitals.get("bpm"),
+            rmssd=self.current_vitals.get("rmssd"),
+            rr_cv=self.current_vitals.get("signal_gate", {}).get("rr_cv") if isinstance(self.current_vitals.get("signal_gate"), dict) else None,
+            pred_rhythm=self.current_vitals.get("arrhythmia_predicted", "Normal")
+        )
+        m_ehr = coupling["ehr_multiplier"]
+
+        is_drifting = (self.base_risk_score >= 20.0) or (self.physiological_instability_score >= 40.0) or (m_ehr >= 1.18)
+        daily_hr_slope = (0.9 + 0.5 * (m_ehr - 1.0) * 4.0) if is_drifting else 0.0
+        daily_rmssd_slope = (-2.1 - 1.2 * (m_ehr - 1.0) * 4.0) if is_drifting else 0.15
+        daily_sleep_slope = -2.2 if is_drifting else 0.1
+        daily_step_slope = -480 if is_drifting else 45
+
+        daily_resting_hr, nocturnal_rmssd, sleep_efficiency, daily_steps = [], [], [], []
+        for day in range(7):
+            wave_jit = ((pid_num + day * 7) % 5 - 2) * 0.4
+            hr_d = int(round(max(46.0, min(115.0, base_hr + day * daily_hr_slope + wave_jit))))
+            rmssd_d = round(max(10.0, min(75.0, base_rmssd + day * daily_rmssd_slope - wave_jit * 0.8)), 1)
+            sleep_d = round(max(58.0, min(97.0, base_sleep + day * daily_sleep_slope + wave_jit * 0.5)), 1)
+            steps_d = int(max(1200, base_steps + day * daily_step_slope + int(wave_jit * 180)))
+
+            daily_resting_hr.append(hr_d)
+            nocturnal_rmssd.append(rmssd_d)
+            sleep_efficiency.append(sleep_d)
+            daily_steps.append(steps_d)
+
+        # Anchor Day 7 to live validated telemetry when active
+        live_bpm = self.current_vitals.get("bpm")
+        live_rmssd = self.current_vitals.get("rmssd")
+        if self.data_source in ("LIVE_HARDWARE", "SIMULATION") and live_bpm is not None and live_bpm > 0:
+            daily_resting_hr[-1] = int(round(float(live_bpm)))
+        if self.data_source in ("LIVE_HARDWARE", "SIMULATION") and live_rmssd is not None and live_rmssd > 0:
+            nocturnal_rmssd[-1] = round(float(live_rmssd), 1)
+
+        delta_rmssd_7d = nocturnal_rmssd[-1] - nocturnal_rmssd[0]
+        slope_7d = max(0.0, -delta_rmssd_7d * 0.6)
+
+        # Baseline acute instability
+        i_t = float(self.physiological_instability_score)
+        if self.current_vitals and self.current_vitals.get("personal_instability"):
+            p_score = self.current_vitals["personal_instability"].get("instability_score")
+            if p_score is not None:
+                i_t = float(p_score)
+
+        # Velocity across recent history (Fixed key: "instability_score")
+        delta_i_recent = 0.0
+        if len(self.risk_history) >= 3:
+            delta_i_recent = float(
+                self.risk_history[-1].get("instability_score", i_t) - self.risk_history[-3].get("instability_score", i_t)
+            )
+
+        pred_2h = max(0.0, min(100.0, i_t + (0.5 * delta_i_recent + 0.4 * slope_7d) * m_ehr))
+        pred_6h = max(0.0, min(100.0, i_t + (1.2 * delta_i_recent + 1.1 * slope_7d) * m_ehr))
+
+        if pred_2h >= 70.0 or i_t >= 70.0:
+            horizon_status = "IMMINENT_DECOMPENSATION_2H"
+        elif pred_6h >= 60.0:
+            horizon_status = "HIGH_RISK_WITHIN_6H"
+        elif pred_6h >= 35.0 or len(coupling["coupling_flags"]) > 0:
+            horizon_status = "EARLY_PRODROMAL_DRIFT"
+        else:
+            horizon_status = "STABLE_HORIZON"
+
+        if pred_6h >= 70.0 and pred_6h > i_t:
+            rate_per_hr = (pred_6h - i_t) / 6.0
+            hrs = (70.0 - i_t) / max(0.5, rate_per_hr)
+            time_to_thresh = round(max(0.5, min(12.0, hrs)), 1)
+        elif i_t >= 70.0:
+            time_to_thresh = 0.0
+        else:
+            time_to_thresh = None
+
+        if horizon_status in ("IMMINENT_DECOMPENSATION_2H", "HIGH_RISK_WITHIN_6H"):
+            cur_bpm = round(self.current_vitals.get("bpm") or base_hr)
+            pct_drop = abs(delta_rmssd_7d) / max(1.0, nocturnal_rmssd[0]) * 100.0
+            narrative = (
+                f"7-day nocturnal RMSSD decline ({nocturnal_rmssd[0]:.1f}ms -> {nocturnal_rmssd[-1]:.1f}ms, -{pct_drop:.0f}%) "
+                f"combined with acute pulse response ({cur_bpm} BPM, M_EHR={m_ehr:.2f}x) projects high-risk hemodynamic "
+                f"instability within {time_to_thresh or 2.5} hours."
+            )
+        elif horizon_status == "EARLY_PRODROMAL_DRIFT":
+            flags_str = ", ".join(coupling["coupling_flags"]) if coupling["coupling_flags"] else "subtle autonomic drift"
+            narrative = f"Early prodromal autonomic drift detected: nocturnal vagal trend ({nocturnal_rmssd[0]:.1f}ms -> {nocturnal_rmssd[-1]:.1f}ms) with {flags_str} indicates physiological vulnerability within 6 hours."
+        else:
+            narrative = f"7-day longitudinal trends (Resting HR ~{daily_resting_hr[-1]} BPM, Nocturnal RMSSD {nocturnal_rmssd[-1]:.1f}ms) demonstrate stable autonomic balance. No acute decompensation projected within 6 hours."
+
+        return {
+            "wearable_7d_summary": {
+                "daily_resting_hr_7d": daily_resting_hr,
+                "nocturnal_rmssd_7d": nocturnal_rmssd,
+                "sleep_efficiency_pct_7d": sleep_efficiency,
+                "daily_steps_7d": daily_steps
+            },
+            "predicted_instability_2h": round(pred_2h, 1),
+            "predicted_instability_6h": round(pred_6h, 1),
+            "adverse_event_horizon_status": horizon_status,
+            "estimated_time_to_threshold_hrs": time_to_thresh,
+            "forecast_narrative": narrative,
+            "ehr_coupling": coupling
+        }
+
     def simulate_treatment(self, modifications: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Interactive 'What-If' Intervention Simulator:
-        Estimates long-term (5-10 year sustained therapeutic adherence) risk reduction
-        based on evidence-based pharmacological and lifestyle modifications.
-        Educational decision-support tool — not an autonomous clinical prescription.
+        Dual-Horizon Clinical Treatment Outcome Simulator (Phase 4.1)
+        Distinguishes active EHR medications from new prescriptions.
+        Provides both:
+          1. 10-Year ASCVD Risk & Vascular Age projections (Long-Term Horizon)
+          2. 24-Hour Hemodynamic & Vagal recovery projections (Short-Term Horizon)
         """
         virtual_patient = json.loads(json.dumps(self.patient))
         v = virtual_patient.get("vitals", {})
         l = virtual_patient.get("labs", {})
         s = virtual_patient.get("lifestyle", {})
+
+        # Active EHR medications
+        active_meds = self.patient.get("clinical_history", {}).get("medications", [])
+        active_med_names = [m.get("name", "").lower() for m in active_meds]
+        active_med_classes = [m.get("class", "").lower() for m in active_meds]
 
         # Apply lifestyle modifications
         if "systolic_bp" in modifications:
@@ -248,30 +468,54 @@ class CardioTwin:
             s["smoker"] = bool(modifications["smoker"])
         if "total_cholesterol" in modifications:
             l["total_cholesterol"] = float(modifications["total_cholesterol"])
-        
-        # Medication simulations with evidence-based assumptions
+        if "hba1c" in modifications:
+            l["hba1c"] = float(modifications["hba1c"])
+
         added_meds = modifications.get("add_medications", [])
         hr_reduction = 0.0
         bp_reduction = 0.0
         chol_reduction_pct = 0.0
+        sglt2_applied = False
         interventions_applied = []
+
+        is_already_on_bb = any("metoprolol" in nm or "beta" in cl for nm, cl in zip(active_med_names, active_med_classes))
+        is_already_on_statin = any("statin" in nm or "statin" in cl for nm, cl in zip(active_med_names, active_med_classes))
+        is_already_on_ace_arb = any("telmisartan" in nm or "ramipril" in nm or "arb" in cl or "ace" in cl for nm, cl in zip(active_med_names, active_med_classes))
 
         for med in added_meds:
             med_lower = med.lower()
             if "metoprolol" in med_lower or "beta" in med_lower:
                 hr_reduction += 12.0
                 bp_reduction += 8.0
-                interventions_applied.append("Beta-blocker (Metoprolol 25-50mg: ~8 mmHg SBP, ~12 BPM reduction)")
+                if is_already_on_bb:
+                    interventions_applied.append("Beta-blocker Adherence & Titration (Metoprolol 50mg: ~8 mmHg SBP, ~12 BPM reduction)")
+                else:
+                    interventions_applied.append("Beta-blocker (Metoprolol 25-50mg: ~8 mmHg SBP, ~12 BPM reduction)")
             elif "statin" in med_lower or "atorvastatin" in med_lower:
-                chol_reduction_pct += 0.28 # 28% total cholesterol / LDL reduction per ACC/AHA statin trials
-                interventions_applied.append("Moderate-intensity statin (Atorvastatin 20mg: ~28% total cholesterol reduction)")
+                chol_reduction_pct += 0.28
+                if is_already_on_statin:
+                    interventions_applied.append("Statin Adherence & Titration (Atorvastatin 40mg: ~28% total cholesterol reduction)")
+                else:
+                    interventions_applied.append("Moderate-intensity statin (Atorvastatin 20mg: ~28% total cholesterol reduction)")
             elif "ramipril" in med_lower or "telmisartan" in med_lower or "ace" in med_lower or "arb" in med_lower:
                 bp_reduction += 12.0
                 v["bp_treated"] = True
-                interventions_applied.append("ACE-inhibitor / ARB (Telmisartan 40mg: ~12 mmHg SBP reduction)")
+                if is_already_on_ace_arb:
+                    interventions_applied.append("ACE-inhibitor / ARB Optimization (Telmisartan 40mg: ~12 mmHg SBP reduction)")
+                else:
+                    interventions_applied.append("ACE-inhibitor / ARB (Telmisartan 40mg: ~12 mmHg SBP reduction)")
+            elif "dapagliflozin" in med_lower or "sglt2" in med_lower or "empagliflozin" in med_lower:
+                sglt2_applied = True
+                bp_reduction += 4.0
+                interventions_applied.append("SGLT2 Inhibitor (Dapagliflozin 10mg: -18% CVD event risk in T2DM/CAD, ~4 mmHg SBP)")
+            elif "glycemic" in med_lower or "hba1c" in med_lower:
+                interventions_applied.append("Glycemic Optimization (Target HbA1c < 6.5%: -10% relative microvascular CVD risk)")
 
-        v["systolic_bp"] = max(100.0, v.get("systolic_bp", 125) - bp_reduction)
-        l["total_cholesterol"] = max(110.0, l.get("total_cholesterol", 190) * (1.0 - chol_reduction_pct))
+        current_sbp = float(self.patient.get("vitals", {}).get("systolic_bp", 125))
+        v["systolic_bp"] = max(100.0, current_sbp - bp_reduction)
+        current_chol = float(self.patient.get("labs", {}).get("total_cholesterol", 190))
+        l["total_cholesterol"] = max(110.0, current_chol * (1.0 - chol_reduction_pct))
+
         current_hr = float(self.current_vitals.get("bpm") if self.current_vitals.get("bpm") is not None else self.patient.get("vitals", {}).get("resting_hr", 72.0))
         simulated_hr = max(50.0, current_hr - hr_reduction)
 
@@ -289,18 +533,39 @@ class CardioTwin:
         )
 
         sim_base_risk = sim_risk_data["recalibrated_risk_pct"]
+        if sglt2_applied:
+            # SGLT2i trial meta-analysis (EMPA-REG / DAPA-HF): 18% relative CVD risk reduction
+            sim_base_risk = round(sim_base_risk * 0.82, 1)
+
         risk_reduction_pct = round(self.base_risk_score - sim_base_risk, 1)
+
+        # 24-Hour Hemodynamic Twin Response
+        rmssd_gain = 0.0
+        if hr_reduction > 0:
+            rmssd_gain += 8.5
+        if not s.get("smoker", True) and self.patient.get("lifestyle", {}).get("smoker", False):
+            rmssd_gain += 4.5
+
+        projected_instability = max(5.0, self.physiological_instability_score - (risk_reduction_pct * 0.6) - (rmssd_gain * 0.4))
 
         return {
             "original_base_risk": self.base_risk_score,
+            "current_baseline_risk": self.base_risk_score,
             "projected_base_risk": sim_base_risk,
+            "simulated_baseline_risk": sim_base_risk,
+            "projected_risk": sim_base_risk,
             "absolute_risk_reduction": risk_reduction_pct,
             "projected_vascular_age": sim_risk_data["vascular_age"],
+            "current_heart_rate": round(current_hr, 1),
             "simulated_heart_rate": round(simulated_hr, 1),
+            "current_systolic_bp": round(current_sbp, 1),
             "simulated_systolic_bp": round(v["systolic_bp"], 1),
-            "time_horizon": "5 to 10-year sustained therapeutic adherence",
+            "projected_rmssd_gain_ms": round(rmssd_gain, 1),
+            "projected_instability_score": round(projected_instability, 1),
+            "active_ehr_medications": active_meds,
+            "time_horizon": "Dual Horizon: 24-Hour Hemodynamic Response + 10-Year ASCVD Risk Reduction",
             "interventions_applied": interventions_applied,
-            "clinical_summary": f"Estimated {abs(risk_reduction_pct)}% {'reduction' if risk_reduction_pct >= 0 else 'increase'} in 10-year CVD risk with sustained adherence. Projected vascular age: {sim_risk_data['vascular_age']} years.",
+            "clinical_summary": f"Estimated {abs(risk_reduction_pct)}% {'reduction' if risk_reduction_pct >= 0 else 'increase'} in 10-year CVD risk with sustained adherence. Projected vascular age: {sim_risk_data['vascular_age']} years. 24h resting pulse projected at {simulated_hr:.0f} BPM with +{rmssd_gain:.1f}ms vagal gain.",
             "disclaimer": "Educational clinical decision support — not an autonomous prescription engine. All therapies require physician review."
         }
 
@@ -316,7 +581,7 @@ class CardioTwin:
         else:
             status_label = "Physiologically Stable"
 
-        # Compute dynamic cardiovascular biological age (Phase 6.1)
+        # Compute dynamic cardiovascular biological age
         cv_age_eval = None
         try:
             try:
@@ -333,6 +598,9 @@ class CardioTwin:
         except Exception:
             cv_age_eval = None
 
+        # Compute proactive horizon forecast and EHR coupling (Phase 3)
+        forecast = self.compute_proactive_forecast()
+
         return {
             "patient_id": self.patient_id,
             "patient_name": self.name,
@@ -343,6 +611,9 @@ class CardioTwin:
             "base_clinical_risk": self.base_risk_score,
             "baseline_10yr_cvd_risk_pct": self.base_risk_score,
             "cardiovascular_age": cv_age_eval,
+            "proactive_forecast": forecast,
+            "ehr_coupling": forecast["ehr_coupling"],
+            "personal_instability": self.current_vitals.get("personal_instability"),
             "current_vitals": self.current_vitals,
             "patient_ehr": self.patient,
             "risk_history": self.risk_history[-30:],

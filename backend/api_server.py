@@ -12,6 +12,7 @@ import csv
 import json
 import time
 import threading
+import copy
 from datetime import datetime
 from collections import deque
 from typing import Dict, Any, Optional
@@ -245,6 +246,7 @@ def index():
     return jsonify({
         "system": "CardioTwin Cardiovascular Digital Twin Engine",
         "version": "3.0.0",
+        "release_codename": "v4.1.0-sentinel",
         "model_version": "v3-8class-2271patients",
         "status": "Investigational Screening Prototype (Non-Diagnostic)",
         "active_patient": active_twin.name,
@@ -255,6 +257,8 @@ def index():
             "GET  /twin/status",
             "POST /twin/simulate",
             "POST /twin/scenario",
+            "GET  /baseline/status",
+            "GET  /fhir/export",
             "POST /data",
             "POST /ingest_telemetry",
             "GET  /command",
@@ -487,6 +491,204 @@ def get_shap_explainability():
         return jsonify(data)
     return jsonify({"error": "SHAP feature importance report not yet generated"}), 404
 
+# 4f. Personal Baseline Status Endpoint
+@app.route("/baseline/status", methods=["GET"])
+def get_baseline_status():
+    with twin_lock:
+        is_valid, invalid_reason = live_baseline_manager.is_baseline_valid()
+        return jsonify({
+            "patient_id": live_baseline_manager.patient_id,
+            "has_calibrated_baseline": is_valid,
+            "invalidation_reason": invalid_reason,
+            "is_calibrating": live_baseline_manager.is_calibrating,
+            "baseline": live_baseline_manager.baseline
+        })
+
+# 4g. ABDM HL7 FHIR R4 Bundle Export Endpoint
+@app.route("/fhir/export", methods=["GET"])
+def export_fhir_bundle():
+    with twin_lock:
+        status = active_twin.get_status()
+        patient = active_twin.patient
+        vitals = active_twin.current_vitals
+        p_id = active_twin.patient_id
+        instability = vitals.get("personal_instability") or {}
+        score = instability.get("instability_score", active_twin.physiological_instability_score)
+
+        bundle_id = f"cardiotwin-bundle-{p_id}-{int(time.time())}"
+        timestamp_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+        patient_resource = {
+            "resourceType": "Patient",
+            "id": p_id,
+            "identifier": [
+                {
+                    "system": "https://healthid.abdm.gov.in",
+                    "value": patient.get("abha_id", f"91-{p_id}-4481-9920")
+                }
+            ],
+            "name": [{"text": active_twin.name}],
+            "gender": patient.get("gender", "unknown"),
+            "birthDate": f"{2026 - int(patient.get('age', 50))}-01-01"
+        }
+
+        device_resource = {
+            "resourceType": "Device",
+            "id": "cardiotwin-esp32-01",
+            "distinctIdentifier": "cardiotwin-esp32-01",
+            "deviceName": [{"name": "CardioTwin Sentinel ESP32 MAX30102 PPG Node", "type": "user-friendly-name"}],
+            "version": [{"value": "v4.1.0-sentinel"}],
+            "status": "active"
+        }
+
+        obs_hr = {
+            "resourceType": "Observation",
+            "id": f"obs-hr-{p_id}",
+            "status": "final",
+            "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs"}]}],
+            "code": {"coding": [{"system": "http://loinc.org", "code": "8867-4", "display": "Heart rate"}]},
+            "subject": {"reference": f"Patient/{p_id}"},
+            "effectiveDateTime": timestamp_iso,
+            "valueQuantity": {
+                "value": vitals.get("bpm"),
+                "unit": "beats/minute",
+                "system": "http://unitsofmeasure.org",
+                "code": "/min"
+            }
+        }
+
+        obs_rmssd = {
+            "resourceType": "Observation",
+            "id": f"obs-rmssd-{p_id}",
+            "status": "final",
+            "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs"}]}],
+            "code": {"coding": [{"system": "http://loinc.org", "code": "80404-7", "display": "R-R interval.standard deviation (Heart rate variability)"}]},
+            "subject": {"reference": f"Patient/{p_id}"},
+            "effectiveDateTime": timestamp_iso,
+            "valueQuantity": {
+                "value": vitals.get("rmssd"),
+                "unit": "ms",
+                "system": "http://unitsofmeasure.org",
+                "code": "ms"
+            }
+        }
+
+        obs_rhythm = {
+            "resourceType": "Observation",
+            "id": f"obs-rhythm-{p_id}",
+            "status": "final",
+            "code": {"coding": [{"system": "http://snomed.info/sct", "code": "361137007", "display": "Pulse rhythm finding"}]},
+            "subject": {"reference": f"Patient/{p_id}"},
+            "effectiveDateTime": timestamp_iso,
+            "valueString": vitals.get("arrhythmia_predicted", "Normal"),
+            "interpretation": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "N" if vitals.get("arrhythmia_predicted") == "Normal" else "A"}]}]
+        }
+
+        obs_instability = {
+            "resourceType": "Observation",
+            "id": f"obs-instability-{p_id}",
+            "status": "final",
+            "code": {"coding": [{"system": "https://cardiotwin.ai/fhir/codes", "code": "CARDIOTWIN-INSTABILITY", "display": "Personal Instability Index"}]},
+            "subject": {"reference": f"Patient/{p_id}"},
+            "effectiveDateTime": timestamp_iso,
+            "valueQuantity": {
+                "value": score,
+                "unit": "%",
+                "system": "http://unitsofmeasure.org",
+                "code": "%"
+            }
+        }
+
+        risk_assessment = {
+            "resourceType": "RiskAssessment",
+            "id": f"risk-cvd-{p_id}",
+            "status": "final",
+            "subject": {"reference": f"Patient/{p_id}"},
+            "occurrenceDateTime": timestamp_iso,
+            "code": {"coding": [{"system": "http://loinc.org", "code": "79423-0", "display": "Cardiovascular disease 10Y risk [Likelihood]"}]},
+            "prediction": [
+                {
+                    "outcome": {"text": "10-Year Recalibrated Framingham General CVD Risk"},
+                    "probabilityDecimal": round(float(active_twin.base_risk_score) / 100.0, 4),
+                    "qualitativeRisk": {"text": "High Risk" if active_twin.base_risk_score >= 20.0 else ("Moderate Risk" if active_twin.base_risk_score >= 10.0 else "Low Risk")}
+                },
+                {
+                    "outcome": {"text": "6-Hour Hemodynamic Decompensation Forecast"},
+                    "qualitativeRisk": {"text": status.get("proactive_forecast", {}).get("adverse_event_horizon_status", "STABLE_HORIZON")},
+                    "whenPeriod": {"start": timestamp_iso, "end": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() + 21600))}
+                }
+            ]
+        }
+
+        fhir_bundle = {
+            "resourceType": "Bundle",
+            "id": bundle_id,
+            "type": "collection",
+            "timestamp": timestamp_iso,
+            "entry": [
+                {"fullUrl": f"urn:uuid:{patient_resource['id']}", "resource": patient_resource},
+                {"fullUrl": f"urn:uuid:{device_resource['id']}", "resource": device_resource},
+                {"fullUrl": f"urn:uuid:{obs_hr['id']}", "resource": obs_hr},
+                {"fullUrl": f"urn:uuid:{obs_rmssd['id']}", "resource": obs_rmssd},
+                {"fullUrl": f"urn:uuid:{obs_rhythm['id']}", "resource": obs_rhythm},
+                {"fullUrl": f"urn:uuid:{obs_instability['id']}", "resource": obs_instability},
+                {"fullUrl": f"urn:uuid:{risk_assessment['id']}", "resource": risk_assessment}
+            ]
+        }
+        return jsonify(fhir_bundle)
+
+
+def _generate_scenario_waveform(scenario: str):
+    """
+    Generate a 180-sample (1.8s @ 100 Hz) morphologically realistic PPG waveform array
+    for interactive scenario demonstrations.
+    """
+    wf = []
+    if scenario == "calm_normal":
+        T = 83
+        for i in range(180):
+            phi = (i % T) / float(T)
+            val = 22000.0 + 8500.0 * (np.exp(-((phi - 0.18)**2)/(2*0.07**2)) + 0.35 * np.exp(-((phi - 0.42)**2)/(2*0.09**2)))
+            wf.append(round(float(val), 1))
+    elif scenario == "stress_tachycardia":
+        T = 43
+        for i in range(180):
+            phi = (i % T) / float(T)
+            val = 24000.0 + 6800.0 * (np.exp(-((phi - 0.16)**2)/(2*0.08**2)) + 0.08 * np.exp(-((phi - 0.45)**2)/(2*0.12**2)))
+            wf.append(round(float(val), 1))
+    elif scenario == "afib_episode":
+        periods = [38, 62, 41, 79, 45, 58]
+        amps = [0.72, 1.15, 0.65, 1.20, 0.85, 0.95]
+        p_idx = 0
+        while len(wf) < 180:
+            T = periods[p_idx % len(periods)]
+            A = amps[p_idx % len(amps)]
+            for j in range(T):
+                if len(wf) >= 180:
+                    break
+                phi = j / float(T)
+                val = 21000.0 + 7500.0 * A * np.exp(-((phi - 0.20)**2)/(2*0.08**2))
+                wf.append(round(float(val), 1))
+            p_idx += 1
+    elif scenario == "motion_artifact":
+        for i in range(180):
+            w = 80000.0 * np.sin(2 * np.pi * 0.35 * i / 100.0) + 40000.0 * np.cos(2 * np.pi * 0.8 * i / 100.0)
+            val = 150000.0 + w + 60000.0 * np.sin(2 * np.pi * 2.1 * i / 100.0)
+            val = max(15000.0, min(260000.0, val))
+            wf.append(round(float(val), 1))
+    elif scenario == "sensor_liftoff":
+        for i in range(180):
+            val = round(float(np.random.uniform(-0.5, 0.5)), 2)
+            wf.append(val)
+    else:
+        T = 62
+        for i in range(180):
+            phi = (i % T) / float(T)
+            val = 23000.0 + 7200.0 * (np.exp(-((phi - 0.18)**2)/(2*0.07**2)) + 0.30 * np.exp(-((phi - 0.42)**2)/(2*0.09**2)))
+            wf.append(round(float(val), 1))
+    return wf
+
+
 # 5. Scenario Injector for Demonstrations (Explicitly Provenanced as Simulation)
 @app.route("/twin/scenario", methods=["POST"])
 def trigger_scenario():
@@ -655,12 +857,67 @@ def trigger_scenario():
     if scenario not in scenarios:
         return jsonify({"error": f"Unknown scenario '{scenario}'. Available: {list(scenarios.keys())}"}), 400
 
-    sim_vitals = scenarios[scenario]
-    with twin_lock:
-        updated_status = active_twin.update_telemetry(sim_vitals)
+    sim_vitals = copy.deepcopy(scenarios[scenario])
 
-    # Broadcast update
+    with twin_lock:
+        # 1. Ensure live_baseline_manager has an active empirical baseline if uncalibrated
+        is_valid, _ = live_baseline_manager.is_baseline_valid()
+        if not is_valid:
+            now_ts = time.time()
+            live_baseline_manager.baseline = {
+                "patient_id": live_baseline_manager.patient_id,
+                "device_id": "cardiotwin-esp32-01",
+                "firmware_version": "4.1.0",
+                "sensor_settings": {"led_current_ma": 6.0, "sample_rate_hz": 100, "pulse_width_us": 411},
+                "calibrated_at": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(now_ts - 3600)),
+                "calibrated_at_ts": now_ts - 3600,
+                "expires_at": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(now_ts + (30 * 86400))),
+                "expires_at_ts": now_ts + (30 * 86400),
+                "protocol_confirmed": "seated_rest_2min",
+                "windows_collected": 8,
+                "windows_accepted": 6,
+                "calibration_quality_rate": 0.75,
+                "median_bpm": 70.0,
+                "mad_bpm": 2.5,
+                "median_rmssd": 42.0,
+                "mad_rmssd": 4.0,
+                "median_rr_cv": 0.06,
+                "mad_rr_cv": 0.015
+            }
+
+        # 2. Compute personal baseline departure / instability
+        is_screening = sim_vitals.get("signal_gate", {}).get("ai_screening_enabled", False)
+        instability_eval = live_baseline_manager.compute_instability(
+            current_bpm=sim_vitals.get("bpm"),
+            current_rmssd=sim_vitals.get("rmssd"),
+            current_rr_cv=sim_vitals.get("signal_gate", {}).get("rr_cv"),
+            is_quality_reliable=is_screening
+        )
+        sim_vitals["personal_instability"] = instability_eval
+
+        # 3. Synthesize realistic 180-sample PPG waveform chunk
+        scenario_waveform = _generate_scenario_waveform(scenario)
+        sim_vitals["waveform_preview"] = scenario_waveform
+        updated_status = active_twin.update_telemetry(sim_vitals)
+        if instability_eval.get("instability_score") is not None:
+            active_twin.physiological_instability_score = instability_eval["instability_score"]
+            active_twin.current_dynamic_risk = instability_eval["instability_score"]
+            updated_status["current_dynamic_risk"] = instability_eval["instability_score"]
+            updated_status["physiological_instability_score"] = instability_eval["instability_score"]
+        updated_status["personal_instability"] = instability_eval
+        updated_status["has_calibrated_baseline"] = live_baseline_manager.baseline is not None
+        updated_status["personal_baseline"] = live_baseline_manager.baseline
+        updated_status["proactive_forecast"] = active_twin.compute_proactive_forecast()
+        updated_status["ehr_coupling"] = updated_status["proactive_forecast"]["ehr_coupling"]
+
+    # Broadcast updates via WebSocket
     socketio.emit("telemetry_update", updated_status)
+    socketio.emit("live_waveform", {
+        "chunk": scenario_waveform,
+        "bpm": sim_vitals.get("bpm"),
+        "spo2": sim_vitals.get("spo2"),
+        "data_source": "SIMULATION"
+    })
     return jsonify({
         "success": True,
         "scenario_applied": scenario,
@@ -775,6 +1032,7 @@ def receive_sensor_data():
                 "screening_status": "GATED",
                 "alert_state": "CLEAR",
                 "alert_message": f"Screening Paused ({gate_res['status']})",
+                "consensus_pattern": pred_label,
                 "consensus_class": pred_label,
                 "is_persistent": False,
                 "history_summary": ["Verification"]
@@ -800,12 +1058,12 @@ def receive_sensor_data():
 
             # Layer 2: Multi-Window Persistence Consensus Engine
             consensus_eval = live_persistence_engine.process_window(
-                predicted_class=raw_pred_label,
+                raw_pred_label=raw_pred_label,
                 class_probabilities=probs,
                 signal_reliable=True
             )
             # Use persistence-filtered consensus class
-            pred_label = consensus_eval["consensus_class"]
+            pred_label = consensus_eval["consensus_pattern"]
 
         # Determine verified BPM: only real measurement or None
         computed_bpm = m["bpm"] if (m and m.get("bpm", 0) > 0) else (feats["bpm"] if (feats and feats.get("bpm", 0) > 0) else 0.0)

@@ -208,10 +208,19 @@ class DualModalityPredictor:
             except Exception as e:
                 probs_dl = None
 
-        # 3. Decision Fusion
+        # 3. Decision Fusion (Tournament Champion: Method B Temperature-Scaled Fusion)
         mode = "HEURISTIC_FALLBACK"
         if probs_c is not None and probs_dl is not None:
-            fused = w_classical * probs_c + w_dl * probs_dl
+            eps = 1e-7
+            log_c = np.log(np.clip(probs_c, eps, 1.0 - eps)) / 0.85
+            sc_c = np.exp(log_c - np.max(log_c))
+            sc_c = sc_c / np.sum(sc_c)
+
+            log_dl = np.log(np.clip(probs_dl, eps, 1.0 - eps)) / 1.15
+            sc_dl = np.exp(log_dl - np.max(log_dl))
+            sc_dl = sc_dl / np.sum(sc_dl)
+
+            fused = w_classical * sc_c + w_dl * sc_dl
             fused = fused / np.sum(fused)
             mode = "DUAL_MODALITY_FUSION"
         elif probs_dl is not None:

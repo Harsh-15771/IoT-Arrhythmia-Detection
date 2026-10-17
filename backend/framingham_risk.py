@@ -191,7 +191,9 @@ def compute_cardiovascular_age(
         "chronological_age": chronological_age,
         "epidemiological_vascular_age": vascular_age,
         "integrated_cardiovascular_age": integrated_cv_age,
+        "estimated_cv_age": integrated_cv_age,
         "age_gap_years": age_gap,
+        "age_delta": age_gap,
         "status": "Accelerated Cardiovascular Aging" if age_gap >= 5 else (
             "Cardioprotective / Younger Biological Profile" if age_gap <= -3 else "Age Concordant"
         ),

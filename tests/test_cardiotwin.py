@@ -715,6 +715,78 @@ class TestPersonalBaselineEngine(unittest.TestCase):
         self.assertIn("Measurement Unreliable", res["status_label"])
 
 
+class TestMasterUpgradeSentinelV41(unittest.TestCase):
+    def setUp(self):
+        self.client = api_server.app.test_client()
+
+    def test_fhir_export_bundle_resource(self):
+        """Phase 6.1 Test 1: GET /fhir/export returns valid HL7 FHIR R4 Bundle"""
+        res = self.client.get("/fhir/export")
+        self.assertEqual(res.status_code, 200)
+        bundle = res.get_json()
+        self.assertEqual(bundle.get("resourceType"), "Bundle")
+        self.assertEqual(bundle.get("type"), "collection")
+        entries = bundle.get("entry", [])
+        self.assertGreaterEqual(len(entries), 6)
+        resource_types = [e.get("resource", {}).get("resourceType") for e in entries]
+        self.assertIn("Patient", resource_types)
+        self.assertIn("Device", resource_types)
+        self.assertIn("Observation", resource_types)
+        self.assertIn("RiskAssessment", resource_types)
+
+    def test_proactive_forecast_and_ehr_coupling(self):
+        """Phase 6.1 Test 2: GET /twin/status contains proactive_forecast and ehr_coupling"""
+        res = self.client.get("/twin/status")
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertIn("proactive_forecast", data)
+        self.assertIn("ehr_coupling", data)
+        forecast = data["proactive_forecast"]
+        self.assertIn("predicted_instability_2h", forecast)
+        self.assertIn("predicted_instability_6h", forecast)
+        self.assertIn("adverse_event_horizon_status", forecast)
+        self.assertIn("wearable_7d_summary", forecast)
+        self.assertIn("daily_resting_hr_7d", forecast["wearable_7d_summary"])
+
+    def test_simulate_treatment_contract_keys(self):
+        """Phase 6.1 Test 3: simulate_treatment returns both projected_base_risk and simulated_baseline_risk"""
+        sim_res = self.client.post("/twin/simulate", json={
+            "add_medications": ["Atorvastatin", "Dapagliflozin"],
+            "systolic_bp": 125
+        })
+        self.assertEqual(sim_res.status_code, 200)
+        sim = sim_res.get_json().get("simulation", {})
+        self.assertIn("original_base_risk", sim)
+        self.assertIn("current_baseline_risk", sim)
+        self.assertIn("projected_base_risk", sim)
+        self.assertIn("simulated_baseline_risk", sim)
+        self.assertIn("projected_risk", sim)
+        self.assertEqual(sim["simulated_baseline_risk"], sim["projected_base_risk"])
+        self.assertEqual(sim["simulated_baseline_risk"], sim["projected_risk"])
+
+    def test_cardiovascular_age_alias_keys(self):
+        """Phase 6.1 Test 4: compute_cardiovascular_age returns both integrated_cardiovascular_age and estimated_cv_age"""
+        from framingham_risk import compute_cardiovascular_age
+        res = compute_cardiovascular_age(chronological_age=63, vascular_age=76, resting_bpm=72.0, rmssd=35.0)
+        self.assertIn("integrated_cardiovascular_age", res)
+        self.assertIn("estimated_cv_age", res)
+        self.assertIn("age_gap_years", res)
+        self.assertIn("age_delta", res)
+        self.assertEqual(res["integrated_cardiovascular_age"], res["estimated_cv_age"])
+        self.assertEqual(res["age_gap_years"], res["age_delta"])
+
+    def test_scenario_personal_instability_and_waveform(self):
+        """Phase 6.1 Test 5: POST /twin/scenario populates personal_instability and waveform_preview"""
+        res = self.client.post("/twin/scenario", json={"scenario": "stress_tachycardia"})
+        self.assertEqual(res.status_code, 200)
+        status = res.get_json().get("updated_status", {})
+        vitals = status.get("current_vitals", {})
+        self.assertIn("personal_instability", vitals)
+        self.assertIsNotNone(vitals["personal_instability"])
+        self.assertIn("waveform_preview", vitals)
+        self.assertEqual(len(vitals["waveform_preview"]), 180)
+
+
 if __name__ == "__main__":
     unittest.main()
 

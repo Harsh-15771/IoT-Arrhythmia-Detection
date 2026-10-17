@@ -118,6 +118,7 @@ class MultiWindowPersistenceEngine:
             return {
                 "screening_status": "GATED",
                 "consensus_pattern": "Verification Required",
+                "consensus_class": "Verification Required",
                 "consensus_count": 0,
                 "recent_history": [],
                 "is_persistent": False,
@@ -168,6 +169,7 @@ class MultiWindowPersistenceEngine:
         return {
             "screening_status": screening_status,
             "consensus_pattern": top_pattern,
+            "consensus_class": top_pattern,
             "consensus_count": top_count,
             "recent_history": recent_labels,
             "is_persistent": is_persistent,

@@ -1,100 +1,135 @@
 {
-  "version": "4.0.0-leak-free-v2",
-  "evaluated_at": "2026-10-05 12:11:03",
+  "version": "4.1.0-sentinel-ablation-v2",
+  "evaluated_at": "2026-10-17 02:21:14",
   "total_windows": 4683,
   "total_patients": 2271,
   "validation_scheme": "Nested 5-Fold StratifiedGroupKFold on Patient IDs (Zero Leakage)",
-  "standalone_benchmarks": {
-    "classical_super_ensemble": {
-      "macro_f1": 0.48000592296175904,
-      "accuracy": 0.5831731795857357
+  "tournament_results": [
+    {
+      "method": "Method B (Temperature-Scaled Global Fusion)",
+      "macro_f1": 0.5440154234553726,
+      "accuracy": 0.5957719410634209
     },
-    "inception_1d_cnn": {
-      "macro_f1": 0.5181353826951258,
-      "accuracy": 0.5637411915438821
+    {
+      "method": "Method C (Class-Specific Reliability Weighting)",
+      "macro_f1": 0.5431003422847724,
+      "accuracy": 0.5979073243647235
+    },
+    {
+      "method": "Method A (Global Scalar Late Fusion)",
+      "macro_f1": 0.53922157386241,
+      "accuracy": 0.5921417894512065
+    },
+    {
+      "method": "Method D (Cost-Sensitive Threshold Tuning)",
+      "macro_f1": 0.5327825518799081,
+      "accuracy": 0.5863762545376895
     }
+  ],
+  "champion_fusion_strategy": "Method B (Temperature-Scaled Global Fusion)",
+  "champion_performance": {
+    "macro_f1": 0.5440154234553726,
+    "accuracy": 0.5957719410634209
   },
-  "nested_dual_fusion": {
-    "macro_f1": 0.53922157386241,
-    "accuracy": 0.5921417894512065,
-    "balanced_accuracy": 0.5745715744201092,
-    "weighted_f1": 0.597008999110262,
-    "outer_fold_macro_f1s": [
-      0.628974415437955,
-      0.556829733157334,
-      0.5419643234042553,
-      0.5425329028946759,
-      0.4343949403126116
-    ],
-    "confidence_interval_95": 0.054540117054709236,
-    "selected_weights_classical": [
-      0.4,
-      0.4,
-      0.4,
-      0.4,
-      0.3
-    ]
+  "three_tier_clinical_actionability": {
+    "tiers": {
+      "Tier 1: Normal / Routine Monitoring": {
+        "sensitivity": 0.6798,
+        "specificity": 0.9883,
+        "precision": 0.9519,
+        "f1_score": 0.7932,
+        "true_positives": 811,
+        "false_positives": 41,
+        "false_negatives": 382,
+        "true_negatives": 3449,
+        "support": 1193
+      },
+      "Tier 2: Actionable Rate / Atrial Anomaly": {
+        "sensitivity": 0.9009,
+        "specificity": 0.6188,
+        "precision": 0.7272,
+        "f1_score": 0.8048,
+        "true_positives": 2236,
+        "false_positives": 839,
+        "false_negatives": 246,
+        "true_negatives": 1362,
+        "support": 2482
+      },
+      "Tier 3: Critical Hemodynamic Alarm": {
+        "sensitivity": 0.4931,
+        "specificity": 0.9295,
+        "precision": 0.6574,
+        "f1_score": 0.5635,
+        "true_positives": 497,
+        "false_positives": 259,
+        "false_negatives": 511,
+        "true_negatives": 3416,
+        "support": 1008
+      }
+    },
+    "tier_macro_f1": 0.7205,
+    "tier_overall_accuracy": 0.7568
   },
   "per_class_report": {
     "AFib": {
-      "precision": 0.46703296703296704,
-      "recall": 0.6375,
-      "f1-score": 0.5391120507399577,
+      "precision": 0.4803738317757009,
+      "recall": 0.6425,
+      "f1-score": 0.5497326203208556,
       "support": 400.0
     },
     "Asystole": {
-      "precision": 0.39747634069400634,
-      "recall": 0.6176470588235294,
-      "f1-score": 0.4836852207293666,
+      "precision": 0.3980891719745223,
+      "recall": 0.6127450980392157,
+      "f1-score": 0.4826254826254826,
       "support": 204.0
     },
     "Bradycardia": {
-      "precision": 0.6493506493506493,
-      "recall": 0.7097791798107256,
-      "f1-score": 0.6782215523737755,
+      "precision": 0.6508620689655172,
+      "recall": 0.7145110410094637,
+      "f1-score": 0.681203007518797,
       "support": 634.0
     },
     "Cardiac_Paced": {
-      "precision": 0.28106508875739644,
-      "recall": 0.475,
-      "f1-score": 0.35315985130111527,
+      "precision": 0.2857142857142857,
+      "recall": 0.47,
+      "f1-score": 0.3553875236294896,
       "support": 400.0
     },
     "Normal": {
-      "precision": 0.957345971563981,
-      "recall": 0.6772841575859179,
-      "f1-score": 0.7933235149729995,
+      "precision": 0.9518779342723005,
+      "recall": 0.6797988264878457,
+      "f1-score": 0.7931540342298289,
       "support": 1193.0
     },
     "Tachycardia": {
-      "precision": 0.618073316283035,
-      "recall": 0.691793893129771,
-      "f1-score": 0.6528590724898694,
+      "precision": 0.6188870151770658,
+      "recall": 0.700381679389313,
+      "f1-score": 0.657117278424351,
       "support": 1048.0
     },
     "V_Flutter_Fib": {
-      "precision": 0.42857142857142855,
+      "precision": 0.4588235294117647,
       "recall": 0.5416666666666666,
-      "f1-score": 0.4785276073619632,
+      "f1-score": 0.4968152866242038,
       "support": 72.0
     },
     "V_Tachycardia": {
-      "precision": 0.5247813411078717,
-      "recall": 0.2459016393442623,
-      "f1-score": 0.33488372093023255,
+      "precision": 0.5126050420168067,
+      "recall": 0.25,
+      "f1-score": 0.33608815426997246,
       "support": 732.0
     },
-    "accuracy": 0.5921417894512065,
+    "accuracy": 0.5957719410634209,
     "macro avg": {
-      "precision": 0.540462137920167,
-      "recall": 0.5745715744201092,
-      "f1-score": 0.53922157386241,
+      "precision": 0.5446541099134954,
+      "recall": 0.576450413949063,
+      "f1-score": 0.5440154234553726,
       "support": 4683.0
     },
     "weighted avg": {
-      "precision": 0.6399454135371747,
-      "recall": 0.5921417894512065,
-      "f1-score": 0.597008999110262,
+      "precision": 0.6390643053959649,
+      "recall": 0.5957719410634209,
+      "f1-score": 0.5998431054858258,
       "support": 4683.0
     }
   }

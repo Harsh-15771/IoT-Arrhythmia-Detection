@@ -55,7 +55,28 @@ CardioTwin strictly enforces **Patient-Isolated Stratified GroupKFold** (`n_spli
 | Standalone Random Guess Baseline | Uniform Random | 12.50% | 12.50% | 12.50% | — |
 | Standalone Classical Super Ensemble | 27 Hand-Crafted Biomarkers | 48.00% | 50.21% | 58.32% | $\pm 4.8\%$ |
 | Standalone Inception-1D CNN | Raw 100 Hz Waveform (1000 samples) | 51.81% | 56.72% | 56.37% | $\pm 5.1\%$ |
-| **🏆 Honest Nested Dual-Modality Fusion** | **Waveforms + Biomarkers ($0.38\text{ Classical} + 0.62\text{ DL}$)** | **53.92%** | **57.46%** | **59.21%** | **$54.09\% \pm 5.45\%$** |
+| Baseline Scalar Dual Fusion (Method A) | Waveforms + Biomarkers ($0.38\text{ Classical} + 0.62\text{ DL}$) | 53.92% | 57.46% | 59.21% | $54.09\% \pm 5.45\%$ |
+| **🏆 Temperature-Scaled Dual Fusion (Method B)** | **Calibrated Logits ($T_c=0.85, T_{dl}=1.15, w=0.40$)** | **54.40%** | **57.88%** | **59.58%** | **$54.40\% \pm 5.21\%$** |
+
+### Fusion Tournament Leaderboard (Nested 5-Fold Group-CV)
+
+1. **Method B (Temperature-Scaled Global Fusion):** **54.40% Macro-F1** (59.58% Accuracy) — *Selected for Production Engine*
+2. **Method C (Class-Specific Reliability Weighting):** **54.31% Macro-F1** (59.79% Accuracy)
+3. **Method A (Global Scalar Late Fusion):** **53.92% Macro-F1** (59.21% Accuracy)
+4. **Method D (Cost-Sensitive Threshold Tuning):** **53.28% Macro-F1** (58.64% Accuracy)
+
+### 3-Tier Clinical Actionability Triage Benchmark
+
+In clinical practice, optical PPG serves as an actionable triage gate rather than an autonomous 8-class diagnostic system. Grouping the 8 classes into standard clinical actionability tiers yields:
+
+| Clinical Actionability Tier | Included Rhythm Classes | Sensitivity (Recall) | Specificity | Precision | F1-Score | Case Support | Clinical Triage Objective |
+|:---|:---|:---:|:---:|:---:|:---:|:---:|:---|
+| **Tier 1: Normal / Routine Monitoring** | `Normal` | 67.98% | **98.83%** | **95.19%** | **79.32%** | 1,193 | High specificity avoids alarming healthy users |
+| **Tier 2: Actionable Rate / Atrial Anomaly** | `AFib`, `Bradycardia`, `Tachycardia`, `Cardiac_Paced` | **90.09%** | 61.88% | 72.72% | **80.48%** | 2,482 | High sensitivity for outpatient non-emergent ECG referral |
+| **Tier 3: Critical Hemodynamic Alarm** | `V_Tachycardia`, `V_Flutter_Fib`, `Asystole` | 49.31% | **92.95%** | 65.74% | **56.35%** | 1,008 | High specificity preserves clinician alarm response fidelity |
+
+- **Overall 3-Tier Clinical Triage Accuracy:** **75.68%**
+- **Macro-F1 across 3 Triage Tiers:** **72.05%**
 
 ### Deep Learning Architecture Tournament (Identical 5-Fold Grouped Splits)
 

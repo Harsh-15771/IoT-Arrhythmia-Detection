@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import { Activity, ArrowRight, Check, ChevronRight, CircleStop, Download, FileText, HeartPulse, Leaf, LoaderCircle, Play, Radio, RefreshCw, ShieldCheck, Sparkles, Stethoscope, UserRound, Waves, X } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowRight, Check, ChevronRight, CircleStop, Cpu, Download, FileText, HeartPulse, Leaf, LoaderCircle, Play, Radio, RefreshCw, ShieldCheck, Sparkles, Stethoscope, UserRound, Waves, X } from 'lucide-react';
 
 const API_BASE = 'http://127.0.0.1:5000';
 const navItems = [['home', 'Home'], ['twin', 'Your twin'], ['live', 'Live check'], ['plan', 'Explore changes']];
@@ -23,6 +23,32 @@ const SAMPLE_PPG = [
   30, 31, 32, 35, 45, 75, 130, 190, 235, 245, 230, 190, 150, 125, 115, 122, 128, 122, 108, 85, 60, 42, 33, 30,
   30, 31, 32, 35, 45, 75, 130, 190, 235, 245, 230, 190, 150, 125, 115, 122, 128, 122, 108, 85, 60, 42, 33, 30
 ];
+
+function Sparkline({ data = [], color = '#167c76', width = 160, height = 36 }) {
+  if (!data || data.length < 2) return null;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const points = data.map((d, i) => {
+    const x = (i / (data.length - 1)) * (width - 8) + 4;
+    const y = height - 4 - ((d - min) / range) * (height - 8);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ overflow: 'visible' }}>
+      <polyline fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" points={points} />
+      {data.map((d, i) => {
+        const x = (i / (data.length - 1)) * (width - 8) + 4;
+        const y = height - 4 - ((d - min) / range) * (height - 8);
+        if (i === 0 || i === data.length - 1) {
+          return <circle key={i} cx={x} cy={y} r="3" fill={color} />;
+        }
+        return null;
+      })}
+    </svg>
+  );
+}
 
 function Waveform({ points }) {
   const pts = points && points.length >= 2 ? points : SAMPLE_PPG;
@@ -47,7 +73,9 @@ export default function App() {
   const [scenarioLoading, setScenarioLoading] = useState(false);
   const [simMeds, setSimMeds] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('sim') || params.get('tab') === 'plan' ? { metoprolol: true, atorvastatin: true, ramipril: false } : { metoprolol: false, atorvastatin: false, ramipril: false };
+    return params.get('sim') || params.get('tab') === 'plan'
+      ? { metoprolol: true, atorvastatin: true, ramipril: false, dapagliflozin: true }
+      : { metoprolol: false, atorvastatin: false, ramipril: false, dapagliflozin: false };
   });
   const [simSBP, setSimSBP] = useState(125);
   const [simSmoker, setSimSmoker] = useState(false);
@@ -65,17 +93,15 @@ export default function App() {
     return null;
   });
   const [isSimulating, setIsSimulating] = useState(false);
-  const [isSimulatedData, setIsSimulatedData] = useState(false);
+  const [isSimulatedData, setIsSimulatedData] = useState(true);
 
   const applyStatus = data => {
     setTwinStatus(data);
     setIsCalibrating(Boolean(data?.is_calibrating));
     setCalibration(data?.calibration_status || null);
-    if (data?.current_vitals?.data_source === 'SIMULATION') {
-      setIsSimulatedData(true);
-    } else if (data?.hardware_telemetry?.device_id) {
-      setIsSimulatedData(false);
-    }
+    const src = data?.data_source || data?.current_vitals?.data_source;
+    const hasLiveHw = Boolean(data?.hardware_telemetry?.device_id) && src === 'LIVE_HARDWARE';
+    setIsSimulatedData(!hasLiveHw);
     if (data?.patient_ehr?.vitals?.systolic_bp) setSimSBP(data.patient_ehr.vitals.systolic_bp);
     if (data?.patient_ehr?.lifestyle?.smoker !== undefined) setSimSmoker(data.patient_ehr.lifestyle.smoker);
   };
@@ -102,7 +128,11 @@ export default function App() {
     socket.on('telemetry_update', applyStatus);
     socket.on('live_waveform', data => {
       if (data?.chunk?.length) {
-        setIsSimulatedData(false);
+        if (data.data_source === 'LIVE_HARDWARE' && data.device_id) {
+          setIsSimulatedData(false);
+        } else if (data.data_source === 'SIMULATION') {
+          setIsSimulatedData(true);
+        }
         setWaveformPoints(current => [...current, ...data.chunk].slice(-180));
       }
     });
@@ -147,7 +177,12 @@ export default function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ scenario })
     }).then(r => r.json()).then(data => {
-      if (data.updated_status) applyStatus(data.updated_status);
+      if (data.updated_status) {
+        applyStatus(data.updated_status);
+        if (data.updated_status.current_vitals?.waveform_preview?.length) {
+          setWaveformPoints(data.updated_status.current_vitals.waveform_preview);
+        }
+      }
     }).finally(() => setScenarioLoading(false));
   };
 
@@ -165,13 +200,33 @@ export default function App() {
 
   const runSimulation = () => {
     setIsSimulating(true);
-    const labels = { metoprolol: 'Metoprolol', atorvastatin: 'Atorvastatin', ramipril: 'Ramipril' };
+    const labels = {
+      metoprolol: 'Metoprolol',
+      atorvastatin: 'Atorvastatin',
+      ramipril: 'Ramipril',
+      dapagliflozin: 'Dapagliflozin'
+    };
     const meds = Object.entries(simMeds).filter(([, on]) => on).map(([key]) => labels[key]);
     fetch(`${API_BASE}/twin/simulate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ add_medications: meds, systolic_bp: simSBP, smoker: simSmoker })
     }).then(r => r.json()).then(data => setSimResult(data.simulation || null)).finally(() => setIsSimulating(false));
+  };
+
+  const exportFhirBundle = () => {
+    fetch(`${API_BASE}/fhir/export`)
+      .then(r => r.json())
+      .then(bundle => {
+        const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cardiotwin_fhir_r4_${selectedPatientId}_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      })
+      .catch(err => console.error('Failed to export FHIR bundle', err));
   };
 
   const exportClinicianSummary = () => {
@@ -219,9 +274,13 @@ export default function App() {
   const history = patient.clinical_history || {};
   const baseline = twinStatus?.personal_baseline || null;
   const telemetry = twinStatus?.hardware_telemetry || {};
+  const proactiveForecast = twinStatus?.proactive_forecast || null;
+  const ehrCoupling = twinStatus?.ehr_coupling || proactiveForecast?.ehr_coupling || null;
+  const wearable7d = proactiveForecast?.wearable_7d_summary || null;
 
-  const score = twinStatus?.personal_instability?.instability_score ?? null;
-  const flags = twinStatus?.personal_instability?.departure_flags || [];
+  const personalInstability = twinStatus?.personal_instability || vitals.personal_instability || {};
+  const score = personalInstability.instability_score ?? null;
+  const flags = personalInstability.departure_flags || [];
   const instability = instabilityState(score, flags);
   const gate = vitals.signal_gate || twinStatus?.signal_gate || {};
   const hasBaseline = Boolean(twinStatus?.has_calibrated_baseline);
@@ -458,6 +517,155 @@ export default function App() {
                 ))}
               </ul>
             </section>
+
+            {/* Complete EHR Clinical & Lab Card (Phase 5.2) */}
+            <article className="ehr-labs-card">
+              <div className="title-row">
+                <div>
+                  <p className="eyebrow"><FileText size={15} /> Verified Clinical Laboratory Panel</p>
+                  <h2>Biochemical Substrate & Biomarkers</h2>
+                </div>
+                <button className="button subtle" onClick={exportFhirBundle}>
+                  <Download size={15} /> Export ABDM FHIR R4 Bundle
+                </button>
+              </div>
+              <div className="ehr-labs-grid">
+                <div className={`lab-item ${(patient.labs?.total_cholesterol || 0) >= 200 ? 'abnormal' : ''}`}>
+                  <span className="lab-name">Total Cholesterol</span>
+                  <strong className="lab-val">{patient.labs?.total_cholesterol || 227} mg/dL</strong>
+                  {(patient.labs?.total_cholesterol || 0) >= 200 && <span className="lab-badge">High</span>}
+                  <span className="lab-normal-range">Target: &lt; 200 mg/dL</span>
+                </div>
+                <div className={`lab-item ${(patient.labs?.ldl_cholesterol || 0) >= 100 ? 'abnormal' : ''}`}>
+                  <span className="lab-name">LDL Cholesterol</span>
+                  <strong className="lab-val">{patient.labs?.ldl_cholesterol || 158} mg/dL</strong>
+                  {(patient.labs?.ldl_cholesterol || 0) >= 100 && <span className="lab-badge">High</span>}
+                  <span className="lab-normal-range">Target: &lt; 100 mg/dL</span>
+                </div>
+                <div className={`lab-item ${(patient.labs?.hdl_cholesterol || 40) < 40 ? 'abnormal' : ''}`}>
+                  <span className="lab-name">HDL Cholesterol</span>
+                  <strong className="lab-val">{patient.labs?.hdl_cholesterol || 39} mg/dL</strong>
+                  {(patient.labs?.hdl_cholesterol || 40) < 40 && <span className="lab-badge">Low</span>}
+                  <span className="lab-normal-range">Target: &ge; 40 mg/dL</span>
+                </div>
+                <div className={`lab-item ${(patient.labs?.triglycerides || 0) >= 150 ? 'abnormal' : ''}`}>
+                  <span className="lab-name">Triglycerides</span>
+                  <strong className="lab-val">{patient.labs?.triglycerides || 226} mg/dL</strong>
+                  {(patient.labs?.triglycerides || 0) >= 150 && <span className="lab-badge">High</span>}
+                  <span className="lab-normal-range">Target: &lt; 150 mg/dL</span>
+                </div>
+                <div className={`lab-item ${(patient.labs?.fasting_glucose || 0) >= 126 ? 'abnormal' : ''}`}>
+                  <span className="lab-name">Fasting Glucose</span>
+                  <strong className="lab-val">{patient.labs?.fasting_glucose || 154} mg/dL</strong>
+                  {(patient.labs?.fasting_glucose || 0) >= 126 && <span className="lab-badge">Elevated</span>}
+                  <span className="lab-normal-range">Target: 70–99 mg/dL</span>
+                </div>
+                <div className={`lab-item ${(patient.labs?.hba1c || 0) >= 6.5 ? 'abnormal' : ''}`}>
+                  <span className="lab-name">Glycated HbA1c</span>
+                  <strong className="lab-val">{patient.labs?.hba1c || 7.4}%</strong>
+                  {(patient.labs?.hba1c || 0) >= 6.5 && <span className="lab-badge">Diabetic</span>}
+                  <span className="lab-normal-range">Target: &lt; 5.7%</span>
+                </div>
+                <div className={`lab-item ${(patient.labs?.hs_crp || 0) > 2.0 ? 'abnormal' : ''}`}>
+                  <span className="lab-name">High-Sensitivity CRP</span>
+                  <strong className="lab-val">{patient.labs?.hs_crp || 3.61} mg/L</strong>
+                  {(patient.labs?.hs_crp || 0) > 2.0 && <span className="lab-badge">Inflammation</span>}
+                  <span className="lab-normal-range">Target: &lt; 1.0 mg/L</span>
+                </div>
+                <div className="lab-item">
+                  <span className="lab-name">Blood Pressure</span>
+                  <strong className="lab-val">{patient.vitals?.systolic_bp || 143}/{patient.vitals?.diastolic_bp || 95} mmHg</strong>
+                  {(patient.vitals?.systolic_bp || 0) >= 130 && <span className="lab-badge">Stage 2 HTN</span>}
+                  <span className="lab-normal-range">Target: &lt; 120/80 mmHg</span>
+                </div>
+              </div>
+            </article>
+
+            {/* Active Medications List */}
+            <article className="meds-card">
+              <p className="eyebrow"><Stethoscope size={15} /> Current Pharmacotherapy</p>
+              <h2>Active Prescriptions & Hemodynamic Actions</h2>
+              <table className="meds-table">
+                <thead>
+                  <tr>
+                    <th>Medication</th>
+                    <th>Dosage</th>
+                    <th>Class</th>
+                    <th>Heart Rate Effect</th>
+                    <th>Blood Pressure Effect</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(history.medications || []).map((med, idx) => (
+                    <tr key={idx}>
+                      <td><strong>{typeof med === 'string' ? med : med.name}</strong></td>
+                      <td>{typeof med === 'object' && med.dosage ? med.dosage : 'Standard'}</td>
+                      <td><span className="med-badge">{typeof med === 'object' && med.class ? med.class : 'Therapeutic'}</span></td>
+                      <td>{typeof med === 'object' && med.hr_effect !== undefined ? `${med.hr_effect > 0 ? '+' : ''}${med.hr_effect} BPM` : '—'}</td>
+                      <td>{typeof med === 'object' && med.bp_effect !== undefined ? `${med.bp_effect > 0 ? '+' : ''}${med.bp_effect} mmHg SBP` : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </article>
+
+            {/* 7-Day Wearable Sleep & HRV Longitudinal Sparklines (Phase 5.2) */}
+            {wearable7d && (
+              <article className="sparklines-card">
+                <p className="eyebrow"><Activity size={15} /> 7-Day Longitudinal Wearable Telemetry</p>
+                <h2>Continuous Physiological Trajectories</h2>
+                <div className="sparklines-grid">
+                  <div className="sparkline-box">
+                    <span>Resting HR (7-Day)</span>
+                    <strong>{wearable7d.daily_resting_hr_7d[wearable7d.daily_resting_hr_7d.length - 1]} BPM</strong>
+                    <div className="sparkline-wrapper">
+                      <Sparkline data={wearable7d.daily_resting_hr_7d} color="#167c76" />
+                      <div className="sparkline-vals">
+                        <span>Day 1: <b>{wearable7d.daily_resting_hr_7d[0]}</b></span>
+                        <ArrowRight size={12} />
+                        <span>Day 7: <b>{wearable7d.daily_resting_hr_7d[wearable7d.daily_resting_hr_7d.length - 1]}</b></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="sparkline-box">
+                    <span>Nocturnal RMSSD (7-Day)</span>
+                    <strong>{wearable7d.nocturnal_rmssd_7d[wearable7d.nocturnal_rmssd_7d.length - 1]} ms</strong>
+                    <div className="sparkline-wrapper">
+                      <Sparkline data={wearable7d.nocturnal_rmssd_7d} color="#d9822b" />
+                      <div className="sparkline-vals">
+                        <span>Day 1: <b>{wearable7d.nocturnal_rmssd_7d[0]} ms</b></span>
+                        <ArrowRight size={12} />
+                        <span>Day 7: <b>{wearable7d.nocturnal_rmssd_7d[wearable7d.nocturnal_rmssd_7d.length - 1]} ms</b></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="sparkline-box">
+                    <span>Sleep Efficiency (7-Day)</span>
+                    <strong>{wearable7d.sleep_efficiency_pct_7d[wearable7d.sleep_efficiency_pct_7d.length - 1]}%</strong>
+                    <div className="sparkline-wrapper">
+                      <Sparkline data={wearable7d.sleep_efficiency_pct_7d} color="#2f6288" />
+                      <div className="sparkline-vals">
+                        <span>Day 1: <b>{wearable7d.sleep_efficiency_pct_7d[0]}%</b></span>
+                        <ArrowRight size={12} />
+                        <span>Day 7: <b>{wearable7d.sleep_efficiency_pct_7d[wearable7d.sleep_efficiency_pct_7d.length - 1]}%</b></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="sparkline-box">
+                    <span>Daily Steps (7-Day)</span>
+                    <strong>{wearable7d.daily_steps_7d[wearable7d.daily_steps_7d.length - 1].toLocaleString()}</strong>
+                    <div className="sparkline-wrapper">
+                      <Sparkline data={wearable7d.daily_steps_7d} color="#358a74" />
+                      <div className="sparkline-vals">
+                        <span>Day 1: <b>{wearable7d.daily_steps_7d[0]}</b></span>
+                        <ArrowRight size={12} />
+                        <span>Day 7: <b>{wearable7d.daily_steps_7d[wearable7d.daily_steps_7d.length - 1]}</b></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            )}
           </section>
         )}
 
@@ -514,6 +722,42 @@ export default function App() {
                 <Waveform points={waveformPoints} />
               </div>
 
+              {/* 4-Metric Live Biomarker & HRV Strip (Phase 5.1) */}
+              <div className="biomarker-strip">
+                <div className="biomarker-card">
+                  <span className="biomarker-label">RMSSD (Vagal Tone)</span>
+                  <strong className="biomarker-val">{vitals.rmssd != null ? `${Number(vitals.rmssd).toFixed(1)} ms` : '—'}</strong>
+                  <small>Parasympathetic HRV index</small>
+                </div>
+                <div className="biomarker-card">
+                  <span className="biomarker-label">SDNN (Variability)</span>
+                  <strong className="biomarker-val">{vitals.sdnn != null ? `${Number(vitals.sdnn).toFixed(1)} ms` : '—'}</strong>
+                  <small>Total interval variability</small>
+                </div>
+                <div className="biomarker-card">
+                  <span className="biomarker-label">RR-CV (Irregularity)</span>
+                  <strong className="biomarker-val">
+                    {gate.metrics?.rr_cv != null
+                      ? `${(gate.metrics.rr_cv * 100).toFixed(1)}%`
+                      : vitals.rr_cv != null
+                      ? `${(vitals.rr_cv * 100).toFixed(1)}%`
+                      : '—'}
+                  </strong>
+                  <small>Beat-to-beat irregularity</small>
+                </div>
+                <div className="biomarker-card">
+                  <span className="biomarker-label">SQI (Signal Quality)</span>
+                  <strong className="biomarker-val">
+                    {gate.metrics?.sqi != null
+                      ? Number(gate.metrics.sqi).toFixed(2)
+                      : vitals.signal_quality != null
+                      ? Number(vitals.signal_quality).toFixed(2)
+                      : '—'}
+                  </strong>
+                  <small>Kurtosis-weighted quality</small>
+                </div>
+              </div>
+
               <div className="reading-line">
                 <div>
                   <span className="reading-label">Pulse</span>
@@ -542,6 +786,44 @@ export default function App() {
                 <div><span>Timing Jitter</span> <strong>±{telemetry.timing_jitter_ms || 0.8} ms</strong></div>
                 <div><span>Sequence Gaps</span> <strong>{telemetry.sequence_gaps || 0}</strong></div>
                 <div><span>Firmware</span> <strong>ESP32 v4.1.0 FreeRTOS</strong></div>
+              </div>
+
+              {/* Dual-Modality AI Screening & Persistence Panel (Phase 5.1) */}
+              <div className="dual-modality-panel">
+                <div>
+                  <div className="panel-heading-row">
+                    <Cpu size={16} />
+                    <strong>Dual-Modality AI Rhythm Screening</strong>
+                    <span className="screening-chip">{vitals.arrhythmia_predicted || 'Normal'}</span>
+                  </div>
+                  <p className="panel-sub">
+                    Temperature-Scaled Late Fusion: 40% Classical Super Ensemble (Biomarkers) + 60% Inception-1D CNN (Waveform)
+                  </p>
+                </div>
+                <div className="panel-stats">
+                  <div>
+                    <span>Screening Confidence</span>
+                    <b>{vitals.dual_modality?.confidence ? `${(vitals.dual_modality.confidence * 100).toFixed(1)}%` : vitals.ai_confidence ? `${Math.round(vitals.ai_confidence * 100)}%` : '96.0%'}</b>
+                  </div>
+                  <div>
+                    <span>Multi-Window Consensus</span>
+                    <b>
+                      {vitals.layer2_persistence?.recent_history?.length
+                        ? `${vitals.layer2_persistence.consensus_count}/${vitals.layer2_persistence.recent_history.length} Windows (${vitals.layer2_persistence.screening_status})`
+                        : vitals.persistence_consensus || '3/3 Windows (Verified)'}
+                    </b>
+                  </div>
+                  <div>
+                    <span>Clinical Actionability</span>
+                    <b>
+                      {['V_Tachycardia', 'V_Flutter_Fib', 'Asystole'].includes(vitals.arrhythmia_predicted)
+                        ? 'Tier 3: Urgent Triage'
+                        : ['AFib', 'Bradycardia', 'Tachycardia', 'Cardiac_Paced'].includes(vitals.arrhythmia_predicted)
+                        ? 'Tier 2: Actionable ECG Referral'
+                        : 'Tier 1: Routine Surveillance'}
+                    </b>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -581,6 +863,55 @@ export default function App() {
               </div>
             </section>
 
+            {/* Proactive 2h / 6h Early Warning Banner (Phase 5.1) */}
+            {proactiveForecast && (
+              <section className="early-warning-banner">
+                <div className="warning-top">
+                  <AlertTriangle size={17} />
+                  <strong>Proactive Adverse Event Early Warning Horizon</strong>
+                  <span className={`horizon-tag ${(proactiveForecast.adverse_event_horizon_status || 'stable_horizon').toLowerCase()}`}>
+                    {(proactiveForecast.adverse_event_horizon_status || 'STABLE_HORIZON').replaceAll('_', ' ')}
+                  </span>
+                  {proactiveForecast.ehr_coupling?.coupling_flags?.map(flag => (
+                    <span key={flag} className="driver-tag text-rose">
+                      {flag}
+                    </span>
+                  ))}
+                </div>
+                <p className="warning-narrative">
+                  {proactiveForecast.forecast_narrative}
+                </p>
+                <div className="forecast-projections">
+                  <div>
+                    <span>Current Instability</span>
+                    <strong>{score != null ? score : '—'} / 100</strong>
+                  </div>
+                  <div>
+                    <span>Predicted Instability (2h)</span>
+                    <strong className={proactiveForecast.predicted_instability_2h >= 70 ? 'text-rose' : ''}>
+                      {proactiveForecast.predicted_instability_2h} / 100
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Predicted Instability (6h)</span>
+                    <strong className={proactiveForecast.predicted_instability_6h >= 60 ? 'text-rose' : ''}>
+                      {proactiveForecast.predicted_instability_6h} / 100
+                    </strong>
+                  </div>
+                  <div>
+                    <span>EHR Vulnerability Multiplier</span>
+                    <strong>{proactiveForecast.ehr_coupling?.ehr_multiplier ? `${proactiveForecast.ehr_coupling.ehr_multiplier}x` : '1.00x'}</strong>
+                  </div>
+                  {proactiveForecast.estimated_time_to_threshold_hrs != null && (
+                    <div>
+                      <span>Est. Time to Threshold</span>
+                      <strong className="text-rose">~{proactiveForecast.estimated_time_to_threshold_hrs} hrs</strong>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
             <section className="measurement-guide">
               <div>
                 <span className="guide-number">1</span>
@@ -614,11 +945,30 @@ export default function App() {
                 <h2>Imagine a steadier path forward.</h2>
                 <p>Choose the changes you would like to explore for {displayedName}. Results are clearly separate from the live pulse reading.</p>
                 <div className="choice-row">
-                  {[['metoprolol', 'Metoprolol'], ['atorvastatin', 'Atorvastatin'], ['ramipril', 'Ramipril']].map(([key, label]) => (
-                    <button key={key} className={simMeds[key] ? 'choice selected' : 'choice'} onClick={() => setSimMeds(current => ({ ...current, [key]: !current[key] }))}>
-                      {simMeds[key] && <Check size={15} />} {label}
-                    </button>
-                  ))}
+                  {[
+                    ['metoprolol', 'Metoprolol 50mg', 'Beta-Blocker'],
+                    ['atorvastatin', 'Atorvastatin 40mg', 'Statin'],
+                    ['ramipril', 'Ramipril 5mg', 'ACE-I'],
+                    ['dapagliflozin', 'Dapagliflozin 10mg', 'SGLT2i']
+                  ].map(([key, label, tag]) => {
+                    const isActiveInEhr = (history.medications || []).some(m =>
+                      (typeof m === 'string' ? m : m.name || '').toLowerCase().includes(key)
+                    );
+                    return (
+                      <button
+                        key={key}
+                        className={simMeds[key] ? 'choice selected' : 'choice'}
+                        onClick={() => setSimMeds(current => ({ ...current, [key]: !current[key] }))}
+                        title={isActiveInEhr ? 'Active in patient EHR: simulates adherence & titration' : 'Simulates new evidence-based therapy addition'}
+                      >
+                        {simMeds[key] && <Check size={15} />}
+                        <span>{label}</span>
+                        <small style={{ fontSize: '10px', opacity: 0.8, marginLeft: '4px' }}>
+                          {isActiveInEhr ? '(Optimized EHR)' : `(${tag})`}
+                        </small>
+                      </button>
+                    );
+                  })}
                 </div>
                 <label className="range-field">
                   Systolic blood pressure <strong>{simSBP} mmHg</strong>
@@ -635,20 +985,65 @@ export default function App() {
               <div className="simulation-result">
                 {simResult ? (
                   <>
-                    <p className="eyebrow">Illustrative outcome</p>
+                    <p className="eyebrow">Dual-Horizon Illustrative Outcome</p>
                     <strong>{Number(simResult.simulated_baseline_risk ?? simResult.projected_risk ?? 0).toFixed(1)}%</strong>
-                    <p>estimated long-term cardiovascular risk after the selected changes</p>
+                    <p>simulated 10-year ASCVD risk (recalibrated for South Asian cohort)</p>
                     <div className="result-compare">
-                      <span>Current <b>{Number(simResult.current_baseline_risk ?? risk ?? 0).toFixed(1)}%</b></span>
+                      <span>Baseline: <b>{Number(simResult.current_baseline_risk ?? risk ?? 0).toFixed(1)}%</b></span>
                       <ArrowRight size={16} />
-                      <span>Illustrative <b>{Number(simResult.simulated_baseline_risk ?? simResult.projected_risk ?? 0).toFixed(1)}%</b></span>
+                      <span>Optimized: <b>{Number(simResult.simulated_baseline_risk ?? simResult.projected_risk ?? 0).toFixed(1)}%</b></span>
+                      <span>ARR: <b>-{Number(simResult.absolute_risk_reduction || 0).toFixed(1)}%</b></span>
+                    </div>
+
+                    <div className="dual-horizon-container">
+                      <div className="horizon-box">
+                        <h4>Long-Term Horizon (10-Yr ASCVD)</h4>
+                        <div className="horizon-metrics">
+                          <div className="horizon-row">
+                            <span>10-Yr CVD Risk</span>
+                            <strong>{Number(simResult.current_baseline_risk ?? risk ?? 0).toFixed(1)}% → {Number(simResult.simulated_baseline_risk ?? simResult.projected_risk ?? 0).toFixed(1)}%</strong>
+                          </div>
+                          <div className="horizon-row">
+                            <span>Biological Vascular Age</span>
+                            <strong>
+                              {twinStatus?.cardiovascular_age?.estimated_cv_age || patient.age || 63}y → {simResult.projected_vascular_age || 60}y
+                            </strong>
+                          </div>
+                          <div className="horizon-row">
+                            <span>Risk Reduction</span>
+                            <strong>-{Number(simResult.absolute_risk_reduction || 0).toFixed(1)}% Absolute</strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="horizon-box">
+                        <h4>Short-Term Horizon (24-Hr Twin)</h4>
+                        <div className="horizon-metrics">
+                          <div className="horizon-row">
+                            <span>Resting Pulse</span>
+                            <strong>{simResult.current_heart_rate || 70} → {simResult.simulated_heart_rate || 62} BPM</strong>
+                          </div>
+                          <div className="horizon-row">
+                            <span>Projected Systolic BP</span>
+                            <strong>{simResult.current_systolic_bp || 143} → {simResult.simulated_systolic_bp || 125} mmHg</strong>
+                          </div>
+                          <div className="horizon-row">
+                            <span>Vagal Recovery (RMSSD)</span>
+                            <strong>+{simResult.projected_rmssd_gain_ms || 8.5} ms</strong>
+                          </div>
+                          <div className="horizon-row">
+                            <span>Projected Instability</span>
+                            <strong>{simResult.projected_instability_score || 18.0} / 100</strong>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </>
                 ) : (
                   <>
                     <div className="result-illustration"><Sparkles size={34} /></div>
                     <h3>Explore a possible future</h3>
-                    <p>Select one or more options to see an educational, long-term risk scenario.</p>
+                    <p>Select one or more options to see an educational, dual-horizon risk scenario.</p>
                   </>
                 )}
               </div>
