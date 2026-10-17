@@ -11,8 +11,7 @@
 
 <p align="center">
   <a href="#-demo-video"><strong>📺 Demo Video</strong></a> &nbsp;•&nbsp;
-  <a href="docs/CardioTwin_Architecture_Diagram.pdf"><strong>🏗️ Architecture Atlas (7-Page PDF)</strong></a> &nbsp;•&nbsp;
-  <a href="docs/CardioTwin_Architecture_Blueprint_2Page.pdf"><strong>📐 Blueprint (2-Page PDF)</strong></a> &nbsp;•&nbsp;
+  <a href="docs/CardioTwin_Architecture_Diagram.pdf"><strong>🏗️ Architecture (PDF)</strong></a> &nbsp;•&nbsp;
   <a href="docs/CardioTwin_Presentation.pptx"><strong>📊 Presentation (PPT)</strong></a>
 </p>
 
@@ -531,10 +530,8 @@ python scripts/evaluate_dual_pipeline_v2.py
 
 | Asset | Format | Link |
 |:---|:---:|:---|
-| **System Architecture Atlas (7 Pages)** | PDF | [`docs/CardioTwin_Architecture_Diagram.pdf`](docs/CardioTwin_Architecture_Diagram.pdf) |
-| **Engineering Blueprint & Math Spec (2 Pages)** | PDF | [`docs/CardioTwin_Architecture_Blueprint_2Page.pdf`](docs/CardioTwin_Architecture_Blueprint_2Page.pdf) |
-| **Executive Presentation (14 Slides, Native Charts)** | PPTX | [`docs/CardioTwin_Presentation.pptx`](docs/CardioTwin_Presentation.pptx) |
-| **Briefing Presentation (12 Slides, High-Res Images)** | PPTX | [`docs/CardioTwin_Presentation_12_Slide_Brief.pptx`](docs/CardioTwin_Presentation_12_Slide_Brief.pptx) |
+| **System Architecture Diagram** | PDF | [`docs/CardioTwin_Architecture_Diagram.pdf`](docs/CardioTwin_Architecture_Diagram.pdf) |
+| **Project Presentation** | PPTX | [`docs/CardioTwin_Presentation.pptx`](docs/CardioTwin_Presentation.pptx) |
 | **Demo Video** | YouTube (Unlisted) | [Demo Video Section](#-demo-video) |
 
 ---
