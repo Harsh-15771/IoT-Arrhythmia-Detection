@@ -512,9 +512,12 @@ class CardioTwin:
                 interventions_applied.append("Glycemic Optimization (Target HbA1c < 6.5%: -10% relative microvascular CVD risk)")
 
         current_sbp = float(self.patient.get("vitals", {}).get("systolic_bp", 125))
-        v["systolic_bp"] = max(100.0, current_sbp - bp_reduction)
+        base_sbp = float(modifications["systolic_bp"]) if "systolic_bp" in modifications else current_sbp
+        v["systolic_bp"] = max(90.0, base_sbp - bp_reduction)
+
         current_chol = float(self.patient.get("labs", {}).get("total_cholesterol", 190))
-        l["total_cholesterol"] = max(110.0, current_chol * (1.0 - chol_reduction_pct))
+        base_chol = float(modifications["total_cholesterol"]) if "total_cholesterol" in modifications else current_chol
+        l["total_cholesterol"] = max(110.0, base_chol * (1.0 - chol_reduction_pct))
 
         current_hr = float(self.current_vitals.get("bpm") if self.current_vitals.get("bpm") is not None else self.patient.get("vitals", {}).get("resting_hr", 72.0))
         simulated_hr = max(50.0, current_hr - hr_reduction)

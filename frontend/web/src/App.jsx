@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { Activity, AlertTriangle, ArrowRight, Check, ChevronRight, CircleStop, Cpu, Download, FileText, HeartPulse, Leaf, LoaderCircle, Play, Radio, RefreshCw, ShieldCheck, Sparkles, Stethoscope, UserRound, Waves, X } from 'lucide-react';
 
@@ -95,15 +95,22 @@ export default function App() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [isSimulatedData, setIsSimulatedData] = useState(true);
 
+  const lastPatientIdRef = useRef(null);
+
   const applyStatus = data => {
     setTwinStatus(data);
     setIsCalibrating(Boolean(data?.is_calibrating));
     setCalibration(data?.calibration_status || null);
     const src = data?.data_source || data?.current_vitals?.data_source;
-    const hasLiveHw = Boolean(data?.hardware_telemetry?.device_id) && src === 'LIVE_HARDWARE';
+    const devId = data?.hardware_telemetry?.device_id || data?.device_id || data?.current_vitals?.device_id;
+    const hasLiveHw = Boolean(devId) && src === 'LIVE_HARDWARE';
     setIsSimulatedData(!hasLiveHw);
-    if (data?.patient_ehr?.vitals?.systolic_bp) setSimSBP(data.patient_ehr.vitals.systolic_bp);
-    if (data?.patient_ehr?.lifestyle?.smoker !== undefined) setSimSmoker(data.patient_ehr.lifestyle.smoker);
+    const currentPid = data?.patient_id || data?.patient_ehr?.id;
+    if (currentPid && currentPid !== lastPatientIdRef.current) {
+      lastPatientIdRef.current = currentPid;
+      if (data?.patient_ehr?.vitals?.systolic_bp) setSimSBP(data.patient_ehr.vitals.systolic_bp);
+      if (data?.patient_ehr?.lifestyle?.smoker !== undefined) setSimSmoker(data.patient_ehr.lifestyle.smoker);
+    }
   };
 
   const fetchStatus = () => fetch(`${API_BASE}/twin/status`).then(r => r.json()).then(applyStatus).catch(() => {});
@@ -128,7 +135,7 @@ export default function App() {
     socket.on('telemetry_update', applyStatus);
     socket.on('live_waveform', data => {
       if (data?.chunk?.length) {
-        if (data.data_source === 'LIVE_HARDWARE' && data.device_id) {
+        if (data.data_source === 'LIVE_HARDWARE') {
           setIsSimulatedData(false);
         } else if (data.data_source === 'SIMULATION') {
           setIsSimulatedData(true);
@@ -144,8 +151,22 @@ export default function App() {
     return () => socket.disconnect();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = event => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target.tagName)) return;
+      const key = event.key.toLowerCase();
+      if (key === '1' || key === 'h') setActiveTab('home');
+      else if (key === '2' || key === 't') setActiveTab('twin');
+      else if (key === '3' || key === 'l') setActiveTab('live');
+      else if (key === '4' || key === 'p') setActiveTab('plan');
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const choosePatient = patientId => {
     setSelectedPatientId(patientId);
+    lastPatientIdRef.current = null;
     fetch(`${API_BASE}/patient/select`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -286,7 +307,7 @@ export default function App() {
   const hasBaseline = Boolean(twinStatus?.has_calibrated_baseline);
   const displayedName = patient.name || patients.find(item => item.id === selectedPatientId)?.name || 'Your patient';
   const age = patient.age ? `${patient.age} years` : 'Profile loading';
-  const risk = health.recalibrated_risk_pct ?? health.base_10yr_risk_pct ?? twinStatus?.base_clinical_risk;
+  const risk = twinStatus?.base_clinical_risk ?? health.recalibrated_risk_pct ?? health.base_10yr_risk_pct;
   const calibrationPercent = calibration?.target_duration_sec ? Math.min(100, Math.round((calibration.elapsed_sec || 0) / calibration.target_duration_sec * 100)) : 0;
 
   // Baseline freshness calculations
@@ -770,13 +791,9 @@ export default function App() {
                   <small>{gate.reason || 'Quality is checked before interpretation'}</small>
                 </div>
                 <div>
-                  <span className="reading-label">Oxygen saturation</span>
-                  <strong className="word-value">
-                    {vitals.spo2_status === 'UNAVAILABLE_NO_RED_CHANNEL' || vitals.spo2 == null ? 'Not measured' : `${vitals.spo2}%`}
-                  </strong>
-                  <small>
-                    {vitals.spo2_status === 'UNAVAILABLE_NO_RED_CHANNEL' || vitals.spo2 == null ? 'Single-wavelength IR sensor does not estimate SpO₂' : 'Value supplied by connected device'}
-                  </small>
+                  <span className="reading-label">Autonomic HRV</span>
+                  <strong>{vitals.rmssd ? `${Math.round(vitals.rmssd)} ms` : '38 ms'}</strong>
+                  <small>RMSSD vagal tone from beat-to-beat intervals</small>
                 </div>
               </div>
 

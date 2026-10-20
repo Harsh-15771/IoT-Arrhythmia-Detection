@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="#-demo-video"><strong>📺 Demo Video</strong></a> &nbsp;•&nbsp;
+  <a href="https://www.youtube.com/playlist?list=PLazaJwZY5aIk" target="_blank" rel="noopener noreferrer"><strong>📺 Demo Video</strong></a> &nbsp;•&nbsp;
   <a href="docs/CardioTwin_Architecture_Diagram.pdf"><strong>🏗️ Architecture (PDF)</strong></a> &nbsp;•&nbsp;
   <a href="docs/CardioTwin_Presentation.pptx"><strong>📊 Presentation (PPT)</strong></a>
 </p>
@@ -70,11 +70,10 @@
 
 ## 📺 Demo Video
 
-<!-- TODO: Upload a 15-20 minute unlisted YouTube video and paste the link below -->
-
-> **🎬 YouTube Demo (Unlisted):** [Coming Soon — Link will be added after upload]
+> **🎬 YouTube Demonstration (Walkthrough Playlist):**  
+> **[▶ Watch CardioTwin Sentinel Video Demonstration on YouTube](https://www.youtube.com/playlist?list=PLazaJwZY5aIk)**
 >
-> *(15–20 minute walkthrough covering: Problem Statement → Hardware Demo → Personal Baseline Calibration → Live Telemetry → SHAP Explainability → What-If Simulator → Honest ML Disclosure)*
+> *(Comprehensive video demonstration covering: Clinical Problem Statement → Edge IoT Hardware & FreeRTOS Telemetry → 2-Minute Empirical Baseline Calibration → Live Web & Mobile Sync → SHAP Game-Theoretic Explainability → Longitudinal What-If Simulator → Honest Evidence Ledger)*
 
 ---
 
@@ -157,40 +156,78 @@ CardioTwin Sentinel addresses **personalized cardiovascular screening and cardio
 
 ## 📸 Screenshots
 
-<!-- TODO: Add screenshots of the live application. Recommended screenshots:
-     1. Home screen with patient profile and vascular age
-     2. Live Check with waveform and SHAP attribution
-     3. What-If Treatment Simulator
-     4. Footer with clinical disclosure
-     Place screenshots in a ./screenshots/ directory and reference them below. -->
+### 1. 🔬 Physical Edge IoT Hardware Node (ESP32 + MAX30102 + OLED)
 
 <table width="100%">
   <tr>
-    <th width="50%">Home — Patient Profile & Normal Baseline</th>
-    <th width="50%">Live Check — Real-Time Waveform & Telemetry Integrity</th>
+    <th width="50%">Live Telemetry Streaming (100 Hz FreeRTOS Capture)</th>
+    <th width="50%">Quiet Standby & Sensor Contact Gate</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./screenshots/hardware_01_streaming.png" alt="Physical ESP32 Sentinel in Live Streaming Mode" width="100%" />
+      <br><i>Real-time optical PPG acquisition: finger placed on optical probe (active red/IR LEDs), live waveform plotting, 100 Hz RTOS dual-core telemetry</i>
+    </td>
+    <td align="center">
+      <img src="./screenshots/hardware_02_standby.png" alt="Physical ESP32 Sentinel in Standby Mode" width="100%" />
+      <br><i>Custom 3D-printed red enclosure in IDLE (READY) standby: flatline noise suppression prevents spurious amplitude scaling until optical contact is verified</i>
+    </td>
+  </tr>
+</table>
+
+### 2. 📱 CardioTwin Sentinel Mobile Companion (React Native / Android)
+
+<table width="100%">
+  <tr>
+    <th width="33%">Live Check — Real-Time Waveform</th>
+    <th width="33%">Your Twin — 10-Yr CVD Risk</th>
+    <th width="34%">What-If — Preventive Simulation</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./screenshots/mobile_01_live_check.png" alt="Mobile Live Check" width="100%" />
+      <br><i>50 Hz fluid PPG sweep, 70 BPM tracking, Normal Sinus decoupled gate, Autonomic HRV (38 ms), and SHAP attribution</i>
+    </td>
+    <td align="center">
+      <img src="./screenshots/mobile_02_twin_risk.png" alt="Mobile Digital Twin" width="100%" />
+      <br><i>Harmonized 81.8% 10-year Framingham ASCVD risk baseline (1.45× South Asian recalibration) and prevention trajectory</i>
+    </td>
+    <td align="center">
+      <img src="./screenshots/mobile_04_whatif_outcome.png" alt="Mobile What-If Simulator" width="100%" />
+      <br><i>Interactive medication & lifestyle simulation demonstrating projected risk drop from 81.8% → 50.1% under sustained therapy</i>
+    </td>
+  </tr>
+</table>
+
+### 3. 💻 Clinician Decision Support Portal (React 19 Web Dashboard)
+
+<table width="100%">
+  <tr>
+    <th width="50%">Home — Patient Profile & Vascular Age</th>
+    <th width="50%">Live Check — Real-Time Waveform & Gate Integrity</th>
   </tr>
   <tr>
     <td align="center">
       <img src="./screenshots/01_home.png" alt="CardioTwin Home Screen" width="100%" />
-      <br><i>Patient overview with quiet baseline reference, clinical context, and dual-engine status</i>
+      <br><i>Patient overview with quiet baseline reference, biological vascular age (~87y), and LIVE HARDWARE gateway telemetry status</i>
     </td>
     <td align="center">
       <img src="./screenshots/02_live_check.png" alt="Live Check Waveform" width="100%" />
-      <br><i>Real-time optical PPG waveform (100 Hz, ±0.8ms jitter), signal gate validation, and baseline comparison</i>
+      <br><i>Real-time optical PPG oscilloscope (100 Hz, ±0.36ms jitter), 5-part decoupled signal reliability gate, and Autonomic HRV (38 ms)</i>
     </td>
   </tr>
   <tr>
-    <th width="50%">What-If Treatment Simulator</th>
-    <th width="50%">Digital Twin Profile & Long-Term Context</th>
+    <th width="50%">Explore Changes — Treatment Simulator</th>
+    <th width="50%">Your Twin — Longitudinal Trajectory Context</th>
   </tr>
   <tr>
     <td align="center">
       <img src="./screenshots/03_whatif.png" alt="What-If Treatment Simulator" width="100%" />
-      <br><i>Educational Framingham Cox simulator demonstrating projected 10-year CVD risk reduction from therapies</i>
+      <br><i>Dual-horizon simulator: 10-year ASCVD risk reduction (81.8% → 26.2%, ARR -55.6%) and 24-hr twin hemodynamic recovery</i>
     </td>
     <td align="center">
       <img src="./screenshots/04_twin_profile.png" alt="Digital Twin Profile" width="100%" />
-      <br><i>Digital twin health story with Framingham perspective, biological vascular age, and longitudinal context</i>
+      <br><i>Long-term cardiovascular narrative separating persistent Framingham baseline risk from acute pulse departures</i>
     </td>
   </tr>
 </table>
@@ -532,7 +569,7 @@ python scripts/evaluate_dual_pipeline_v2.py
 |:---|:---:|:---|
 | **System Architecture Diagram** | PDF | [`docs/CardioTwin_Architecture_Diagram.pdf`](docs/CardioTwin_Architecture_Diagram.pdf) |
 | **Project Presentation** | PPTX | [`docs/CardioTwin_Presentation.pptx`](docs/CardioTwin_Presentation.pptx) |
-| **Demo Video** | YouTube (Unlisted) | [Demo Video Section](#-demo-video) |
+| **Demo Video** | YouTube (Walkthrough Playlist) | [Watch on YouTube](https://www.youtube.com/playlist?list=PLazaJwZY5aIk) |
 
 ---
 

@@ -26,6 +26,7 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+~$*
 
 # Testing & Coverage
 .coverage
@@ -73,6 +74,8 @@ PLAN.md
 DONE.md
 PLAN*.md
 DONE*.md
+docs/SCREENPLAY*.md
+docs/*screenplay*
 
 # Runtime Patient Baselines (Persist directory structure via .gitkeep)
 backend/baselines/*.json

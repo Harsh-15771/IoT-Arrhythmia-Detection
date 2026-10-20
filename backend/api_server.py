@@ -1146,6 +1146,15 @@ def receive_sensor_data():
             twin_status["has_calibrated_baseline"] = live_baseline_manager.baseline is not None
             twin_status["personal_baseline"] = live_baseline_manager.baseline
             twin_status["is_calibrating"] = live_baseline_manager.is_calibrating
+            twin_status["hardware_telemetry"] = {
+                "device_id": state.get("last_device_id"),
+                "device_boot_id": state.get("last_device_boot_id"),
+                "measured_sample_rate": state.get("measured_sample_rate", 100.0),
+                "timing_jitter_ms": state.get("timing_jitter_ms", 0.0),
+                "sequence_gaps": state.get("sequence_gaps", 0),
+                "dropped_buffers": state.get("dropped_buffers_total", 0),
+                "last_sequence": state.get("last_sequence")
+            }
         
         # Broadcast full twin status to WebSocket
         socketio.emit("telemetry_update", twin_status)
@@ -1196,6 +1205,15 @@ def receive_sensor_data():
         }
         with twin_lock:
             twin_status = active_twin.update_telemetry(buffering_payload)
+            twin_status["hardware_telemetry"] = {
+                "device_id": state.get("last_device_id"),
+                "device_boot_id": state.get("last_device_boot_id"),
+                "measured_sample_rate": state.get("measured_sample_rate", 100.0),
+                "timing_jitter_ms": state.get("timing_jitter_ms", 0.0),
+                "sequence_gaps": state.get("sequence_gaps", 0),
+                "dropped_buffers": state.get("dropped_buffers_total", 0),
+                "last_sequence": state.get("last_sequence")
+            }
         socketio.emit("telemetry_update", twin_status)
 
     # Lightweight broadcast of live waveform chunk to keep graph fluid
@@ -1203,6 +1221,7 @@ def receive_sensor_data():
         "chunk": ppg_chunk[-25:],
         "bpm": raw_bpm,
         "spo2": raw_spo2,
+        "device_id": state["last_device_id"],
         "data_source": "LIVE_HARDWARE"
     })
 

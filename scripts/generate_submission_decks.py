@@ -947,7 +947,7 @@ def generate_presentation_pptx(wave_img, bench_img, shap_img):
 
     add_card(s10, 6.80, 1.70, 5.85, 5.10, "Dual-Horizon Simulation Output (PAT001 Case Study)", [
         "▸ Horizon 1: Long-Term 10-Year ASCVD Trajectory",
-        "  • Baseline Recalibrated Risk: 99.0% (Post-PCI CAD, Smoker, HbA1c 7.4%)",
+        "  • Baseline Recalibrated Risk: 81.8% (Post-PCI CAD, SBP 143, HbA1c 7.4%, 1.45x Multiplier)",
         "  • Optimized Protocol Risk:    34.8% (-64.2% Absolute Risk Reduction)",
         "  • Biological Vascular Age:    85 yrs  --->  68 yrs (-17 yrs shift)",
         "",

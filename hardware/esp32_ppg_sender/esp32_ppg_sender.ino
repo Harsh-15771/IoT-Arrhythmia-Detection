@@ -133,6 +133,7 @@ void setup() {
 
   // WiFi Connection
   showMessage("WiFi", "Connecting...");
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(400);
@@ -412,28 +413,33 @@ void drawOLED() {
   }
   u8g2.drawStr(72, 8, bpmText);
 
-  // Dynamic PPG waveform plot
-  long minVal = rawGraph[0];
-  long maxVal = rawGraph[0];
-  int len = gFull ? GRAPH_LEN : gIdx;
+  // Dynamic PPG waveform plot: quiet flatline when no finger is placed
+  if (!fingerOn) {
+    int midY = GRAPH_Y + (GRAPH_H / 2);
+    u8g2.drawHLine(0, midY, GRAPH_LEN);
+  } else {
+    long minVal = rawGraph[0];
+    long maxVal = rawGraph[0];
+    int len = gFull ? GRAPH_LEN : gIdx;
 
-  for (int i = 0; i < len; i++) {
-    if (rawGraph[i] < minVal) minVal = rawGraph[i];
-    if (rawGraph[i] > maxVal) maxVal = rawGraph[i];
-  }
-
-  long range = maxVal - minVal;
-  if (range < 500) range = 500;
-
-  int prevY = -1;
-  for (int x = 0; x < len - 1; x++) {
-    int idx = gFull ? (gIdx + x) % GRAPH_LEN : x;
-    int y = GRAPH_Y + GRAPH_H - (int)(((rawGraph[idx] - minVal) * GRAPH_H) / range);
-    y = constrain(y, GRAPH_Y, GRAPH_Y + GRAPH_H);
-    if (prevY != -1) {
-      u8g2.drawLine(x, prevY, x + 1, y);
+    for (int i = 0; i < len; i++) {
+      if (rawGraph[i] < minVal) minVal = rawGraph[i];
+      if (rawGraph[i] > maxVal) maxVal = rawGraph[i];
     }
-    prevY = y;
+
+    long range = maxVal - minVal;
+    if (range < 500) range = 500;
+
+    int prevY = -1;
+    for (int x = 0; x < len - 1; x++) {
+      int idx = gFull ? (gIdx + x) % GRAPH_LEN : x;
+      int y = GRAPH_Y + GRAPH_H - (int)(((rawGraph[idx] - minVal) * GRAPH_H) / range);
+      y = constrain(y, GRAPH_Y, GRAPH_Y + GRAPH_H);
+      if (prevY != -1) {
+        u8g2.drawLine(x, prevY, x + 1, y);
+      }
+      prevY = y;
+    }
   }
 
   // Footer status bar

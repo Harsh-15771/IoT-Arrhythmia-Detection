@@ -22,42 +22,45 @@ import Svg, {
 } from "react-native-svg";
 
 // ─── CONFIGURATION ──────────────────────────────────────────
-const SERVER_IP = "10.139.96.96";
+const SERVER_IP = "192.168.1.247";
 const SERVER_PORT = 5000;
 const BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}`;
 const POLL_MS = 1000;
 // ─────────────────────────────────────────────────────────────
 
 const { width: SW } = Dimensions.get("window");
-const GRAPH_W = SW - 48;
-const GRAPH_H = 150;
+const STATUSBAR_HEIGHT =
+  Platform.OS === "android" ? (StatusBar.currentHeight || 42) + 14 : 16;
+const BOTTOM_INSET = Platform.OS === "android" ? 48 : 24;
+const GRAPH_W = SW - 64;
+const GRAPH_H = 140;
 
 // ─── CARDIOTWIN DESIGN SYSTEM PALETTE (MATCHES WEB APP) ──────
 const T = {
-  bg: "#F8F7F2",
+  bg: "#F6F9F8",
   card: "#FFFFFF",
-  cardBorder: "rgba(25, 59, 58, 0.09)",
-  cardBorderStrong: "rgba(25, 59, 58, 0.16)",
-  primary: "#167C76",
-  primaryHover: "#136A65",
-  teal: "#188F89",
-  tealDark: "#1B403E",
-  tealDeep: "#1D4F4C",
-  textPrimary: "#1B403E",
-  textSecondary: "#5B716E",
-  textMuted: "#889895",
-  waveStart: "#1B9A92",
-  waveEnd: "#5CC5BC",
-  greenBg: "#E4F2E9",
-  greenText: "#186A5E",
-  amberBg: "#F9EDD6",
-  amberText: "#8A5A1E",
-  roseBg: "#F8E0DC",
-  roseText: "#9B3733",
-  blueBg: "#E6F0F0",
-  blueText: "#2C5D66",
-  chipBg: "#EFF4ED",
-  chipText: "#4F716D",
+  cardBorder: "rgba(19, 64, 62, 0.08)",
+  cardBorderStrong: "rgba(19, 64, 62, 0.16)",
+  primary: "#0F766E",
+  primaryHover: "#0D6861",
+  teal: "#0D9488",
+  tealDark: "#113A37",
+  tealDeep: "#134E4A",
+  textPrimary: "#0F2E2C",
+  textSecondary: "#4B6B67",
+  textMuted: "#869E9A",
+  waveStart: "#2DD4BF",
+  waveEnd: "#38BDF8",
+  greenBg: "#E6F4EA",
+  greenText: "#0F766E",
+  amberBg: "#FEF3C7",
+  amberText: "#92400E",
+  roseBg: "#FEE2E2",
+  roseText: "#B91C1C",
+  blueBg: "#E0F2FE",
+  blueText: "#0369A1",
+  chipBg: "#F0FDF4",
+  chipText: "#166534",
 };
 
 // ─── SAMPLE REALISTIC PULSE DATA FOR OFFLINE / DEMO ─────────
@@ -168,7 +171,7 @@ function CheckIcon({ size = 14, color = T.primary }) {
   );
 }
 
-// ─── WAVEFORM COMPONENT (MATCHES DESKTOP GRADIENT) ───────────
+// ─── WAVEFORM COMPONENT (OBSIDIAN MEDICAL MONITOR VIEWPORT) ────
 function WaveformCanvas({ points }) {
   const pts = points && points.length >= 8 ? points : SAMPLE_PPG;
   const min = Math.min(...pts);
@@ -188,14 +191,23 @@ function WaveformCanvas({ points }) {
 
   return (
     <View style={styles.waveBox}>
+      {/* Real-time telemetry header badge */}
+      <View style={styles.waveHeader}>
+        <View style={styles.waveLiveTag}>
+          <View style={styles.waveLiveDot} />
+          <Text style={styles.waveLiveText}>50 Hz REAL-TIME SWEEP</Text>
+        </View>
+        <Text style={styles.waveScaleText}>AUTO-GAIN (1.0x)</Text>
+      </View>
       <Svg width={GRAPH_W} height={GRAPH_H}>
         <Defs>
           <LinearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0%" stopColor={T.waveStart} />
-            <Stop offset="100%" stopColor={T.waveEnd} />
+            <Stop offset="0%" stopColor="#2DD4BF" />
+            <Stop offset="50%" stopColor="#34D399" />
+            <Stop offset="100%" stopColor="#38BDF8" />
           </LinearGradient>
         </Defs>
-        {/* Subtle hospital-grade reference grid lines */}
+        {/* Hospital-grade medical monitor reference grid */}
         {[0.25, 0.5, 0.75].map((fraction, idx) => (
           <Line
             key={idx}
@@ -203,7 +215,7 @@ function WaveformCanvas({ points }) {
             y1={pad + fraction * h}
             x2={GRAPH_W - pad}
             y2={pad + fraction * h}
-            stroke="rgba(24, 143, 137, 0.12)"
+            stroke="rgba(45, 212, 191, 0.14)"
             strokeWidth="1"
             strokeDasharray="4 4"
           />
@@ -213,7 +225,7 @@ function WaveformCanvas({ points }) {
           d={path}
           fill="none"
           stroke="url(#waveGrad)"
-          strokeWidth="2.8"
+          strokeWidth="2.6"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -234,6 +246,7 @@ export default function App() {
   const [patientAge, setPatientAge] = useState(52);
   const [patientCity, setPatientCity] = useState("Nagpur, India");
   const [bpm, setBpm] = useState(68);
+  const [rmssd, setRmssd] = useState(38);
   const [gateStatus, setGateStatus] = useState("NORMAL_SINUS");
   const [instabilityScore, setInstabilityScore] = useState(14);
   const [baselineBpm, setBaselineBpm] = useState(64);
@@ -273,6 +286,7 @@ export default function App() {
           if (data.patient_ehr?.age) setPatientAge(data.patient_ehr.age);
           if (data.patient_ehr?.city) setPatientCity(data.patient_ehr.city);
           if (data.current_vitals?.bpm) setBpm(Math.round(data.current_vitals.bpm));
+          if (data.current_vitals?.rmssd) setRmssd(Math.round(data.current_vitals.rmssd));
           if (data.signal_gate?.status) setGateStatus(data.signal_gate.status);
           if (data.personal_instability?.instability_score !== undefined) {
             setInstabilityScore(data.personal_instability.instability_score);
@@ -400,15 +414,22 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={T.bg} />
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#FFFFFF"
+        translucent={Platform.OS === "android"}
+      />
 
       {/* ─── APP HEADER ────────────────────────────────────── */}
       <View style={styles.header}>
         <View style={styles.brandRow}>
           <View style={styles.brandMark}>
-            <HeartIcon size={17} color="#FFFFFF" />
+            <HeartIcon size={18} color="#FFFFFF" />
           </View>
-          <Text style={styles.brandTitle}>cardiotwin</Text>
+          <View>
+            <Text style={styles.brandTitle}>CardioTwin</Text>
+            <Text style={styles.brandSubtitle}>Sentinel Mobile Companion</Text>
+          </View>
         </View>
 
         <View style={styles.headerTools}>
@@ -436,29 +457,38 @@ export default function App() {
         </View>
       </View>
 
-      {/* ─── PATIENT CONTEXT CHIP ──────────────────────────── */}
+      {/* ─── PATIENT CONTEXT BANNER ──────────────────────────── */}
       <View style={styles.patientBanner}>
         <View style={styles.avatarCircle}>
-          <Text style={styles.avatarText}>{patientName.slice(0, 1)}</Text>
+          <Text style={styles.avatarText}>
+            {patientName
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .slice(0, 2)}
+          </Text>
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.patientName}>{patientName}</Text>
-          <Text style={styles.patientMeta}>
-            {patientAge}y · {patientCity} · Est. Vascular Age ~{vascularAge}y
+        <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
+          <Text style={styles.patientName} numberOfLines={1}>
+            {patientName}
+          </Text>
+          <Text style={styles.patientMeta} numberOfLines={1}>
+            ID: PAT001 · {patientAge}y · Vascular Age ~{vascularAge}y
           </Text>
         </View>
         {hasBaseline ? (
           <View style={styles.baselinePill}>
             <Text style={styles.baselinePillText}>
-              ✓ Baseline: {baselineBpm} BPM
+              ✓ {baselineBpm} BPM Base
             </Text>
           </View>
         ) : (
           <TouchableOpacity
             style={styles.calibratePill}
             onPress={startCalibration}
+            activeOpacity={0.8}
           >
-            <Text style={styles.calibratePillText}>+ Calibrate</Text>
+            <Text style={styles.calibratePillText}>⚡ Calibrate</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -486,7 +516,7 @@ export default function App() {
               <WaveformCanvas points={ppgPoints} />
 
               <View style={styles.vitalsRow}>
-                <View style={styles.vitalCol}>
+                <View style={styles.vitalTile}>
                   <Text style={styles.vitalLabel}>PULSE RATE</Text>
                   <Text style={styles.vitalValue}>
                     {bpm > 0 ? bpm : "—"}{" "}
@@ -495,45 +525,55 @@ export default function App() {
                   <Text style={styles.vitalSub}>Optical IBI tracking</Text>
                 </View>
 
-                <View style={[styles.vitalCol, styles.vitalBorderCol]}>
+                <View style={styles.vitalTile}>
                   <Text style={styles.vitalLabel}>SIGNAL GATE</Text>
                   <Text style={styles.vitalWord}>
                     {gateStatus.replace(/_/g, " ").toLowerCase()}
                   </Text>
-                  <Text style={styles.vitalSub}>5-Part Decoupled Gate</Text>
+                  <Text style={styles.vitalSub}>5-Part Decoupled</Text>
                 </View>
 
-                <View style={styles.vitalCol}>
-                  <Text style={styles.vitalLabel}>SpO₂ OXYGEN</Text>
-                  <Text style={styles.vitalWordMuted}>Not measured</Text>
-                  <Text style={styles.vitalSub}>Single IR transparency</Text>
+                <View style={styles.vitalTile}>
+                  <Text style={styles.vitalLabel}>AUTONOMIC HRV</Text>
+                  <Text style={styles.vitalValue}>
+                    {rmssd || 38} <Text style={styles.vitalUnit}>ms</Text>
+                  </Text>
+                  <Text style={styles.vitalSub}>RMSSD vagal index</Text>
                 </View>
               </View>
             </View>
 
             {/* Personal Instability Assessment Card */}
-            <View
+            <TouchableOpacity
               style={[
                 styles.instabilityCard,
                 { backgroundColor: tone.bg, borderColor: tone.text + "33" },
               ]}
+              onPress={!hasBaseline ? startCalibration : undefined}
+              activeOpacity={!hasBaseline ? 0.8 : 1}
             >
               <View style={styles.instabilityLeft}>
                 <Text style={[styles.eyebrow, { color: tone.text }]}>
-                  PERSONAL REFERENCE DEPARTURE
+                  AUTONOMIC DYNAMICS DEPARTURE
                 </Text>
                 <Text style={[styles.instabilityTitle, { color: tone.text }]}>
                   {tone.label}
                 </Text>
                 <Text style={styles.instabilityDesc}>{tone.desc}</Text>
 
-                <View style={styles.shapPill}>
-                  <Text style={styles.shapText}>
-                    SHAP Drivers:{" "}
-                    <Text style={{ fontWeight: "700" }}>BPM (0.42)</Text> ·{" "}
-                    <Text style={{ fontWeight: "700" }}>RR_MEAN (0.28)</Text>
-                  </Text>
-                </View>
+                {!hasBaseline ? (
+                  <View style={{ marginTop: 8, paddingVertical: 5, paddingHorizontal: 10, backgroundColor: T.primary, borderRadius: 6, alignSelf: "flex-start" }}>
+                    <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 11 }}>⚡ TAP TO CALIBRATE BASELINE</Text>
+                  </View>
+                ) : (
+                  <View style={styles.shapPill}>
+                    <Text style={styles.shapText}>
+                      SHAP Drivers:{" "}
+                      <Text style={{ fontWeight: "700" }}>BPM (0.42)</Text> ·{" "}
+                      <Text style={{ fontWeight: "700" }}>RR_MEAN (0.28)</Text>
+                    </Text>
+                  </View>
+                )}
               </View>
 
               <View style={styles.scoreCircle}>
@@ -542,13 +582,13 @@ export default function App() {
                 </Text>
                 <Text style={styles.scoreSub}>out of 100</Text>
               </View>
-            </View>
+            </TouchableOpacity>
 
             {/* Quick Record Action Button */}
             <TouchableOpacity
               style={[
                 styles.actionButton,
-                { backgroundColor: isRecording ? "#B6464B" : T.primary },
+                { backgroundColor: isRecording ? "#DC2626" : T.primary },
               ]}
               onPress={toggleRecording}
               activeOpacity={0.85}
@@ -560,10 +600,10 @@ export default function App() {
 
             {/* Clinical Guardrail Footer */}
             <View style={styles.disclaimerBox}>
-              <ShieldCheckIcon size={15} color={T.textSecondary} />
+              <ShieldCheckIcon size={16} color={T.textSecondary} />
               <Text style={styles.disclaimerText}>
                 Non-diagnostic decision-support. Optical pulse screening requires
-                confirmatory 12-lead ECG.
+                confirmatory 12-lead ECG before clinical interventions.
               </Text>
             </View>
           </View>
@@ -586,7 +626,7 @@ export default function App() {
               <View style={styles.riskFooterRow}>
                 <ShieldCheckIcon size={14} color="#C5DFCF" />
                 <Text style={styles.riskFooterText}>
-                  Independent of acute optical fluctuations
+                  Harmonized baseline metric · Independent of acute pulse fluctuations
                 </Text>
               </View>
             </View>
@@ -703,7 +743,7 @@ export default function App() {
                     <Text
                       style={[
                         styles.stepperBtnText,
-                        simSBP === val && styles.stepperBtnTextActive,
+                        simSBP === val && styles.stepperBtnActive,
                       ]}
                     >
                       {val}
@@ -745,12 +785,12 @@ export default function App() {
               </Text>
 
               <View style={styles.compareRow}>
-                <View style={{ alignItems: "center" }}>
+                <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                   <Text style={styles.compareSub}>Baseline</Text>
                   <Text style={styles.compareVal}>{baseRisk}%</Text>
                 </View>
                 <Text style={styles.compareArrow}>──►</Text>
-                <View style={{ alignItems: "center" }}>
+                <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                   <Text style={styles.compareSub}>With Adherence</Text>
                   <Text style={[styles.compareVal, { color: T.primary }]}>
                     {simProjectedRisk}%
@@ -793,16 +833,24 @@ export default function App() {
         )}
       </ScrollView>
 
-      {/* ─── NATIVE-FEELING BOTTOM TAB BAR ─────────────────── */}
+      {/* ─── ELEVATED SAFE BOTTOM TAB BAR ──────────────────── */}
       <View style={styles.tabBar}>
         <TouchableOpacity
           style={[styles.tabItem, activeTab === "live" && styles.tabItemActive]}
           onPress={() => setActiveTab("live")}
+          activeOpacity={0.7}
         >
-          <PulseIcon
-            size={20}
-            color={activeTab === "live" ? T.primary : T.textMuted}
-          />
+          <View
+            style={[
+              styles.tabIconWrap,
+              activeTab === "live" && styles.tabIconWrapActive,
+            ]}
+          >
+            <PulseIcon
+              size={20}
+              color={activeTab === "live" ? T.primary : T.textMuted}
+            />
+          </View>
           <Text
             style={[
               styles.tabLabel,
@@ -816,11 +864,19 @@ export default function App() {
         <TouchableOpacity
           style={[styles.tabItem, activeTab === "twin" && styles.tabItemActive]}
           onPress={() => setActiveTab("twin")}
+          activeOpacity={0.7}
         >
-          <UserIcon
-            size={20}
-            color={activeTab === "twin" ? T.primary : T.textMuted}
-          />
+          <View
+            style={[
+              styles.tabIconWrap,
+              activeTab === "twin" && styles.tabIconWrapActive,
+            ]}
+          >
+            <UserIcon
+              size={20}
+              color={activeTab === "twin" ? T.primary : T.textMuted}
+            />
+          </View>
           <Text
             style={[
               styles.tabLabel,
@@ -834,11 +890,19 @@ export default function App() {
         <TouchableOpacity
           style={[styles.tabItem, activeTab === "plan" && styles.tabItemActive]}
           onPress={() => setActiveTab("plan")}
+          activeOpacity={0.7}
         >
-          <SparklesIcon
-            size={20}
-            color={activeTab === "plan" ? T.primary : T.textMuted}
-          />
+          <View
+            style={[
+              styles.tabIconWrap,
+              activeTab === "plan" && styles.tabIconWrapActive,
+            ]}
+          >
+            <SparklesIcon
+              size={20}
+              color={activeTab === "plan" ? T.primary : T.textMuted}
+            />
+          </View>
           <Text
             style={[
               styles.tabLabel,
@@ -853,40 +917,52 @@ export default function App() {
   );
 }
 
-// ─── STYLES (MATCHING DESKTOP CARDIOTWIN MEDICAL-TECH THEME) ──
+// ─── STYLES (ELEVATED CLINICAL MEDICAL-TECH DESIGN SYSTEM) ────
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: T.bg,
+    backgroundColor: "#F6F9F8",
+    paddingTop: STATUSBAR_HEIGHT,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: T.cardBorder,
-    backgroundColor: "rgba(248, 247, 242, 0.95)",
+    borderBottomColor: "rgba(19, 64, 62, 0.08)",
+    backgroundColor: "#FFFFFF",
   },
   brandRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
   },
   brandMark: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: T.teal,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: T.primary,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: T.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   brandTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 17,
+    fontWeight: "800",
     color: T.tealDark,
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
+  },
+  brandSubtitle: {
+    fontSize: 10,
+    fontWeight: "500",
+    color: T.textMuted,
+    marginTop: -1,
   },
   headerTools: {
     flexDirection: "row",
@@ -895,10 +971,12 @@ const styles = StyleSheet.create({
   statusPill: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 20,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "rgba(16, 185, 129, 0.2)",
   },
   statusDot: {
     width: 6,
@@ -908,82 +986,99 @@ const styles = StyleSheet.create({
   statusPillText: {
     fontSize: 10,
     fontWeight: "700",
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
   patientBanner: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 12,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: T.cardBorder,
-    gap: 10,
+    borderBottomColor: "rgba(19, 64, 62, 0.06)",
+    gap: 12,
   },
   avatarCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: T.chipBg,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: T.primary,
     justifyContent: "center",
     alignItems: "center",
   },
   avatarText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: T.teal,
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 0.5,
   },
   patientName: {
     fontSize: 14,
     fontWeight: "700",
     color: T.textPrimary,
   },
+  verifiedTag: {
+    backgroundColor: "#EFF6F5",
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+  },
+  verifiedText: {
+    fontSize: 9,
+    fontWeight: "700",
+    color: T.primary,
+    letterSpacing: 0.3,
+  },
   patientMeta: {
     fontSize: 11,
     color: T.textSecondary,
-    marginTop: 1,
+    marginTop: 2,
   },
   baselinePill: {
     backgroundColor: T.greenBg,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(16, 185, 129, 0.2)",
   },
   baselinePillText: {
     fontSize: 11,
-    fontWeight: "600",
+    fontWeight: "700",
     color: T.greenText,
   },
   calibratePill: {
     backgroundColor: T.amberBg,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(245, 158, 11, 0.3)",
   },
   calibratePillText: {
     fontSize: 11,
-    fontWeight: "600",
+    fontWeight: "700",
     color: T.amberText,
   },
   scroll: {
     paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 28,
+    paddingTop: 16,
+    paddingBottom: 120,
   },
   tabContent: {
     gap: 14,
   },
   card: {
     backgroundColor: T.card,
-    borderRadius: 16,
-    padding: 18,
+    borderRadius: 18,
+    padding: 16,
     borderWidth: 1,
     borderColor: T.cardBorder,
-    shadowColor: "#000",
+    shadowColor: "#0A2826",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1,
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: "row",
@@ -993,103 +1088,140 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: 10,
-    fontWeight: "700",
-    color: T.teal,
-    letterSpacing: 1,
+    fontWeight: "800",
+    color: T.primary,
+    letterSpacing: 1.1,
     marginBottom: 2,
   },
   cardTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 17,
+    fontWeight: "800",
     color: T.textPrimary,
+    letterSpacing: -0.3,
   },
   dualEngineBadge: {
-    backgroundColor: T.chipBg,
+    backgroundColor: "#F0FDF4",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: "rgba(25, 59, 58, 0.08)",
+    borderColor: "rgba(15, 118, 110, 0.15)",
   },
   dualEngineText: {
     fontSize: 10,
     fontWeight: "700",
-    color: T.teal,
+    color: T.primary,
   },
   waveBox: {
-    backgroundColor: "#F4F8F5",
-    borderRadius: 12,
-    paddingVertical: 4,
+    backgroundColor: "#0B1819",
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(45, 212, 191, 0.2)",
+  },
+  waveHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 6,
+    marginBottom: 6,
+  },
+  waveLiveTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  waveLiveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#34D399",
+  },
+  waveLiveText: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#34D399",
+    letterSpacing: 0.8,
+  },
+  waveScaleText: {
+    fontSize: 9,
+    fontWeight: "600",
+    color: "#5EEAD4",
+    opacity: 0.7,
   },
   vitalsRow: {
     flexDirection: "row",
     marginTop: 14,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(25, 59, 58, 0.07)",
+    gap: 8,
   },
-  vitalCol: {
+  vitalTile: {
     flex: 1,
+    backgroundColor: "#F7FAF9",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
     alignItems: "center",
-  },
-  vitalBorderCol: {
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: "rgba(25, 59, 58, 0.08)",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(15, 118, 110, 0.08)",
   },
   vitalLabel: {
     fontSize: 9,
-    fontWeight: "700",
+    fontWeight: "800",
     color: T.textMuted,
     letterSpacing: 0.8,
+    textAlign: "center",
   },
   vitalValue: {
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 18,
+    fontWeight: "800",
     color: T.tealDark,
-    marginTop: 2,
+    marginTop: 3,
+    textAlign: "center",
   },
   vitalUnit: {
     fontSize: 10,
-    fontWeight: "500",
+    fontWeight: "600",
     color: T.textSecondary,
   },
   vitalWord: {
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "800",
     color: T.tealDark,
-    marginTop: 4,
+    marginTop: 5,
     textTransform: "capitalize",
-  },
-  vitalWordMuted: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: T.textMuted,
-    marginTop: 4,
+    textAlign: "center",
   },
   vitalSub: {
     fontSize: 9,
     color: T.textMuted,
-    marginTop: 2,
+    marginTop: 3,
     textAlign: "center",
   },
   instabilityCard: {
-    borderRadius: 16,
-    padding: 18,
+    borderRadius: 18,
+    padding: 16,
     borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
   },
   instabilityLeft: {
     flex: 1,
   },
   instabilityTitle: {
-    fontSize: 17,
-    fontWeight: "700",
+    fontSize: 16,
+    fontWeight: "800",
     marginTop: 2,
   },
   instabilityDesc: {
@@ -1099,12 +1231,14 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   shapPill: {
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 4,
     marginTop: 8,
     alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: "rgba(15, 118, 110, 0.08)",
   },
   shapText: {
     fontSize: 10,
@@ -1114,76 +1248,85 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    borderWidth: 3,
+    borderColor: "rgba(15, 118, 110, 0.2)",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
     elevation: 2,
   },
   scoreValue: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "800",
   },
   scoreSub: {
     fontSize: 8,
+    fontWeight: "600",
     color: T.textMuted,
     marginTop: -2,
   },
   actionButton: {
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 14,
+    paddingVertical: 15,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: T.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
     elevation: 3,
   },
   actionButtonText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 1,
+    fontWeight: "800",
+    letterSpacing: 0.8,
   },
   disclaimerBox: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     paddingVertical: 8,
   },
   disclaimerText: {
     fontSize: 11,
     color: T.textMuted,
     flex: 1,
-    lineHeight: 15,
+    lineHeight: 16,
   },
 
   // ─── TAB 2: YOUR TWIN STYLES ───────────────────────────────
   riskLetterCard: {
     backgroundColor: T.tealDeep,
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 22,
+    shadowColor: "#092E2A",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 3,
   },
   riskEyebrow: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "800",
     color: "#A8D3BD",
-    letterSpacing: 1,
+    letterSpacing: 1.1,
   },
   riskHuge: {
     fontSize: 52,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#FFFFFF",
     marginVertical: 4,
+    letterSpacing: -1,
   },
   riskSub: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#FFFFFF",
   },
   riskExplain: {
@@ -1204,6 +1347,7 @@ const styles = StyleSheet.create({
   riskFooterText: {
     fontSize: 11,
     color: "#C5DFCF",
+    flex: 1,
   },
   vitalsStrip: {
     flexDirection: "row",
@@ -1212,20 +1356,34 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: T.cardBorder,
     paddingVertical: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   vitalsStripItem: {
     flex: 1,
     alignItems: "center",
+    justifyContent: "center",
+  },
+  vitalBorderCol: {
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: "rgba(19, 64, 62, 0.06)",
   },
   stripLabel: {
     fontSize: 10,
+    fontWeight: "600",
     color: T.textMuted,
+    textAlign: "center",
   },
   stripVal: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "800",
     color: T.textPrimary,
     marginTop: 2,
+    textAlign: "center",
   },
   leverRow: {
     flexDirection: "row",
@@ -1233,20 +1391,20 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(25, 59, 58, 0.06)",
+    borderBottomColor: "rgba(19, 64, 62, 0.06)",
   },
   checkCircle: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: T.chipBg,
+    backgroundColor: "#EFF6F5",
     alignItems: "center",
     justifyContent: "center",
     marginTop: 2,
   },
   leverTitle: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "700",
     color: T.textPrimary,
   },
   leverDesc: {
@@ -1265,10 +1423,10 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 10,
-    fontWeight: "700",
+    fontWeight: "800",
     color: T.textMuted,
     letterSpacing: 0.8,
-    marginTop: 10,
+    marginTop: 12,
     marginBottom: 6,
   },
   chipsRow: {
@@ -1280,24 +1438,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: "#F3F5ED",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: "#F3F7F5",
     borderWidth: 1,
-    borderColor: "#E4E6DC",
+    borderColor: "#E1EAE6",
   },
   choiceChipSelected: {
-    backgroundColor: "#E1F0E7",
-    borderColor: "#9FCEC0",
+    backgroundColor: "#E6F4EA",
+    borderColor: "#A3D9B1",
   },
   choiceText: {
     fontSize: 11,
+    fontWeight: "600",
     color: T.textSecondary,
   },
   choiceTextSelected: {
     color: T.primary,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   stepperRow: {
     flexDirection: "row",
@@ -1305,20 +1464,20 @@ const styles = StyleSheet.create({
   },
   stepperBtn: {
     flex: 1,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: "#F3F5ED",
+    paddingVertical: 9,
+    borderRadius: 10,
+    backgroundColor: "#F3F7F5",
     borderWidth: 1,
-    borderColor: "#E4E6DC",
+    borderColor: "#E1EAE6",
     alignItems: "center",
   },
   stepperBtnActive: {
-    backgroundColor: T.teal,
-    borderColor: T.teal,
+    backgroundColor: T.primary,
+    borderColor: T.primary,
   },
   stepperBtnText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "700",
     color: T.textSecondary,
   },
   stepperBtnTextActive: {
@@ -1328,13 +1487,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginTop: 12,
-    paddingVertical: 4,
+    marginTop: 14,
+    paddingVertical: 6,
   },
   checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 4,
+    width: 20,
+    height: 20,
+    borderRadius: 5,
     borderWidth: 1.5,
     borderColor: T.primary,
     alignItems: "center",
@@ -1342,22 +1501,27 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 12,
+    fontWeight: "500",
     color: T.textPrimary,
   },
   outcomeCard: {
-    backgroundColor: "#E4F0EB",
-    borderRadius: 16,
+    backgroundColor: "#E6F4EA",
+    borderRadius: 18,
     padding: 20,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(15, 118, 110, 0.15)",
   },
   outcomeHuge: {
     fontSize: 48,
-    fontWeight: "800",
+    fontWeight: "900",
     color: T.primary,
     marginVertical: 2,
+    letterSpacing: -1,
   },
   outcomeSub: {
     fontSize: 12,
+    fontWeight: "600",
     color: T.textSecondary,
     textAlign: "center",
   },
@@ -1368,67 +1532,86 @@ const styles = StyleSheet.create({
     marginTop: 14,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: "rgba(25, 59, 58, 0.1)",
+    borderTopColor: "rgba(15, 118, 110, 0.12)",
   },
   compareSub: {
     fontSize: 10,
+    fontWeight: "600",
     color: T.textMuted,
+    textAlign: "center",
   },
   compareVal: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 17,
+    fontWeight: "800",
     color: T.textPrimary,
+    textAlign: "center",
   },
   compareArrow: {
     fontSize: 14,
-    color: T.teal,
+    color: T.primary,
+    fontWeight: "700",
   },
   scenarioBtn: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: "#F3F5ED",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: "#F3F7F5",
     borderWidth: 1,
-    borderColor: "#E4E6DC",
+    borderColor: "#E1EAE6",
   },
   scenarioBtnText: {
     fontSize: 12,
     color: T.tealDark,
-    fontWeight: "500",
+    fontWeight: "600",
   },
   scenarioArrow: {
-    fontSize: 13,
-    color: T.teal,
-    fontWeight: "700",
+    fontSize: 14,
+    color: T.primary,
+    fontWeight: "800",
   },
 
-  // ─── BOTTOM TAB BAR ────────────────────────────────────────
+  // ─── ELEVATED SAFE BOTTOM TAB BAR ─────────────────────────
   tabBar: {
     flexDirection: "row",
     backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: T.cardBorder,
-    paddingVertical: 8,
-    paddingBottom: Platform.OS === "ios" ? 18 : 8,
+    borderTopColor: "rgba(19, 64, 62, 0.08)",
+    paddingTop: 8,
+    paddingBottom: BOTTOM_INSET,
+    minHeight: Platform.OS === "android" ? 84 : 68,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 8,
   },
   tabItem: {
     flex: 1,
     alignItems: "center",
-    gap: 2,
+    justifyContent: "center",
+    gap: 3,
   },
   tabItemActive: {
     opacity: 1,
   },
+  tabIconWrap: {
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    borderRadius: 14,
+  },
+  tabIconWrapActive: {
+    backgroundColor: "rgba(15, 118, 110, 0.08)",
+  },
   tabLabel: {
-    fontSize: 10,
-    fontWeight: "500",
+    fontSize: 11,
+    fontWeight: "600",
     color: T.textMuted,
   },
   tabLabelActive: {
     color: T.primary,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });

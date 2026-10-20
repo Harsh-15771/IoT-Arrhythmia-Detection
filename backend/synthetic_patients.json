@@ -69,8 +69,8 @@
       ]
     },
     "cardiovascular_risk": {
-      "base_10yr_risk_pct": 77.0,
-      "recalibrated_risk_pct": 99.0,
+      "base_10yr_risk_pct": 56.4,
+      "recalibrated_risk_pct": 81.8,
       "risk_category": "High",
       "vascular_age": 85,
       "south_asian_factor_applied": true,
